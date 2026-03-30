@@ -15,4 +15,4 @@ python-dotenv = "*"
 python_version = "3.12"
 
 [scripts]
-dev = "python backend/app.py"
+dev = "flask --app app run --debug"
