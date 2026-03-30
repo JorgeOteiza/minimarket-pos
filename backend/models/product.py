@@ -14,16 +14,26 @@ class Product(db.Model):
     cost = db.Column(db.Numeric(10, 2), nullable=True)
 
     stock = db.Column(db.Integer, default=0)
-
-    # Para control de stock mínimo
     min_stock = db.Column(db.Integer, default=5)
 
-    # Para productos a granel
     is_weighted = db.Column(db.Boolean, default=False)
-    weight = db.Column(db.Float, nullable=True)  # ejemplo: 0.5, 1.0
+    weight = db.Column(db.Float, nullable=True)
 
-    # Margen de ganancia
     margin = db.Column(db.Float, default=0.3)
 
     def __repr__(self):
-        return f"<Product {self.name}>"
+        return f"<Product id={self.id} name={self.name}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "barcode": self.barcode,
+            "price": float(self.price),
+            "cost": float(self.cost) if self.cost else None,
+            "stock": self.stock,
+            "min_stock": self.min_stock,
+            "is_weighted": self.is_weighted,
+            "weight": self.weight,
+            "margin": self.margin,
+        }
