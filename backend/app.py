@@ -2,9 +2,11 @@ from flask import Flask
 from config import Config
 from extensions import db, migrate
 from routes.products import products_bp
+from routes.sales import sales_bp
 
 # 👇 IMPORTANTE: esto registra los modelos en SQLAlchemy
 from models import Product
+
 
 
 def create_app():
@@ -15,6 +17,7 @@ def create_app():
     migrate.init_app(app, db)
 
     app.register_blueprint(products_bp, url_prefix="/api")
+    app.register_blueprint(sales_bp, url_prefix="/api")
 
     @app.route("/")
     def home():

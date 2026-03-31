@@ -6,15 +6,18 @@ from services.product_service import (
     update_product,
     delete_product,
 )
+from schemas.product_schema import ProductSchema
 
 products_bp = Blueprint("products", __name__)
+product_schema = ProductSchema()
+products_schema = ProductSchema(many=True)
 
 
 # 🔹 GET ALL
 @products_bp.route("/products", methods=["GET"])
 def get_products():
     products = get_all_products()
-    return jsonify([p.to_dict() for p in products]), 200
+    return jsonify(products_schema.dump(products)), 200
 
 
 # 🔹 GET BY ID
@@ -25,37 +28,43 @@ def get_product(id):
     if not product:
         return jsonify({"error": "Product not found"}), 404
 
-    return jsonify(product.to_dict()), 200
+    return jsonify(product_schema.dump(product)), 200
 
 
 # 🔹 CREATE
 @products_bp.route("/products", methods=["POST"])
-def create_product_route():
-    data = request.get_json()
+def create_product():
+    try:
+        data = request.get_json()
 
-    if not data:
-        return jsonify({"error": "No input data"}), 400
+        validated_data = product_schema.load(data)
 
-    if not data.get("name") or data.get("price") is None:
-        return jsonify({"error": "name and price required"}), 400
+        product = create_product(validated_data)
 
-    product = create_product(data)
+        return jsonify(product_schema.dump(product)), 201
 
-    return jsonify(product.to_dict()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 # 🔹 UPDATE
 @products_bp.route("/products/<int:id>", methods=["PUT"])
-def update_product_route(id):
-    product = get_product_by_id(id)
+def update_product(id):
+    try:
+        product = get_product_by_id(id)
 
-    if not product:
-        return jsonify({"error": "Product not found"}), 404
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
 
-    data = request.get_json()
+        data = request.get_json()
 
-    updated_product = update_product(product, data)
+        validated_data = product_schema.load(data, partial=True)
 
-    return jsonify(updated_product.to_dict()), 200
+        updated_product = update_product(product, validated_data)
+
+        return jsonify(product_schema.dump(updated_product)), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 # 🔹 DELETE
 @products_bp.route("/products/<int:id>", methods=["DELETE"])
