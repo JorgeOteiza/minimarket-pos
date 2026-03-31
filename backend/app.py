@@ -5,7 +5,7 @@ from routes.products import products_bp
 from routes.sales import sales_bp
 
 # 👇 IMPORTANTE: esto registra los modelos en SQLAlchemy
-from models import Product
+from models import Product, Sale, SaleItem
 
 
 

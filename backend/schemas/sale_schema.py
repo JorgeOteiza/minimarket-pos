@@ -1,11 +1,29 @@
 from marshmallow import Schema, fields
 
 
-class SaleSchema(Schema):
-    id = fields.Int(dump_only=True)
-
+# 🔹 INPUT (lo que envía el cliente)
+class SaleItemInputSchema(Schema):
     product_id = fields.Int(required=True)
     quantity = fields.Float(required=True)
 
-    total_price = fields.Float(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
+
+class SaleInputSchema(Schema):
+    items = fields.List(
+        fields.Nested(SaleItemInputSchema),
+        required=True
+    )
+
+
+# 🔹 OUTPUT (lo que responde la API)
+class SaleItemOutputSchema(Schema):
+    product_id = fields.Int()
+    quantity = fields.Float()
+    unit_price = fields.Float()
+    subtotal = fields.Float()
+
+
+class SaleOutputSchema(Schema):
+    id = fields.Int()
+    items = fields.List(fields.Nested(SaleItemOutputSchema))
+    total_amount = fields.Float()
+    created_at = fields.DateTime()

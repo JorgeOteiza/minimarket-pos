@@ -10,6 +10,7 @@ flask-migrate = "*"
 python-dotenv = "*"
 marshmallow = "*"
 flask-marshmallow = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

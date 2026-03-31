@@ -6,10 +6,13 @@ class Sale(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
-
-    quantity = db.Column(db.Float, nullable=False)
-
-    total_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    items = db.relationship(
+        "SaleItem",
+        backref="sale",
+        cascade="all, delete-orphan",
+        lazy=True
+    )
