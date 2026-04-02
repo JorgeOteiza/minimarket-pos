@@ -8,11 +8,14 @@ class Sale(db.Model):
 
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
 
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now()
+    )
 
     items = db.relationship(
         "SaleItem",
-        backref="sale",
+        back_populates="sale",
         cascade="all, delete-orphan",
-        lazy=True
+        lazy="joined"  # 🔥 importante para evitar N+1
     )

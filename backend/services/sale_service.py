@@ -1,26 +1,57 @@
 from models import Product
 from models.sale import Sale
+from models.sale_item import SaleItem
 from extensions import db
+from sqlalchemy.orm import joinedload
+
+
+def get_all_sales():
+    return db.session.query(Sale).options(
+        joinedload(Sale.items).joinedload(SaleItem.product)
+    ).all()
+
+
+def get_sale_by_id(id):
+    return db.session.query(Sale).options(
+        joinedload(Sale.items).joinedload(SaleItem.product)
+    ).filter(Sale.id == id).first()
 
 
 def create_sale(data):
-    product = Product.query.get(data["product_id"])
+    items_data = data["items"]
 
-    if not product:
-        raise Exception("Product not found")
+    if not items_data:
+        raise Exception("Sale must have at least one item")
 
-    if product.stock < data["quantity"]:
-        raise Exception("Not enough stock")
+    sale = Sale(total_amount=0)
+    total_amount = 0
 
-    total_price = float(product.price) * data["quantity"]
+    for item in items_data:
+        product = db.session.get(Product, item["product_id"])
 
-    product.stock -= data["quantity"]
+        if not product:
+            raise Exception(f"Product {item['product_id']} not found")
 
-    sale = Sale(
-        product_id=product.id,
-        quantity=data["quantity"],
-        total_price=total_price
-    )
+        if product.stock < item["quantity"]:
+            raise Exception(f"Not enough stock for {product.name}")
+
+        subtotal = float(product.price) * item["quantity"]
+
+        sale_item = SaleItem(
+            product_id=product.id,
+            quantity=item["quantity"],
+            unit_price=product.price,
+            subtotal=subtotal
+        )
+
+        # 🔻 actualizar stock
+        product.stock -= item["quantity"]
+
+        sale.items.append(sale_item)
+
+        total_amount += subtotal
+
+    sale.total_amount = total_amount
 
     db.session.add(sale)
     db.session.commit()

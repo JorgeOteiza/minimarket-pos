@@ -1,10 +1,17 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError
+from marshmallow.decorators import validates
+from schemas.product_schema import ProductSchema
 
 
-# 🔹 INPUT (lo que envía el cliente)
+# 🔹 INPUT
 class SaleItemInputSchema(Schema):
     product_id = fields.Int(required=True)
     quantity = fields.Float(required=True)
+
+    @validates("quantity")
+    def validate_quantity(self, value, **kwargs):
+        if value <= 0:
+            raise ValidationError("Quantity must be greater than 0")
 
 
 class SaleInputSchema(Schema):
@@ -13,17 +20,23 @@ class SaleInputSchema(Schema):
         required=True
     )
 
+    @validates("items")
+    def validate_items(self, value, **kwargs):
+        if not value:
+            raise ValidationError("Items list cannot be empty")
 
-# 🔹 OUTPUT (lo que responde la API)
+
+# 🔹 OUTPUT
 class SaleItemOutputSchema(Schema):
     product_id = fields.Int()
     quantity = fields.Float()
-    unit_price = fields.Float()
-    subtotal = fields.Float()
+    unit_price = fields.Decimal(as_string=True)
+    subtotal = fields.Decimal(as_string=True)
+    product = fields.Nested(ProductSchema)
 
 
 class SaleOutputSchema(Schema):
     id = fields.Int()
     items = fields.List(fields.Nested(SaleItemOutputSchema))
-    total_amount = fields.Float()
+    total_amount = fields.Decimal(as_string=True)
     created_at = fields.DateTime()

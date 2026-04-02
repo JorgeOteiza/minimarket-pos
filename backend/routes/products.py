@@ -44,6 +44,7 @@ def create_product():
         return jsonify(product_schema.dump(product)), 201
 
     except Exception as e:
+        print("ERROR:", e)
         return jsonify({"error": str(e)}), 400
 
 # 🔹 UPDATE
@@ -64,6 +65,7 @@ def update_product(id):
         return jsonify(product_schema.dump(updated_product)), 200
 
     except Exception as e:
+        print("ERROR:", e)
         return jsonify({"error": str(e)}), 400
 
 # 🔹 DELETE

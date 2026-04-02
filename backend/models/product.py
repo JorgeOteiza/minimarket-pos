@@ -21,6 +21,19 @@ class Product(db.Model):
 
     margin = db.Column(db.Float, default=0.3)
 
+    # 🔥 FK REAL (esto es lo que te falta en la BD)
+    category_id = db.Column(
+        db.Integer,
+        db.ForeignKey("categories.id"),
+        nullable=True
+    )
+
+    # 🔥 relación ORM
+    category = db.relationship(
+        "Category",
+        back_populates="products"
+    )
+
     def __repr__(self):
         return f"<Product id={self.id} name={self.name}>"
 
@@ -36,4 +49,5 @@ class Product(db.Model):
             "is_weighted": self.is_weighted,
             "weight": self.weight,
             "margin": self.margin,
+            "category_id": self.category_id,
         }
