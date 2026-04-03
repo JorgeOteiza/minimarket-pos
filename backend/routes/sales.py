@@ -26,15 +26,10 @@ def get_sale(id):
 
 @sales_bp.route("/sales", methods=["POST"])
 def create_sale_route():
-    try:
-        data = request.get_json()
+    data = request.get_json()
 
-        validated_data = sale_input_schema.load(data)
+    validated_data = sale_input_schema.load(data)
 
-        sale = create_sale(validated_data)
+    sale = create_sale(validated_data)
 
-        return jsonify(sale_output_schema.dump(sale)), 201
-
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"error": str(e)}), 400
+    return jsonify(sale_output_schema.dump(sale)), 201
