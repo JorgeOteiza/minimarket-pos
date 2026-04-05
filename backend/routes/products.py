@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from services.product_service import (
     get_all_products,
     get_product_by_id,
-    create_product,
-    update_product,
+    create_product as create_product_service,  # 🔥 alias
+    update_product as update_product_service,
     delete_product,
 )
 from schemas.product_schema import ProductSchema
@@ -34,39 +34,31 @@ def get_product(id):
 # 🔹 CREATE
 @products_bp.route("/products", methods=["POST"])
 def create_product():
-    try:
-        data = request.get_json()
+    data = request.get_json()
 
-        validated_data = product_schema.load(data)
+    validated_data = product_schema.load(data)
 
-        product = create_product(validated_data)
+    product = create_product_service(validated_data)
 
-        return jsonify(product_schema.dump(product)), 201
+    return jsonify(product_schema.dump(product)), 201
 
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"error": str(e)}), 400
 
 # 🔹 UPDATE
 @products_bp.route("/products/<int:id>", methods=["PUT"])
 def update_product(id):
-    try:
-        product = get_product_by_id(id)
+    product = get_product_by_id(id)
 
-        if not product:
-            return jsonify({"error": "Product not found"}), 404
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
 
-        data = request.get_json()
+    data = request.get_json()
 
-        validated_data = product_schema.load(data, partial=True)
+    validated_data = product_schema.load(data, partial=True)
 
-        updated_product = update_product(product, validated_data)
+    updated_product = update_product_service(product, validated_data)
 
-        return jsonify(product_schema.dump(updated_product)), 200
+    return jsonify(product_schema.dump(updated_product)), 200
 
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"error": str(e)}), 400
 
 # 🔹 DELETE
 @products_bp.route("/products/<int:id>", methods=["DELETE"])

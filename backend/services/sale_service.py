@@ -2,6 +2,7 @@ from models import Product
 from models.sale import Sale
 from models.sale_item import SaleItem
 from extensions import db
+from exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
 
 
@@ -21,7 +22,7 @@ def create_sale(data):
     items_data = data["items"]
 
     if not items_data:
-        raise Exception("Sale must have at least one item")
+        raise ValidationError("Sale must have at least one item")
 
     sale = Sale(total_amount=0)
     total_amount = 0
@@ -30,10 +31,12 @@ def create_sale(data):
         product = db.session.get(Product, item["product_id"])
 
         if not product:
-            raise Exception(f"Product {item['product_id']} not found")
+            raise NotFoundError(f"Product {item['product_id']} not found")
 
         if product.stock < item["quantity"]:
-            raise Exception(f"Not enough stock for {product.name}")
+            raise InsufficientStockError(
+                f"Not enough stock for {product.name}"
+)
 
         subtotal = float(product.price) * item["quantity"]
 
@@ -55,5 +58,6 @@ def create_sale(data):
 
     db.session.add(sale)
     db.session.commit()
+    print("SERVICE EXECUTED")
 
     return sale
