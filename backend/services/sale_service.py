@@ -2,6 +2,7 @@ from models import Product
 from models.sale import Sale
 from models.sale_item import SaleItem
 from extensions import db
+from collections import defaultdict
 from exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
@@ -21,48 +22,68 @@ def get_sale_by_id(id):
 
 
 def create_sale(data):
-    items_data = data["items"]
+    items_data = data.get("items")
 
     if not items_data:
         raise ValidationError("Sale must have at least one item")
 
+    # 🔹 agrupar items duplicados
+    grouped_items = defaultdict(float)
+
+    for item in items_data:
+        grouped_items[item["product_id"]] += item["quantity"]
+
     sale = Sale(total_amount=0)
     total_amount = 0
 
-    for item in items_data:
-        product = db.session.get(Product, item["product_id"])
+    try:
+        with db.session.begin():
 
-        if not product:
-            raise NotFoundError(f"Product {item['product_id']} not found")
+            for product_id, quantity in grouped_items.items():
 
-        if product.stock < item["quantity"]:
-            raise InsufficientStockError(
-                f"Not enough stock for {product.name}"
-)
+                product = db.session.get(Product, product_id)
 
-        subtotal = float(product.price) * item["quantity"]
+                if not product:
+                    raise NotFoundError(f"Product {product_id} not found")
 
-        sale_item = SaleItem(
-            product_id=product.id,
-            quantity=item["quantity"],
-            unit_price=product.price,
-            subtotal=subtotal
-        )
+                # 🔹 validación unitario vs granel
+                if not product.is_weighted and not float(quantity).is_integer():
+                    raise ValidationError(
+                        f"Product {product.name} must have integer quantity"
+                    )
 
-        # 🔻 actualizar stock
-        product.stock -= item["quantity"]
+                # 🔹 validación stock
+                if product.stock < quantity:
+                    raise InsufficientStockError(
+                        f"Not enough stock for {product.name}"
+                    )
 
-        sale.items.append(sale_item)
+                unit_price = product.price
+                subtotal = float(unit_price) * quantity
 
-        total_amount += subtotal
+                sale_item = SaleItem(
+                    product_id=product.id,
+                    quantity=quantity,
+                    unit_price=unit_price,
+                    subtotal=subtotal
+                )
 
-    sale.total_amount = total_amount
+                # 🔻 actualizar stock
+                product.stock -= quantity
 
-    db.session.add(sale)
-    db.session.commit()
-    print("SERVICE EXECUTED")
+                sale.items.append(sale_item)
 
-    return sale
+                total_amount += subtotal
+
+            sale.total_amount = total_amount
+
+            db.session.add(sale)
+
+        return sale
+
+    except Exception:
+        # rollback automático ya manejado por SQLAlchemy
+        raise
 
 
 def get_today_sales_summary():
