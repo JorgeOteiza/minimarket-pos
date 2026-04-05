@@ -4,6 +4,8 @@ from models.sale_item import SaleItem
 from extensions import db
 from exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
+from datetime import date, datetime
 
 
 def get_all_sales():
@@ -61,3 +63,20 @@ def create_sale(data):
     print("SERVICE EXECUTED")
 
     return sale
+
+
+def get_today_sales_summary():
+    today = date.today()
+
+    sales = db.session.query(Sale).filter(
+        func.date(Sale.created_at) == today
+    ).all()
+
+    total_amount = sum(float(s.total_amount) for s in sales)
+
+    return {
+        "total": total_amount,
+        "count": len(sales)
+    }
+    
+    today = datetime.utcnow().date()
