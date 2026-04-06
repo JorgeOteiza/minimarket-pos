@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from schemas.sale_schema import SaleInputSchema, SaleOutputSchema
-from services.sale_service import create_sale, get_all_sales, get_sale_by_id
+from services.sale_service import (create_sale, get_all_sales, get_sale_by_id, get_today_sales_summary,)
 
 sales_bp = Blueprint("sales", __name__)
 
@@ -33,3 +33,9 @@ def create_sale_route():
     sale = create_sale(validated_data)
 
     return jsonify(sale_output_schema.dump(sale)), 201
+
+
+@sales_bp.route("/sales/today", methods=["GET"])
+def get_today_sales():
+    summary = get_today_sales_summary()
+    return jsonify(summary), 200

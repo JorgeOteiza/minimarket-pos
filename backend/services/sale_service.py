@@ -2,8 +2,11 @@ from models import Product
 from models.sale import Sale
 from models.sale_item import SaleItem
 from extensions import db
+from collections import defaultdict
 from exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
+from datetime import date
 
 
 def get_all_sales():
@@ -19,45 +22,83 @@ def get_sale_by_id(id):
 
 
 def create_sale(data):
-    items_data = data["items"]
+    items_data = data.get("items")
 
     if not items_data:
         raise ValidationError("Sale must have at least one item")
 
-    sale = Sale(total_amount=0)
-    total_amount = 0
-
+    # 🔹 agrupar productos repetidos
+    grouped_items = defaultdict(float)
     for item in items_data:
-        product = db.session.get(Product, item["product_id"])
+        product_id = item.get("product_id")
+        quantity = item.get("quantity")
 
-        if not product:
-            raise NotFoundError(f"Product {item['product_id']} not found")
+        grouped_items[product_id] += quantity
 
-        if product.stock < item["quantity"]:
-            raise InsufficientStockError(
-                f"Not enough stock for {product.name}"
-)
+    # 🔥 transacción atómica
+    with db.session.begin():
 
-        subtotal = float(product.price) * item["quantity"]
+        sale = Sale(total_amount=0)
+        total_amount = 0
 
-        sale_item = SaleItem(
-            product_id=product.id,
-            quantity=item["quantity"],
-            unit_price=product.price,
-            subtotal=subtotal
-        )
+        for product_id, quantity in grouped_items.items():
 
-        # 🔻 actualizar stock
-        product.stock -= item["quantity"]
+            product = db.session.get(Product, product_id)
 
-        sale.items.append(sale_item)
+            # 🔍 validar existencia
+            if not product:
+                raise NotFoundError(f"Product {product_id} not found")
 
-        total_amount += subtotal
+            # 🔹 validación unitario vs granel
+            if not product.is_weighted and not float(quantity).is_integer():
+                raise ValidationError(
+                    f"Product {product.name} must have integer quantity"
+                )
 
-    sale.total_amount = total_amount
+            # 🔍 validar stock
+            if product.stock < quantity:
+                raise InsufficientStockError(
+                    f"Not enough stock for {product.name}"
+                )
 
-    db.session.add(sale)
-    db.session.commit()
-    print("SERVICE EXECUTED")
+            # 💰 cálculo
+            unit_price = product.price
+            subtotal = float(unit_price) * quantity
+
+            # 📦 crear item
+            sale_item = SaleItem(
+                product_id=product.id,
+                quantity=quantity,
+                unit_price=unit_price,
+                subtotal=subtotal
+            )
+
+            # 🔻 actualizar stock
+            product.stock -= quantity
+
+            # 🔗 relación
+            sale.items.append(sale_item)
+
+            total_amount += subtotal
+
+        sale.total_amount = total_amount
+
+        db.session.add(sale)
 
     return sale
+
+
+def get_today_sales_summary():
+    today = date.today()
+
+    result = db.session.query(
+        func.count(Sale.id),
+        func.coalesce(func.sum(Sale.total_amount), 0)
+    ).filter(
+        func.date(Sale.created_at) == today
+    ).one()
+
+    return {
+        "count": result[0],
+        "total": float(result[1])
+    }

@@ -6,6 +6,10 @@ def get_all_products():
     return Product.query.all()
 
 
+def get_product_by_barcode(barcode: str):
+    return Product.query.filter_by(barcode=barcode).first()
+
+
 def get_product_by_id(product_id):
     return Product.query.get(product_id)
 

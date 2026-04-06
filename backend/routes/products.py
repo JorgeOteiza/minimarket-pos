@@ -2,9 +2,10 @@ from flask import Blueprint, request, jsonify
 from services.product_service import (
     get_all_products,
     get_product_by_id,
-    create_product as create_product_service,  # 🔥 alias
+    create_product as create_product_service,
     update_product as update_product_service,
     delete_product,
+    get_product_by_barcode,
 )
 from schemas.product_schema import ProductSchema
 
@@ -27,6 +28,17 @@ def get_product(id):
 
     if not product:
         return jsonify({"error": "Product not found"}), 404
+
+    return jsonify(product_schema.dump(product)), 200
+
+
+@products_bp.route("/products/barcode/<string:barcode>", methods=["GET"])
+def get_product_by_barcode_route(barcode):
+    product = get_product_by_barcode(barcode)
+
+    if not product:
+        from exceptions import NotFoundError
+        raise NotFoundError("Product not found")
 
     return jsonify(product_schema.dump(product)), 200
 
