@@ -43,6 +43,7 @@ def remove_from_cart_route(product_id):
 # 🔹 Disminuir cantidad
 @cart_bp.route("/cart/decrease", methods=["POST"])
 def decrease_quantity_route():
+    print("DECREASE ENDPOINT HIT")
     data = request.get_json()
 
     product_id = data.get("product_id")

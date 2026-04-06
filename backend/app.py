@@ -1,3 +1,4 @@
+print("CART ROUTES LOADED")
 from flask import Flask, jsonify
 from config import Config
 from extensions import db, migrate
@@ -52,6 +53,12 @@ def create_app():
     app.register_blueprint(cart_bp, url_prefix="/api")
 
     register_error_handlers(app)
+
+    # 🔥 DEBUG: ver rutas registradas
+    print("\n=== REGISTERED ROUTES ===")
+    for rule in app.url_map.iter_rules():
+        print(rule)
+    print("=========================\n")
 
     @app.route("/")
     def home():
