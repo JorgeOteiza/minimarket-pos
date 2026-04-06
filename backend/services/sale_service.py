@@ -6,7 +6,7 @@ from collections import defaultdict
 from exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
-from datetime import date, datetime
+from datetime import date
 
 
 def get_all_sales():
@@ -27,77 +27,78 @@ def create_sale(data):
     if not items_data:
         raise ValidationError("Sale must have at least one item")
 
-    # 🔹 agrupar items duplicados
+    # 🔹 agrupar productos repetidos
     grouped_items = defaultdict(float)
-
     for item in items_data:
-        grouped_items[item["product_id"]] += item["quantity"]
+        product_id = item.get("product_id")
+        quantity = item.get("quantity")
 
-    sale = Sale(total_amount=0)
-    total_amount = 0
+        grouped_items[product_id] += quantity
 
-    try:
-        with db.session.begin():
+    # 🔥 transacción atómica
+    with db.session.begin():
 
-            for product_id, quantity in grouped_items.items():
+        sale = Sale(total_amount=0)
+        total_amount = 0
 
-                product = db.session.get(Product, product_id)
+        for product_id, quantity in grouped_items.items():
 
-                if not product:
-                    raise NotFoundError(f"Product {product_id} not found")
+            product = db.session.get(Product, product_id)
 
-                # 🔹 validación unitario vs granel
-                if not product.is_weighted and not float(quantity).is_integer():
-                    raise ValidationError(
-                        f"Product {product.name} must have integer quantity"
-                    )
+            # 🔍 validar existencia
+            if not product:
+                raise NotFoundError(f"Product {product_id} not found")
 
-                # 🔹 validación stock
-                if product.stock < quantity:
-                    raise InsufficientStockError(
-                        f"Not enough stock for {product.name}"
-                    )
-
-                unit_price = product.price
-                subtotal = float(unit_price) * quantity
-
-                sale_item = SaleItem(
-                    product_id=product.id,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    subtotal=subtotal
+            # 🔹 validación unitario vs granel
+            if not product.is_weighted and not float(quantity).is_integer():
+                raise ValidationError(
+                    f"Product {product.name} must have integer quantity"
                 )
 
-                # 🔻 actualizar stock
-                product.stock -= quantity
+            # 🔍 validar stock
+            if product.stock < quantity:
+                raise InsufficientStockError(
+                    f"Not enough stock for {product.name}"
+                )
 
-                sale.items.append(sale_item)
+            # 💰 cálculo
+            unit_price = product.price
+            subtotal = float(unit_price) * quantity
 
-                total_amount += subtotal
+            # 📦 crear item
+            sale_item = SaleItem(
+                product_id=product.id,
+                quantity=quantity,
+                unit_price=unit_price,
+                subtotal=subtotal
+            )
 
-            sale.total_amount = total_amount
+            # 🔻 actualizar stock
+            product.stock -= quantity
 
-            db.session.add(sale)
+            # 🔗 relación
+            sale.items.append(sale_item)
 
-        return sale
+            total_amount += subtotal
 
-    except Exception:
-        # rollback automático ya manejado por SQLAlchemy
-        raise
+        sale.total_amount = total_amount
+
+        db.session.add(sale)
+
+    return sale
 
 
 def get_today_sales_summary():
     today = date.today()
 
-    sales = db.session.query(Sale).filter(
+    result = db.session.query(
+        func.count(Sale.id),
+        func.coalesce(func.sum(Sale.total_amount), 0)
+    ).filter(
         func.date(Sale.created_at) == today
-    ).all()
-
-    total_amount = sum(float(s.total_amount) for s in sales)
+    ).one()
 
     return {
-        "total": total_amount,
-        "count": len(sales)
+        "count": result[0],
+        "total": float(result[1])
     }
-    
-    today = datetime.utcnow().date()

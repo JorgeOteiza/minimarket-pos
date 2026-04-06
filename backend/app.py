@@ -7,6 +7,8 @@ from models import Product, Sale, SaleItem
 from exceptions import AppError
 from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.exceptions import HTTPException
+from routes.cart import cart_bp
+import traceback
 
 
 def register_error_handlers(app):
@@ -26,6 +28,7 @@ def register_error_handlers(app):
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
         print("UNEXPECTED ERROR:", error)
+        traceback.print_exc()
         return jsonify({
             "error": "Internal server error"
         }), 500
@@ -46,6 +49,7 @@ def create_app():
 
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sales_bp, url_prefix="/api")
+    app.register_blueprint(cart_bp, url_prefix="/api")
 
     register_error_handlers(app)
 
