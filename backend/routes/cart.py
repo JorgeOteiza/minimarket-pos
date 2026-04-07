@@ -15,11 +15,16 @@ from exceptions import NotFoundError, ValidationError
 cart_bp = Blueprint("cart", __name__)
 
 
+# 🔹 Helper: respuesta estándar JSON
+def success_response(data, status=200):
+    return jsonify(data), status
+
+
 # 🔹 Obtener carrito actual
 @cart_bp.route("/cart", methods=["GET"])
 def get_cart_route():
     cart = get_cart()
-    return jsonify(cart), 200
+    return success_response(cart)
 
 
 # 🔹 Escaneo por código de barras (CORE POS)
@@ -30,23 +35,24 @@ def scan_product_route(barcode):
     if not product:
         raise NotFoundError("Product not found")
 
+    # ⚠️ IMPORTANTE: frontend puede no enviar body → fallback seguro
     data = request.get_json(silent=True) or {}
 
-    # 🔹 cantidad dinámica
     quantity = data.get("quantity")
 
+    # 🔹 lógica POS realista (peso vs unidad)
     if quantity is None:
-        quantity = 0.25 if product.is_weighted else 1
+        quantity = 0.25 if getattr(product, "is_weighted", False) else 1
 
-    cart = add_to_cart(product.id, quantity)
+    updated_cart = add_to_cart(product.id, quantity)
 
-    return jsonify(cart), 200
+    return success_response(updated_cart)
 
 
 # 🔹 Agregar producto manual
 @cart_bp.route("/cart/add", methods=["POST"])
 def add_to_cart_route():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
@@ -54,22 +60,22 @@ def add_to_cart_route():
     if not product_id:
         raise ValidationError("product_id is required")
 
-    cart = add_to_cart(product_id, quantity)
+    updated_cart = add_to_cart(product_id, quantity)
 
-    return jsonify(cart), 200
+    return success_response(updated_cart)
 
 
 # 🔹 Remover producto completo
 @cart_bp.route("/cart/<int:product_id>", methods=["DELETE"])
 def remove_from_cart_route(product_id):
-    cart = remove_from_cart(product_id)
-    return jsonify(cart), 200
+    updated_cart = remove_from_cart(product_id)
+    return success_response(updated_cart)
 
 
 # 🔹 Disminuir cantidad
 @cart_bp.route("/cart/decrease", methods=["POST"])
 def decrease_quantity_route():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
@@ -77,16 +83,20 @@ def decrease_quantity_route():
     if not product_id:
         raise ValidationError("product_id is required")
 
-    cart = decrease_quantity(product_id, quantity)
+    updated_cart = decrease_quantity(product_id, quantity)
 
-    return jsonify(cart), 200
+    return success_response(updated_cart)
 
 
 # 🔹 Vaciar carrito
 @cart_bp.route("/cart/clear", methods=["POST"])
 def clear_cart_route():
     result = clear_cart()
-    return jsonify(result), 200
+
+    return success_response({
+        "message": "Cart cleared",
+        "cart": result
+    })
 
 
 # 🔹 Confirmar venta
@@ -94,8 +104,8 @@ def clear_cart_route():
 def checkout_route():
     sale = checkout()
 
-    return jsonify({
+    return success_response({
         "message": "Sale completed",
         "sale_id": sale.id,
         "total": float(sale.total_amount)
-    }), 201
+    }, status=201)

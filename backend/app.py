@@ -10,6 +10,8 @@ from werkzeug.exceptions import HTTPException
 from routes.cart import cart_bp
 import traceback
 
+from flask_cors import CORS 
+
 
 def register_error_handlers(app):
 
@@ -46,6 +48,8 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    CORS(app)
 
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sales_bp, url_prefix="/api")
