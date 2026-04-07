@@ -5,9 +5,15 @@ from extensions import db
 def get_all_products():
     return Product.query.all()
 
+def search_products_by_name(name):
+    return db.session.query(Product).filter(
+        Product.name.ilike(f"%{name}%")
+    ).all()
 
-def get_product_by_barcode(barcode: str):
-    return Product.query.filter_by(barcode=barcode).first()
+def get_product_by_barcode(barcode):
+    return db.session.query(Product).filter(
+        Product.barcode == barcode
+    ).first()
 
 
 def get_product_by_id(product_id):

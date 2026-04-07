@@ -54,7 +54,16 @@ def add_to_cart(product_id, quantity):
             f"Product {product.name} must have integer quantity"
         )
 
-    cart[product_id] += quantity
+    # 🔥 VALIDACIÓN DE STOCK EN TIEMPO REAL
+    current_quantity = cart.get(product_id, 0)
+    new_quantity = current_quantity + quantity
+
+    if product.stock < new_quantity:
+        raise ValidationError(
+            f"Not enough stock for {product.name}. Available: {product.stock}"
+        )
+
+    cart[product_id] = new_quantity
 
     return get_cart()
 
