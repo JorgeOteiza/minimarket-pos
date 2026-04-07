@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 
+from services.product_service import get_product_by_barcode
 from services.cart_service import (
     get_cart,
     add_to_cart,
@@ -8,6 +9,8 @@ from services.cart_service import (
     clear_cart,
     checkout
 )
+
+from exceptions import NotFoundError, ValidationError
 
 cart_bp = Blueprint("cart", __name__)
 
@@ -19,13 +22,37 @@ def get_cart_route():
     return jsonify(cart), 200
 
 
-# 🔹 Agregar producto
+# 🔹 Escaneo por código de barras (CORE POS)
+@cart_bp.route("/cart/scan/<string:barcode>", methods=["POST"])
+def scan_product_route(barcode):
+    product = get_product_by_barcode(barcode)
+
+    if not product:
+        raise NotFoundError("Product not found")
+
+    data = request.get_json(silent=True) or {}
+
+    # 🔹 cantidad dinámica
+    quantity = data.get("quantity")
+
+    if quantity is None:
+        quantity = 0.25 if product.is_weighted else 1
+
+    cart = add_to_cart(product.id, quantity)
+
+    return jsonify(cart), 200
+
+
+# 🔹 Agregar producto manual
 @cart_bp.route("/cart/add", methods=["POST"])
 def add_to_cart_route():
-    data = request.get_json()
+    data = request.get_json() or {}
 
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
+
+    if not product_id:
+        raise ValidationError("product_id is required")
 
     cart = add_to_cart(product_id, quantity)
 
@@ -36,17 +63,19 @@ def add_to_cart_route():
 @cart_bp.route("/cart/<int:product_id>", methods=["DELETE"])
 def remove_from_cart_route(product_id):
     cart = remove_from_cart(product_id)
-
     return jsonify(cart), 200
 
 
 # 🔹 Disminuir cantidad
 @cart_bp.route("/cart/decrease", methods=["POST"])
 def decrease_quantity_route():
-    data = request.get_json()
+    data = request.get_json() or {}
 
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
+
+    if not product_id:
+        raise ValidationError("product_id is required")
 
     cart = decrease_quantity(product_id, quantity)
 

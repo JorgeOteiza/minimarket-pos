@@ -6,6 +6,7 @@ from services.product_service import (
     update_product as update_product_service,
     delete_product,
     get_product_by_barcode,
+    search_products_by_name,
 )
 from schemas.product_schema import ProductSchema
 
@@ -41,6 +42,18 @@ def get_product_by_barcode_route(barcode):
         raise NotFoundError("Product not found")
 
     return jsonify(product_schema.dump(product)), 200
+
+
+@products_bp.route("/products/search", methods=["GET"])
+def search_products():
+    name = request.args.get("name")
+
+    if not name:
+        return jsonify({"error": "Query param 'name' is required"}), 400
+
+    products = search_products_by_name(name)
+
+    return jsonify(products_schema.dump(products)), 200
 
 
 # 🔹 CREATE
