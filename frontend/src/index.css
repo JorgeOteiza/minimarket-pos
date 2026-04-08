@@ -12,6 +12,8 @@ body {
 .left {
   padding: 20px;
   overflow-y: auto;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
 }
 
 .right {
@@ -39,4 +41,13 @@ button {
   margin-bottom: 10px;
   font-size: 16px;
   cursor: pointer;
+}
+
+.error {
+  background: #ffdddd;
+  color: #a00;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ffaaaa;
+  border-radius: 5px;
 }
