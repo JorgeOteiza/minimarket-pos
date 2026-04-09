@@ -1,13 +1,13 @@
 from flask import Flask, jsonify
-from config import Config
-from extensions import db, migrate
-from routes.products import products_bp
-from routes.sales import sales_bp
-from models import Product, Sale, SaleItem
-from exceptions import AppError
+from backend.config import Config
+from backend.extensions import db, migrate
+from backend.routes.products import products_bp
+from backend.routes.sales import sales_bp
+from backend.models import Product, Sale, SaleItem
+from backend.exceptions import AppError
 from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.exceptions import HTTPException
-from routes.cart import cart_bp
+from backend.routes.cart import cart_bp
 import traceback
 
 from flask_cors import CORS 

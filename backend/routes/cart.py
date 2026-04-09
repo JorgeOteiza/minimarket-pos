@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
-from services.product_service import get_product_by_barcode
-from services.cart_service import (
+from backend.services.product_service import get_product_by_barcode
+from backend.services.cart_service import (
     get_cart,
     add_to_cart,
     remove_from_cart,
@@ -10,7 +10,7 @@ from services.cart_service import (
     checkout
 )
 
-from exceptions import NotFoundError, ValidationError
+from backend.exceptions import NotFoundError, ValidationError
 
 cart_bp = Blueprint("cart", __name__)
 

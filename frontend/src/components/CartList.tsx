@@ -24,13 +24,15 @@ export default function CartList({ items }: Props) {
             key={item.product_id}
             className="cart-item"
             style={{
-              background: isLast ? "#e6ffe6" : "transparent",
-              transition: "background 0.2s",
+              background: isLast ? "#d4fcd4" : "transparent",
+              transform: isLast ? "scale(1.02)" : "scale(1)",
+              transition: "all 0.15s ease",
             }}
           >
             <span>{item.name}</span>
             <span>
-              {item.quantity} x ${item.unit_price.toFixed(2)}
+              <strong style={{ fontSize: "18px" }}>x{item.quantity}</strong> $
+              {item.unit_price.toFixed(2)}
             </span>
           </div>
         );
