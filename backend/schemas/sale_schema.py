@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, ValidationError
 from marshmallow.decorators import validates
-from schemas.product_schema import ProductSchema
+from backend.schemas.product_schema import ProductSchema
 
 
 # 🔹 INPUT

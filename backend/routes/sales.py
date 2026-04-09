@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from schemas.sale_schema import SaleInputSchema, SaleOutputSchema
-from services.sale_service import (create_sale, get_all_sales, get_sale_by_id, get_today_sales_summary,)
+from backend.schemas.sale_schema import SaleInputSchema, SaleOutputSchema
+from backend.services.sale_service import (create_sale, get_all_sales, get_sale_by_id, get_today_sales_summary,)
 
 sales_bp = Blueprint("sales", __name__)
 

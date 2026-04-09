@@ -1,5 +1,5 @@
-from models import Product
-from extensions import db
+from backend.models import Product
+from backend.extensions import db
 
 
 def get_all_products():

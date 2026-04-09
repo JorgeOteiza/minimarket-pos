@@ -1,9 +1,9 @@
-from models import Product
-from models.sale import Sale
-from models.sale_item import SaleItem
-from extensions import db
+from backend.models import Product
+from backend.models.sale_item import SaleItem
+from backend.models.sale import Sale
+from backend.extensions import db
 from collections import defaultdict
-from exceptions import InsufficientStockError, ValidationError, NotFoundError
+from backend.exceptions import InsufficientStockError, ValidationError, NotFoundError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from datetime import date
