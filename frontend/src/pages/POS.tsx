@@ -136,55 +136,46 @@ export default function POS() {
 
   return (
     <div className="pos-container">
-      <div className="left">
-        {/* 🔴 error visual */}
-        {error && (
-          <div
-            style={{
-              background: "#ffdddd",
-              color: "#900",
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "5px",
+      <header className="pos-header">
+        <h1>POS Minimarket</h1>
+      </header>
+
+      <main className="pos-main">
+        <section className="pos-left">
+          {error && <div className="error">{error}</div>}
+
+          <input
+            className="pos-input"
+            type="text"
+            placeholder="Escanear o escribir código..."
+            value={manualCode}
+            onChange={(e) => setManualCode(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && manualCode.trim()) {
+                handleScan(manualCode);
+                setManualCode("");
+              }
             }}
-          >
-            {error}
-          </div>
-        )}
+          />
 
-        {/* 🔍 input manual */}
-        <input
-          type="text"
-          placeholder="Escanear o escribir código..."
-          value={manualCode}
-          onChange={(e) => setManualCode(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && manualCode.trim()) {
-              handleScan(manualCode);
-              setManualCode("");
-            }
-          }}
-          style={{
-            width: "100%",
-            padding: "12px",
-            fontSize: "18px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-          }}
-        />
+          <CartList items={cart.items} />
+        </section>
 
-        <CartList items={cart.items} />
-      </div>
+        <aside className="pos-right">
+          <SummaryPanel
+            total={cart.total}
+            onCheckout={handleCheckout}
+            onClear={handleClear}
+            loading={loading}
+          />
+        </aside>
+      </main>
 
-      <div className="right">
-        <SummaryPanel
-          total={cart.total}
-          onCheckout={handleCheckout}
-          onClear={handleClear}
-          loading={loading}
-        />
-      </div>
+      <footer className="pos-footer">
+        <span>F2: Checkout</span>
+        <span>F4: Vaciar</span>
+        <span>F8: Eliminar último</span>
+      </footer>
     </div>
   );
 }

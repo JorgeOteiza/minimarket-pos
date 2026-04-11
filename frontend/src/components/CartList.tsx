@@ -7,9 +7,18 @@ type Props = {
 export default function CartList({ items }: Props) {
   if (items.length === 0) {
     return (
-      <div style={{ padding: "20px", color: "#666" }}>
-        <h2>Esperando escaneo...</h2>
-        <p>Escanea un producto para comenzar la venta</p>
+      <div className="cart-empty">
+        <div className="empty-content">
+          <div className="empty-icon">🛒</div>
+
+          <h2>Listo para vender</h2>
+
+          <p>Escanea un producto para comenzar la venta</p>
+
+          <div className="empty-hint">
+            <span>Usa lector o escribe el código manualmente</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -22,17 +31,11 @@ export default function CartList({ items }: Props) {
         return (
           <div
             key={item.product_id}
-            className="cart-item"
-            style={{
-              background: isLast ? "#d4fcd4" : "transparent",
-              transform: isLast ? "scale(1.02)" : "scale(1)",
-              transition: "all 0.15s ease",
-            }}
+            className={`cart-item ${isLast ? "highlight" : ""}`}
           >
             <span>{item.name}</span>
             <span>
-              <strong style={{ fontSize: "18px" }}>x{item.quantity}</strong> $
-              {item.unit_price.toFixed(2)}
+              <strong>x{item.quantity}</strong> ${item.unit_price.toFixed(2)}
             </span>
           </div>
         );

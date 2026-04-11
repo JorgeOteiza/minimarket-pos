@@ -13,7 +13,8 @@ export default function SummaryPanel({
 }: Props) {
   return (
     <div>
-      <h2 className="total">Total: ${total.toFixed(2)}</h2>
+      <h2 className="total">Total</h2>
+      <div className="total-amount">${total.toFixed(2)}</div>
 
       <button onClick={onCheckout} disabled={loading}>
         {loading ? "Procesando..." : "Cobrar"}

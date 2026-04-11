@@ -1,6 +1,5 @@
 from backend.extensions import db
 
-
 class Sale(db.Model):
     __tablename__ = "sales"
 
