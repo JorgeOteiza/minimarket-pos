@@ -33,7 +33,7 @@ body {
 .pos-left {
   display: flex;
   flex-direction: column;
-  background: rgb(236, 215, 215);
+  background: rgb(236 215 215 / 47%);
   border-radius: 8px;
   padding: 12px;
   overflow: hidden;
@@ -42,7 +42,7 @@ body {
 /* INPUT */
 .pos-input {
   padding: 14px;
-  font-size: 18px;
+  font-size: 30px;
   border-radius: 6px;
   border: 1px solid #ccc;
   margin-bottom: 10px;
@@ -55,7 +55,7 @@ body {
 
 /* RIGHT (SUMMARY) */
 .pos-right {
-  background: #1f2937;
+  background: #112712;
   color: white;
   border-radius: 8px;
   padding: 20px;
@@ -101,9 +101,11 @@ body {
 /* BUTTONS */
 button {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 10px;
-  font-size: 16px;
+  padding: 30px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border-radius: 112px;
+  font-size: 33px;
   cursor: pointer;
 }
 
@@ -130,7 +132,7 @@ button {
 }
 
 .empty-icon {
-  font-size: 60px;
+  font-size: 100px;
   margin-bottom: 16px;
   opacity: 0.7;
 }
@@ -138,14 +140,16 @@ button {
 .empty-content h2 {
   margin-bottom: 8px;
   color: #111827;
+  font-size: 30px;
 }
 
 .empty-content p {
+  font-size: 20px;
   margin-bottom: 12px;
 }
 
 .empty-hint {
-  font-size: 14px;
+  font-size: 18px;
   opacity: 0.6;
 }
 
