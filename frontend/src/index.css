@@ -33,7 +33,7 @@ body {
 .pos-left {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: rgb(236, 215, 215);
   border-radius: 8px;
   padding: 12px;
   overflow: hidden;
