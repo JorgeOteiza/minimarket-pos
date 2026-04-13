@@ -1,8 +1,16 @@
+import { formatCurrency } from "../../utils/format";
+
 type Props = {
   total: number;
   onCheckout: () => Promise<void>;
   onClear: () => Promise<void>;
   loading: boolean;
+  lastItem?:
+    | {
+        name: string;
+        quantity: number;
+      }
+    | undefined;
 };
 
 export default function SummaryPanel({
@@ -10,19 +18,32 @@ export default function SummaryPanel({
   onCheckout,
   onClear,
   loading,
+  lastItem,
 }: Props) {
   return (
     <div>
-      <h2 className="total">Total</h2>
-      <div className="total-amount">${total.toFixed(2)}</div>
+      <div>
+        <h2 className="total">Total</h2>
+        <div className="total-amount">{formatCurrency(total)}</div>
+      </div>
 
-      <button onClick={onCheckout} disabled={loading}>
-        {loading ? "Procesando..." : "Cobrar"}
-      </button>
+      {lastItem && (
+        <div className="last-item">
+          <span>Último producto</span>
+          <strong>{lastItem.name}</strong>
+          <small>x{lastItem.quantity}</small>
+        </div>
+      )}
 
-      <button onClick={onClear} disabled={loading}>
-        Vaciar carrito
-      </button>
+      <div>
+        <button onClick={onCheckout} disabled={loading}>
+          {loading ? "Procesando..." : "Cobrar"}
+        </button>
+
+        <button onClick={onClear} disabled={loading}>
+          Vaciar carrito
+        </button>
+      </div>
     </div>
   );
 }

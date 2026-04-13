@@ -1,10 +1,12 @@
 import type { CartItem } from "../types/cart";
+import CartItemRow from "./CartItemRow";
 
 type Props = {
   items: CartItem[];
+  lastScannedId: number | null;
 };
 
-export default function CartList({ items }: Props) {
+export default function CartList({ items, lastScannedId }: Props) {
   if (items.length === 0) {
     return (
       <div className="cart-empty">
@@ -25,19 +27,15 @@ export default function CartList({ items }: Props) {
 
   return (
     <div>
-      {items.map((item, index) => {
-        const isLast = index === items.length - 1;
+      {items.map((item) => {
+        const isHighlighted = item.product_id === lastScannedId;
 
         return (
-          <div
-            key={item.product_id}
-            className={`cart-item ${isLast ? "highlight" : ""}`}
-          >
-            <span>{item.name}</span>
-            <span>
-              <strong>x{item.quantity}</strong> ${item.unit_price.toFixed(2)}
-            </span>
-          </div>
+          <CartItemRow
+            key={`${item.product_id}-${item.quantity}`}
+            item={item}
+            highlight={isHighlighted}
+          />
         );
       })}
     </div>

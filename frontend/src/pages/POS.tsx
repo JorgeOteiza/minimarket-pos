@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import type { Cart } from "../types/cart";
 import { getCart, scanProduct, checkout, clearCart } from "../api/cartApi";
 import CartList from "../components/CartList";
@@ -16,13 +16,17 @@ export default function POS() {
   const [loading, setLoading] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [lastScannedId, setLastScannedId] = useState<number | null>(null);
 
-  // 🔊 sonidos
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // 🔊 AUDIO PRE-CARGADO
+  const scanAudio = useMemo(() => new Audio("/sounds/scan.mp3"), []);
+  const errorAudio = useMemo(() => new Audio("/sounds/error.mp3"), []);
+
   const playSound = (type: "ok" | "error") => {
-    const src = type === "ok" ? "/sounds/scan.mp3" : "/sounds/error.mp3";
-
-    const audio = new Audio(src);
-    audio.currentTime = 0; // evita solapamiento
+    const audio = type === "ok" ? scanAudio : errorAudio;
+    audio.currentTime = 0;
     audio.play().catch(() => {});
   };
 
@@ -42,7 +46,24 @@ export default function POS() {
     loadCart();
   }, []);
 
-  // 🔍 escaneo (FIX: sonido SOLO si éxito)
+  // 🔥 mantener foco en scanner (sin robar foco al input manual)
+  useEffect(() => {
+    const focusInput = () => {
+      if (document.activeElement?.tagName !== "INPUT") {
+        inputRef.current?.focus();
+      }
+    };
+
+    focusInput();
+
+    window.addEventListener("click", focusInput);
+
+    return () => {
+      window.removeEventListener("click", focusInput);
+    };
+  }, []);
+
+  // 🔍 escaneo
   const handleScan = async (barcode: string) => {
     if (loading) return;
 
@@ -50,11 +71,15 @@ export default function POS() {
       const updatedCart = await scanProduct(barcode);
       setCart(updatedCart);
 
-      playSound("ok"); // ✅ solo éxito
+      const lastItem = updatedCart.items[updatedCart.items.length - 1];
+      if (lastItem) {
+        setLastScannedId(lastItem.product_id);
+      }
+
+      playSound("ok");
       setError(null);
     } catch (err: unknown) {
       console.error(err);
-
       playSound("error");
       setError(getErrorMessage(err));
     }
@@ -86,7 +111,7 @@ export default function POS() {
       setError(null);
 
       const res = await clearCart();
-      setCart(res.cart); // 🔥 importante: no recargar innecesario
+      setCart(res.cart);
     } catch (err: unknown) {
       console.error(err);
       setError(getErrorMessage(err));
@@ -96,7 +121,7 @@ export default function POS() {
     }
   };
 
-  // ⬅️ eliminar último producto
+  // ⬅️ eliminar último
   const handleRemoveLast = async () => {
     if (cart.items.length === 0) return;
 
@@ -126,13 +151,16 @@ export default function POS() {
     }
   };
 
-  // ⌨️ shortcuts (ya corregidos: SIN ENTER)
   useKeyboardShortcuts({
     onCheckout: handleCheckout,
     onClear: handleClear,
     onRemoveLast: handleRemoveLast,
     disabled: loading,
   });
+
+  const lastScannedItem = cart.items.find(
+    (item) => item.product_id === lastScannedId,
+  );
 
   return (
     <div className="pos-container">
@@ -144,10 +172,27 @@ export default function POS() {
         <section className="pos-left">
           {error && <div className="error">{error}</div>}
 
+          {/* 🔴 INPUT VISIBLE (fallback manual) */}
           <input
             className="pos-input"
             type="text"
-            placeholder="Escanear o escribir código..."
+            placeholder="Buscar producto manualmente..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const value = (e.target as HTMLInputElement).value.trim();
+                if (value) {
+                  handleScan(value);
+                  (e.target as HTMLInputElement).value = "";
+                }
+              }
+            }}
+          />
+
+          {/* 🟢 INPUT OCULTO (scanner real) */}
+          <input
+            ref={inputRef}
+            className="hidden-input"
+            type="text"
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
             onKeyDown={(e) => {
@@ -158,7 +203,7 @@ export default function POS() {
             }}
           />
 
-          <CartList items={cart.items} />
+          <CartList items={cart.items} lastScannedId={lastScannedId} />
         </section>
 
         <aside className="pos-right">
@@ -167,6 +212,7 @@ export default function POS() {
             onCheckout={handleCheckout}
             onClear={handleClear}
             loading={loading}
+            lastItem={lastScannedItem}
           />
         </aside>
       </main>
