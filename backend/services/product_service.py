@@ -40,15 +40,21 @@ def create_product(data):
 
 
 def update_product(product, data):
-    product.name = data.get("name", product.name)
-    product.price = data.get("price", product.price)
-    product.barcode = data.get("barcode", product.barcode)
-    product.cost = data.get("cost", product.cost)
-    product.stock = data.get("stock", product.stock)
-    product.min_stock = data.get("min_stock", product.min_stock)
-    product.is_weighted = data.get("is_weighted", product.is_weighted)
-    product.weight = data.get("weight", product.weight)
-    product.margin = data.get("margin", product.margin)
+    allowed_fields = {
+        "name",
+        "price",
+        "barcode",
+        "cost",
+        "stock",
+        "min_stock",
+        "is_weighted",
+        "weight",
+        "margin",
+    }
+
+    for key, value in data.items():
+        if key in allowed_fields:
+            setattr(product, key, value)
 
     db.session.commit()
 
