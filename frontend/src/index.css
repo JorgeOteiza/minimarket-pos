@@ -216,3 +216,101 @@ button {
     transform: scale(1);
   }
 }
+
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+  height: 60px;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.navbar-right {
+  display: flex;
+  gap: 16px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: white;
+}
+
+.nav-link.active {
+  color: white;
+  font-weight: 600;
+}
+
+/* =========================
+   DASHBOARD LAYOUT
+========================= */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: calc(100vh - 60px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: #02060e;
+  color: white;
+  padding: 20px;
+  border-right: 1px solid #1f2937;
+}
+
+.sidebar-title {
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-nav a {
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+  background: #1f2937;
+  color: white;
+}
+
+.sidebar-nav a.active {
+  background: #111827;
+  color: white;
+  font-weight: 600;
+}
+
+/* MAIN */
+.dashboard-main {
+  padding: 20px;
+  background: #f9fafb;
+  overflow-y: auto;
+}

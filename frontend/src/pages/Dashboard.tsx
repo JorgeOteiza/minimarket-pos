@@ -1,31 +1,24 @@
-import { useState } from "react";
-import { ProductSearch } from "../../features/products/components/ProductSearch";
-import { ProductForm } from "../../features/products/components/ProductForm";
-import type { Product } from "../../features/products/types/product";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const handleSelectProduct = (product: Product) => {
-    console.log("Producto seleccionado:", product);
-    setSelectedProduct(product);
-  };
-
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <h1>Dashboard</h1>
 
-      <ProductSearch onSelectProduct={handleSelectProduct} />
+      <p>Bienvenido al panel de administración.</p>
 
-      {selectedProduct && (
-        <ProductForm
-          product={selectedProduct}
-          onUpdated={(updated) => {
-            console.log("Producto actualizado:", updated);
-            setSelectedProduct(updated); // 🔄 mantiene UI sincronizada
-          }}
-        />
-      )}
+      <div style={{ marginTop: "20px" }}>
+        <p>Desde aquí puedes:</p>
+
+        <ul>
+          <li>
+            <Link to="/dashboard/products">Ir a productos</Link>
+          </li>
+          <li>
+            <Link to="/dashboard/analytics">Ver analytics</Link>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };
