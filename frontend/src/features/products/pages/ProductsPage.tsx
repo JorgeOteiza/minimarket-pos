@@ -12,7 +12,7 @@ const ProductsPage = () => {
 
   const [query, setQuery] = useState("");
 
-  // 🔄 carga inicial + búsqueda
+  // 🔄 carga inicial + búsqueda (con cancelación)
   useEffect(() => {
     const controller = new AbortController();
 
@@ -50,13 +50,11 @@ const ProductsPage = () => {
       }
     };
 
-    const timeout = setTimeout(() => {
-      loadProducts();
-    }, 300); // debounce
+    const timeout = setTimeout(loadProducts, 300);
 
     return () => {
       clearTimeout(timeout);
-      controller.abort(); // 🔥 cancela requests pendientes
+      controller.abort();
     };
   }, [query]);
 
@@ -89,12 +87,11 @@ const ProductsPage = () => {
       {/* ⚠️ ERROR */}
       {error && <div className="error">{error}</div>}
 
+      {/* ⏳ LOADING */}
+      {loading && <p>Cargando productos...</p>}
+
       {/* 📦 LISTA */}
-      <ProductList
-        products={products}
-        loading={loading}
-        onSelectProduct={setSelectedProduct}
-      />
+      <ProductList products={products} onSelectProduct={setSelectedProduct} />
 
       {/* 📝 FORM */}
       {selectedProduct && (
