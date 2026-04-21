@@ -1,55 +1,53 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { updateProduct } from "../services/productApi";
-import type { Product, UpdateProductDTO } from "../types/product";
+import type { Product } from "../types/product";
 
 interface Props {
   product: Product;
   onUpdated?: (product: Product) => void;
 }
 
+interface FormState {
+  name: string;
+  price: string;
+  cost: string;
+  stock: string;
+  barcode: string;
+  category_id?: number;
+}
+
 export const ProductForm = ({ product, onUpdated }: Props) => {
-  const [form, setForm] = useState<UpdateProductDTO>({
-    name: "",
-    price: 0,
-    stock: 0,
-    barcode: "",
-    cost: 0,
-    category_id: undefined,
+  const [form, setForm] = useState<FormState>({
+    name: product.name ?? "",
+    price: product.price != null ? String(product.price) : "",
+    cost: product.cost != null ? String(product.cost) : "",
+    stock: product.stock != null ? String(product.stock) : "",
+    barcode: product.barcode ?? "",
+    category_id:
+      typeof product.category_id === "number" ? product.category_id : undefined,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔄 sincroniza cuando cambia el producto seleccionado
-  useEffect(() => {
-    if (product) {
-      setForm({
-        name: product.name,
-        price: product.price,
-        stock: product.stock,
-        barcode: product.barcode,
-        cost: product.cost ?? 0,
-        category_id: product.category_id,
-      });
-    }
-  }, [product]);
+  const handleChange = useCallback((field: keyof FormState, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
 
-  // 🧠 handler genérico
-  const handleChange = useCallback(
-    (field: keyof UpdateProductDTO, value: string | number) => {
-      setForm((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    },
-    [],
-  );
-
-  // ✅ validación simple (puedes escalar esto después)
   const validate = (): string | null => {
     if (!form.name.trim()) return "El nombre es obligatorio";
-    if (form.price < 0) return "El precio no puede ser negativo";
-    if (form.stock < 0) return "El stock no puede ser negativo";
+
+    const price = Number(form.price);
+    const stock = Number(form.stock);
+    const cost = Number(form.cost);
+
+    if (isNaN(price) || price < 0) return "Precio inválido";
+    if (isNaN(stock) || stock < 0) return "Stock inválido";
+    if (isNaN(cost) || cost < 0) return "Costo inválido";
+
     return null;
   };
 
@@ -66,7 +64,16 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
     setError(null);
 
     try {
-      const updated = await updateProduct(product.id, form);
+      const payload = {
+        name: form.name,
+        price: Number(form.price),
+        cost: Number(form.cost),
+        stock: Number(form.stock),
+        barcode: form.barcode,
+        category_id: form.category_id,
+      };
+
+      const updated = await updateProduct(product.id, payload);
       onUpdated?.(updated);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -83,7 +90,7 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
     <form onSubmit={handleSubmit} style={{ marginTop: "20px" }}>
       <h2>Editar producto</h2>
 
-      {error && <div style={{ color: "red" }}>{error}</div>}
+      {error && <div className="error">{error}</div>}
 
       <div>
         <label>Nombre</label>
@@ -94,11 +101,11 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
       </div>
 
       <div>
-        <label>Precio</label>
+        <label>Precio venta</label>
         <input
           type="number"
           value={form.price}
-          onChange={(e) => handleChange("price", Number(e.target.value))}
+          onChange={(e) => handleChange("price", e.target.value)}
         />
       </div>
 
@@ -107,7 +114,7 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
         <input
           type="number"
           value={form.cost}
-          onChange={(e) => handleChange("cost", Number(e.target.value))}
+          onChange={(e) => handleChange("cost", e.target.value)}
         />
       </div>
 
@@ -116,7 +123,7 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
         <input
           type="number"
           value={form.stock}
-          onChange={(e) => handleChange("stock", Number(e.target.value))}
+          onChange={(e) => handleChange("stock", e.target.value)}
         />
       </div>
 
