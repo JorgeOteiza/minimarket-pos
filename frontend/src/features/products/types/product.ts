@@ -13,6 +13,7 @@ export interface Product {
 
   is_weighted?: boolean;
   weight?: number;
+  iva?: number;
 }
 
 export interface UpdateProductDTO {
@@ -24,4 +25,5 @@ export interface UpdateProductDTO {
   cost?: number;
   margin?: number;
   min_stock?: number;
+  iva?: number;
 }
