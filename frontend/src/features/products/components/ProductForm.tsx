@@ -23,8 +23,7 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
     cost: product.cost != null ? String(product.cost) : "",
     stock: product.stock != null ? String(product.stock) : "",
     barcode: product.barcode ?? "",
-    category_id:
-      typeof product.category_id === "number" ? product.category_id : undefined,
+    category_id: product.category_id,
   });
 
   const [loading, setLoading] = useState(false);

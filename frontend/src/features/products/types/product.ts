@@ -14,6 +14,7 @@ export interface Product {
   is_weighted?: boolean;
   weight?: number;
   iva?: number;
+  category_id?: number;
 }
 
 export interface UpdateProductDTO {

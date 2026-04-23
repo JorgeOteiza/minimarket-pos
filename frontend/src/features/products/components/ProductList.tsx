@@ -11,13 +11,12 @@ export const ProductList = ({
   loading = false,
   onSelectProduct,
 }: Props) => {
-  const formatCLP = (value: number) => {
-    return new Intl.NumberFormat("es-CL", {
+  const formatCLP = (value: number) =>
+    new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
       maximumFractionDigits: 0,
     }).format(value);
-  };
 
   const getStockStatus = (product: Product) => {
     if (product.stock === 0) return "out";
@@ -52,7 +51,6 @@ export const ProductList = ({
             <th>Costo neto</th>
             <th>Precio venta</th>
             <th>Precio c/IVA</th>
-            <th>Precio sugerido</th>
 
             <th>Utilidad</th>
             <th>Margen</th>
@@ -66,13 +64,11 @@ export const ProductList = ({
           {products.map((product) => {
             const cost = product.cost ?? 0;
             const iva = product.iva ?? 0.19;
-            const margin = product.margin ?? 0.3;
 
-            const priceWithIVA = product.price * (1 + iva);
-            const suggestedPrice = cost * (1 + margin);
+            const priceNet = product.price;
+            const priceWithIVA = priceNet * (1 + iva);
 
-            const profit = product.price - cost;
-
+            const profit = priceNet - cost;
             const marginPercent =
               cost > 0 ? ((profit / cost) * 100).toFixed(0) : "0";
 
@@ -86,26 +82,15 @@ export const ProductList = ({
                 style={{
                   cursor: "pointer",
                   borderBottom: "1px solid #eee",
-                  transition: "background 0.15s",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#f9fafb")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
               >
-                {/* 🔹 IDENTIFICACIÓN */}
                 <td>{product.name}</td>
                 <td>{product.barcode || "-"}</td>
 
-                {/* 🔹 COSTOS / PRECIOS */}
                 <td>{formatCLP(cost)}</td>
-                <td>{formatCLP(product.price)}</td>
+                <td>{formatCLP(priceNet)}</td>
                 <td>{formatCLP(priceWithIVA)}</td>
-                <td>{formatCLP(suggestedPrice)}</td>
 
-                {/* 🔹 RENTABILIDAD */}
                 <td
                   style={{
                     color: profit > 0 ? "#16a34a" : "#dc2626",
@@ -117,7 +102,6 @@ export const ProductList = ({
 
                 <td>{marginPercent}%</td>
 
-                {/* 🔹 INVENTARIO */}
                 <td>{product.stock}</td>
 
                 <td>
