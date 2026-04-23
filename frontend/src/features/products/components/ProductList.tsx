@@ -1,4 +1,9 @@
 import type { Product } from "../types/product";
+import {
+  calculatePriceWithIVA,
+  calculateProfit,
+  calculateMargin,
+} from "../../../utils/pricing";
 
 interface Props {
   products: Product[];
@@ -62,15 +67,13 @@ export const ProductList = ({
 
         <tbody>
           {products.map((product) => {
+            const priceNet = product.price;
             const cost = product.cost ?? 0;
             const iva = product.iva ?? 0.19;
 
-            const priceNet = product.price;
-            const priceWithIVA = priceNet * (1 + iva);
-
-            const profit = priceNet - cost;
-            const marginPercent =
-              cost > 0 ? ((profit / cost) * 100).toFixed(0) : "0";
+            const priceWithIVA = calculatePriceWithIVA(priceNet, iva);
+            const profit = calculateProfit(priceNet, cost);
+            const marginPercent = calculateMargin(profit, cost).toFixed(0);
 
             const status = getStockStatus(product);
             const badge = getStockBadge(status);
