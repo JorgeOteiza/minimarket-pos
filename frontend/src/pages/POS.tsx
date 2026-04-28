@@ -105,21 +105,24 @@ export default function POS() {
   };
 
   // 🧹 limpiar carrito
-  const handleClear = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+// SOLO CAMBIA ESTA PARTE
 
-      const res = await clearCart();
-      setCart(res.cart);
-    } catch (err: unknown) {
-      console.error(err);
-      setError(getErrorMessage(err));
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleClear = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    const updatedCart = await clearCart();
+    setCart(updatedCart);
+
+  } catch (err: unknown) {
+    console.error(err);
+    setError(getErrorMessage(err));
+    playSound("error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ⬅️ eliminar último
   const handleRemoveLast = async () => {

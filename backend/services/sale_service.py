@@ -27,7 +27,6 @@ def create_sale(data):
     if not items_data:
         raise ValidationError("Sale must have at least one item")
 
-    # 🔹 agrupar productos repetidos
     grouped_items = defaultdict(float)
     for item in items_data:
         product_id = item.get("product_id")
@@ -35,7 +34,6 @@ def create_sale(data):
 
         grouped_items[product_id] += quantity
 
-    # 🔥 transacción atómica
     with db.session.begin():
 
         sale = Sale(total_amount=0)
@@ -45,27 +43,22 @@ def create_sale(data):
 
             product = db.session.get(Product, product_id)
 
-            # 🔍 validar existencia
             if not product:
                 raise NotFoundError(f"Product {product_id} not found")
 
-            # 🔹 validación unitario vs granel
             if not product.is_weighted and not float(quantity).is_integer():
                 raise ValidationError(
                     f"Product {product.name} must have integer quantity"
                 )
 
-            # 🔍 validar stock
             if product.stock < quantity:
                 raise InsufficientStockError(
                     f"Not enough stock for {product.name}"
                 )
 
-            # 💰 cálculo
             unit_price = product.price
             subtotal = float(unit_price) * quantity
 
-            # 📦 crear item
             sale_item = SaleItem(
                 product_id=product.id,
                 quantity=quantity,
@@ -73,10 +66,8 @@ def create_sale(data):
                 subtotal=subtotal
             )
 
-            # 🔻 actualizar stock
             product.stock -= quantity
 
-            # 🔗 relación
             sale.items.append(sale_item)
 
             total_amount += subtotal
