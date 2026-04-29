@@ -7,6 +7,7 @@ from backend.exceptions import InsufficientStockError, ValidationError, NotFound
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from datetime import date
+from decimal import Decimal
 
 
 def get_all_sales():
@@ -57,7 +58,8 @@ def create_sale(data):
                 )
 
             unit_price = product.price
-            subtotal = float(unit_price) * quantity
+            quantity_dec = Decimal(str(quantity))
+            subtotal = unit_price * quantity_dec
 
             sale_item = SaleItem(
                 product_id=product.id,

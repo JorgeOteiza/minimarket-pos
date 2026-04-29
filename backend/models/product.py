@@ -33,6 +33,15 @@ class Product(db.Model):
         back_populates="products"
     )
 
+    def update_from_dict(self, data: dict):
+       for field in [
+        "name", "barcode", "price", "cost",
+        "stock", "min_stock", "is_weighted",
+        "weight", "margin", "category_id"
+    ]:
+        if field in data:
+            setattr(self, field, data[field])
+
     def __repr__(self):
         return f"<Product id={self.id} name={self.name}>"
 

@@ -28,6 +28,18 @@ def get_product_by_barcode(barcode):
 def get_product_by_id(product_id):
     return Product.query.get(product_id)
 
+def upsert_product(data):
+    product = Product.query.filter_by(
+        barcode=data.get("barcode")
+    ).first()
+
+    if product:
+        product.update_from_dict(data)
+    else:
+        product = Product(**data)
+        db.session.add(product)
+
+    return product
 
 # 🔹 CREATE
 def create_product(data):

@@ -17,4 +17,3 @@ class ProductSchema(Schema):
     weight = fields.Float(allow_none=True)
 
     margin = fields.Float(load_default=0.3)
-    price = fields.Float(required=True)
