@@ -1,0 +1,21 @@
+name,barcode,cost,price,margin,stock,min_stock,is_weighted,weight,category
+SALCHICHA TRAD. PF (24x250gr),,3427.20,4455.36,0.30,24,5,false,,cecinas y elaborados
+PATE SABOR TERNERA PF (16x125g),,3300.00,4290.00,0.30,16,5,false,,cecinas y elaborados
+SALAME T. ITALIANO PF (12x100gr),,10958.30,14245.79,0.30,12,5,false,,cecinas y elaborados
+LONGANIZA PARRILLERA PF (9x250g),,4266.70,5546.71,0.30,9,5,false,,cecinas y elaborados
+SALCH. SURENA POLLO PF (24x250g),,3032.80,3942.64,0.30,24,5,false,,cecinas y elaborados
+CHURR. VAC. RDA (36x120g),,7497.70,9747.01,0.30,36,5,false,,cecinas y elaborados
+APANADO POLLO PF (66x100gr),,3104.60,4035.98,0.30,66,5,false,,cecinas y elaborados
+POLLO A LA PLANCHA PF (70x80gr),,5410.70,7033.91,0.30,70,5,false,,cecinas y elaborados
+MOLIDA FLOWPACK (24x250g),,4876.30,6339.19,0.30,24,5,false,,cecinas y elaborados
+HAMB. DE VACUNO RDA (42x100gr),,5116.70,6651.71,0.30,42,5,false,,cecinas y elaborados
+SALCHICHAS SURENAS PF (24x250g),,3391.70,4409.21,0.30,24,5,false,,cecinas y elaborados
+COMPOTA MANZ/DUR PF (18x90g),,3265.40,4245.02,0.30,18,5,false,,cecinas y elaborados
+CHORIZO PARRILLERO PF (9x250g),,3984.90,5180.37,0.30,9,5,false,,cecinas y elaborados
+HAMBURGUESA T-REX PF (27x185g),,3461.50,4500.00,0.30,27,5,false,,cecinas y elaborados
+MORT. JAMONADA PF (12x150g),,4272.20,5553.86,0.30,12,5,false,,cecinas y elaborados
+MINI SNACK SALAMINI RDA (15x50g),,12920.00,16796.00,0.30,15,5,false,,cecinas y elaborados
+PATE SABOR JAMON PF (16x125g),,3600.00,4680.00,0.30,16,5,false,,cecinas y elaborados
+HAMBURGUESA PF (42x90g),,3246.00,4219.80,0.30,42,5,false,,cecinas y elaborados
+HAMBURGUESA DE POLLO PF (42x90g),,3867.70,5027.99,0.30,42,5,false,,cecinas y elaborados
+POROTO VERDE FRANCES (10x150g),,2793.30,3631.29,0.30,10,5,false,,cecinas y elaborados
