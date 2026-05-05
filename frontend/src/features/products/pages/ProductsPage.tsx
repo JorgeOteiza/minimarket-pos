@@ -12,7 +12,6 @@ const ProductsPage = () => {
 
   const [query, setQuery] = useState("");
 
-  // 🔄 carga inicial + búsqueda (con cancelación)
   useEffect(() => {
     const controller = new AbortController();
 
@@ -23,7 +22,7 @@ const ProductsPage = () => {
       try {
         const url = query
           ? `http://localhost:5000/api/products/search?name=${query}`
-          : `http://localhost:5000/api/products`;
+          : "http://localhost:5000/api/products";
 
         const res = await fetch(url, {
           signal: controller.signal,
@@ -36,9 +35,7 @@ const ProductsPage = () => {
         const data = await res.json();
         setProducts(data);
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
+        if (err instanceof DOMException && err.name === "AbortError") return;
 
         if (err instanceof Error) {
           setError(err.message);
@@ -58,49 +55,60 @@ const ProductsPage = () => {
     };
   }, [query]);
 
-  // 🔥 update inmediato en UI
+  const handleSelectProduct = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
   const handleProductUpdated = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-
     setSelectedProduct(updated);
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Gestión de Productos</h1>
+    <div className="products-page">
+      <div className="products-header">
+        <div>
+          <h1>Gestión de Productos</h1>
+          <p>Administra costos, precios, stock e inventario.</p>
+        </div>
+      </div>
 
-      {/* 🔍 BUSCADOR */}
       <input
         type="text"
         placeholder="Buscar por nombre..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        style={{
-          padding: "10px",
-          width: "100%",
-          marginBottom: "16px",
-          borderRadius: "6px",
-          border: "1px solid #ccc",
-        }}
+        className="products-search"
       />
 
-      {/* ⚠️ ERROR */}
       {error && <div className="error">{error}</div>}
 
-      {/* ⏳ LOADING */}
-      {loading && <p>Cargando productos...</p>}
+      <div className="products-layout">
+        <div className="products-list-panel">
+          <ProductList
+            products={products}
+            loading={loading}
+            selectedProductId={selectedProduct?.id ?? null}
+            onSelectProduct={handleSelectProduct}
+            onProductUpdated={handleProductUpdated}
+          />
+        </div>
 
-      {/* 📦 LISTA */}
-      <ProductList products={products} onSelectProduct={setSelectedProduct} />
-
-      {/* 📝 FORM */}
-      {selectedProduct && (
-        <ProductForm
-          key={selectedProduct.id}
-          product={selectedProduct}
-          onUpdated={handleProductUpdated}
-        />
-      )}
+        <div className="products-form-panel">
+          {selectedProduct ? (
+            <ProductForm
+              key={selectedProduct.id}
+              product={selectedProduct}
+              onUpdated={handleProductUpdated}
+            />
+          ) : (
+            <div className="empty-product-form">
+              <h2>Selecciona un producto</h2>
+              <p>Haz clic en una fila para editar sus datos.</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

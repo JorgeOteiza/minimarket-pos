@@ -5,7 +5,7 @@ const API_URL = "http://localhost:5000/api";
 export const searchProducts = async (query: string): Promise<Product[]> => {
   if (!query) return [];
 
-  const res = await fetch(`${API_URL}/products/search?q=${query}`);
+  const res = await fetch(`${API_URL}/products/search?name=${query}`);
 
   if (!res.ok) {
     throw new Error("Error fetching products");

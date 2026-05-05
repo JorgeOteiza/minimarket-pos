@@ -3,17 +3,55 @@ from marshmallow import Schema, fields, validate
 
 class ProductSchema(Schema):
     id = fields.Int(dump_only=True)
- 
-    name = fields.Str(required=True, validate=validate.Length(min=1))
-    price = fields.Float(required=True)
-    
-    barcode = fields.Str(allow_none=True)
-    cost = fields.Float(allow_none=True)
 
-    stock = fields.Int(load_default=0)
-    min_stock = fields.Int(load_default=5)
+    name = fields.Str(
+        required=True,
+        validate=validate.Length(min=1, max=150),
+    )
+
+    price = fields.Float(
+        required=False,
+        allow_none=True,
+        validate=validate.Range(min=0),
+    )
+
+    barcode = fields.Str(
+        required=False,
+        allow_none=True,
+        validate=validate.Length(max=50),
+    )
+
+    cost = fields.Float(
+        required=False,
+        allow_none=True,
+        validate=validate.Range(min=0),
+    )
+
+    stock = fields.Int(
+        load_default=0,
+        validate=validate.Range(min=0),
+    )
+
+    min_stock = fields.Int(
+        load_default=5,
+        validate=validate.Range(min=0),
+    )
 
     is_weighted = fields.Bool(load_default=False)
-    weight = fields.Float(allow_none=True)
 
-    margin = fields.Float(load_default=0.3)
+    weight = fields.Float(
+        required=False,
+        allow_none=True,
+        validate=validate.Range(min=0),
+    )
+
+    margin = fields.Float(
+        load_default=0.3,
+        validate=validate.Range(min=0),
+    )
+
+    category_id = fields.Int(
+        required=False,
+        allow_none=True,
+        validate=validate.Range(min=1),
+    )

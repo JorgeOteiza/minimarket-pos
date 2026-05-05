@@ -1,29 +1,25 @@
 export interface Product {
   id: number;
   name: string;
-  price: number;
-
-  cost?: number;
-  barcode?: string;
-
+  price: number | null;
+  cost?: number | null;
+  barcode?: string | null;
   stock: number;
   min_stock?: number;
-
   margin?: number;
-
   is_weighted?: boolean;
   weight?: number;
   iva?: number;
-  category_id?: number;
+  category_id?: number | null;
 }
 
 export interface UpdateProductDTO {
   name?: string;
-  price?: number;
+  price?: number | null;
   stock?: number;
-  barcode?: string;
-  category_id?: number;
-  cost?: number;
+  barcode?: string | null;
+  category_id?: number | null;
+  cost?: number | null;
   margin?: number;
   min_stock?: number;
   iva?: number;

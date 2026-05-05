@@ -9,7 +9,7 @@ class Product(db.Model):
 
     barcode = db.Column(db.String(50), unique=True, nullable=True, index=True)
 
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=True)
     cost = db.Column(db.Numeric(10, 2), nullable=True)
 
     stock = db.Column(db.Integer, default=0)
@@ -50,7 +50,7 @@ class Product(db.Model):
             "id": self.id,
             "name": self.name,
             "barcode": self.barcode,
-            "price": float(self.price),
+            "price": float(self.price) if self.price is not None else None,
             "cost": float(self.cost) if self.cost else None,
             "stock": self.stock,
             "min_stock": self.min_stock,

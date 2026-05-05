@@ -1,27 +1,42 @@
+import { useState } from "react";
 import type { Product } from "../types/product";
 import {
-  calculatePriceWithIVA,
+  calculateNetPrice,
   calculateProfit,
   calculateMargin,
 } from "../../../utils/pricing";
+import { updateProduct } from "../services/productApi";
 
 interface Props {
   products: Product[];
   loading?: boolean;
+  selectedProductId?: number | null;
   onSelectProduct: (product: Product) => void;
+  onProductUpdated: (product: Product) => void;
 }
 
 export const ProductList = ({
   products,
   loading = false,
+  selectedProductId = null,
   onSelectProduct,
+  onProductUpdated,
 }: Props) => {
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [tempPrice, setTempPrice] = useState("");
+
   const formatCLP = (value: number) =>
     new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
       maximumFractionDigits: 0,
     }).format(value);
+
+  const formatOptionalCLP = (value: number | null | undefined) => {
+    if (value === null || value === undefined || Number.isNaN(value))
+      return "-";
+    return formatCLP(value);
+  };
 
   const getStockStatus = (product: Product) => {
     if (product.stock === 0) return "out";
@@ -40,6 +55,29 @@ export const ProductList = ({
     }
   };
 
+  const handleSavePrice = async (product: Product) => {
+    const value = tempPrice.trim();
+
+    if (value !== "" && Number(value) < 0) {
+      setEditingId(null);
+      setTempPrice("");
+      return;
+    }
+
+    try {
+      const updated = await updateProduct(product.id, {
+        price: value === "" ? null : Number(value),
+      });
+
+      onProductUpdated(updated);
+    } catch (err) {
+      console.error("Error actualizando precio", err);
+    } finally {
+      setEditingId(null);
+      setTempPrice("");
+    }
+  };
+
   if (loading) return <p>Cargando productos...</p>;
   if (!products.length) return <p>No hay productos</p>;
 
@@ -47,85 +85,131 @@ export const ProductList = ({
     <div>
       <h2>Lista de Productos</h2>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "2px solid #ddd" }}>
-            <th>Nombre</th>
-            <th>Barcode</th>
+      <div className="products-table-wrapper">
+        <table className="products-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Barcode</th>
+              <th>Costo caja</th>
+              <th>Costo unidad</th>
+              <th>Precio venta</th>
+              <th>Precio sin IVA</th>
+              <th>Utilidad</th>
+              <th>Margen</th>
+              <th>Stock</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
 
-            <th>Costo neto</th>
-            <th>Precio venta</th>
-            <th>Precio c/IVA</th>
+          <tbody>
+            {products.map((product) => {
+              const finalPrice = product.price ?? null;
+              const boxCost = product.cost ?? null;
+              const stock = product.stock ?? 0;
+              const iva = product.iva ?? 0.19;
 
-            <th>Utilidad</th>
-            <th>Margen</th>
+              const unitCost =
+                boxCost !== null && stock > 0 ? boxCost / stock : null;
 
-            <th>Stock</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
+              const netPrice =
+                finalPrice !== null ? calculateNetPrice(finalPrice, iva) : null;
 
-        <tbody>
-          {products.map((product) => {
-            const priceNet = product.price;
-            const cost = product.cost ?? 0;
-            const iva = product.iva ?? 0.19;
+              const profit =
+                finalPrice !== null && unitCost !== null
+                  ? calculateProfit(finalPrice, unitCost, iva)
+                  : null;
 
-            const priceWithIVA = calculatePriceWithIVA(priceNet, iva);
-            const profit = calculateProfit(priceNet, cost);
-            const marginPercent = calculateMargin(profit, cost).toFixed(0);
+              const marginPercent =
+                profit !== null && unitCost !== null
+                  ? calculateMargin(profit, unitCost).toFixed(0)
+                  : null;
 
-            const status = getStockStatus(product);
-            const badge = getStockBadge(status);
+              const status = getStockStatus(product);
+              const badge = getStockBadge(status);
+              const isSelected = selectedProductId === product.id;
+              const isEditing = editingId === product.id;
 
-            return (
-              <tr
-                key={product.id}
-                onClick={() => onSelectProduct(product)}
-                style={{
-                  cursor: "pointer",
-                  borderBottom: "1px solid #eee",
-                }}
-              >
-                <td>{product.name}</td>
-                <td>{product.barcode || "-"}</td>
-
-                <td>{formatCLP(cost)}</td>
-                <td>{formatCLP(priceNet)}</td>
-                <td>{formatCLP(priceWithIVA)}</td>
-
-                <td
-                  style={{
-                    color: profit > 0 ? "#16a34a" : "#dc2626",
-                    fontWeight: "bold",
-                  }}
+              return (
+                <tr
+                  key={product.id}
+                  className={`product-row ${isSelected ? "selected" : ""}`}
+                  onClick={() => onSelectProduct(product)}
                 >
-                  {formatCLP(profit)}
-                </td>
+                  <td>{product.name}</td>
+                  <td>{product.barcode || "-"}</td>
+                  <td>{formatOptionalCLP(boxCost)}</td>
+                  <td>{formatOptionalCLP(unitCost)}</td>
 
-                <td>{marginPercent}%</td>
-
-                <td>{product.stock}</td>
-
-                <td>
-                  <span
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      background: badge.bg,
-                      color: badge.color,
+                  <td
+                    className="editable-price-cell"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectProduct(product);
+                      setEditingId(product.id);
+                      setTempPrice(
+                        finalPrice !== null ? String(finalPrice) : "",
+                      );
                     }}
                   >
-                    {badge.label}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        value={tempPrice}
+                        autoFocus
+                        className="inline-price-input"
+                        onChange={(e) => setTempPrice(e.target.value)}
+                        onBlur={() => handleSavePrice(product)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSavePrice(product);
+                          }
+
+                          if (e.key === "Escape") {
+                            setEditingId(null);
+                            setTempPrice("");
+                          }
+                        }}
+                      />
+                    ) : finalPrice !== null ? (
+                      formatCLP(finalPrice)
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td>{formatOptionalCLP(netPrice)}</td>
+
+                  <td
+                    className={
+                      profit !== null && profit > 0
+                        ? "profit-positive"
+                        : "profit-negative"
+                    }
+                  >
+                    {formatOptionalCLP(profit)}
+                  </td>
+
+                  <td>{marginPercent !== null ? `${marginPercent}%` : "-"}</td>
+                  <td>{stock}</td>
+
+                  <td>
+                    <span
+                      className="stock-badge"
+                      style={{
+                        background: badge.bg,
+                        color: badge.color,
+                      }}
+                    >
+                      {badge.label}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -93,8 +93,8 @@ def _parse_row(row: dict) -> dict:
 
     margin = _parse_margin(row.get("margin"))
 
-    if price is None:
-        price = _calculate_price(cost, margin)
+    # if price is None:
+    #     price = _calculate_price(cost, margin)
 
     stock = _parse_int(row.get("stock"), "stock", default=0, min_value=0)
     min_stock = _parse_int(row.get("min_stock"), "min_stock", default=5, min_value=0)

@@ -13,7 +13,7 @@ interface FormState {
   cost: string;
   stock: string;
   barcode: string;
-  category_id?: number;
+  category_id?: number | null;
 }
 
 export const ProductForm = ({ product, onUpdated }: Props) => {
@@ -39,13 +39,19 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
   const validate = (): string | null => {
     if (!form.name.trim()) return "El nombre es obligatorio";
 
-    const price = Number(form.price);
+    const price = form.price.trim() === "" ? null : Number(form.price);
     const stock = Number(form.stock);
-    const cost = Number(form.cost);
+    const cost = form.cost.trim() === "" ? null : Number(form.cost);
 
-    if (isNaN(price) || price < 0) return "Precio inválido";
-    if (isNaN(stock) || stock < 0) return "Stock inválido";
-    if (isNaN(cost) || cost < 0) return "Costo inválido";
+    if (price !== null && (Number.isNaN(price) || price < 0)) {
+      return "Precio inválido";
+    }
+
+    if (Number.isNaN(stock) || stock < 0) return "Stock inválido";
+
+    if (cost !== null && (Number.isNaN(cost) || cost < 0)) {
+      return "Costo inválido";
+    }
 
     return null;
   };
@@ -64,12 +70,12 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
 
     try {
       const payload = {
-        name: form.name,
-        price: Number(form.price),
-        cost: Number(form.cost),
+        name: form.name.trim(),
+        price: form.price.trim() === "" ? null : Number(form.price),
+        cost: form.cost.trim() === "" ? null : Number(form.cost),
         stock: Number(form.stock),
-        barcode: form.barcode,
-        category_id: form.category_id,
+        barcode: form.barcode.trim() === "" ? null : form.barcode.trim(),
+        category_id: form.category_id ?? null,
       };
 
       const updated = await updateProduct(product.id, payload);
@@ -86,55 +92,63 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "20px" }}>
-      <h2>Editar producto</h2>
+    <form onSubmit={handleSubmit} className="product-form-card">
+      <div className="product-form-header">
+        <h2>Editar producto</h2>
+        <p>Actualiza precio, costo, stock o código de barras.</p>
+      </div>
 
       {error && <div className="error">{error}</div>}
 
-      <div>
-        <label>Nombre</label>
-        <input
-          value={form.name}
-          onChange={(e) => handleChange("name", e.target.value)}
-        />
+      <div className="product-form-grid">
+        <div className="form-field full">
+          <label>Nombre</label>
+          <input
+            value={form.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Precio venta</label>
+          <input
+            type="number"
+            value={form.price}
+            placeholder="-"
+            onChange={(e) => handleChange("price", e.target.value)}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Costo caja</label>
+          <input
+            type="number"
+            value={form.cost}
+            placeholder="-"
+            onChange={(e) => handleChange("cost", e.target.value)}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Stock</label>
+          <input
+            type="number"
+            value={form.stock}
+            onChange={(e) => handleChange("stock", e.target.value)}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Barcode</label>
+          <input
+            value={form.barcode}
+            placeholder="-"
+            onChange={(e) => handleChange("barcode", e.target.value)}
+          />
+        </div>
       </div>
 
-      <div>
-        <label>Precio venta</label>
-        <input
-          type="number"
-          value={form.price}
-          onChange={(e) => handleChange("price", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Costo</label>
-        <input
-          type="number"
-          value={form.cost}
-          onChange={(e) => handleChange("cost", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Stock</label>
-        <input
-          type="number"
-          value={form.stock}
-          onChange={(e) => handleChange("stock", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label>Barcode</label>
-        <input
-          value={form.barcode}
-          onChange={(e) => handleChange("barcode", e.target.value)}
-        />
-      </div>
-
-      <button type="submit" disabled={loading}>
+      <button type="submit" disabled={loading} className="product-save-button">
         {loading ? "Guardando..." : "Guardar cambios"}
       </button>
     </form>

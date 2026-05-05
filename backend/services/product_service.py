@@ -1,12 +1,21 @@
 from backend.models import Product
 from backend.extensions import db
+from decimal import Decimal, ROUND_HALF_UP
 
 
 # 🔹 helper: calcular precio desde costo + margen
+
 def calculate_price(cost, margin):
     if cost is None:
         return None
-    return round(cost * (1 + margin), 2)
+
+    cost = Decimal(str(cost))
+    margin = Decimal(str(margin))
+
+    return (cost * (Decimal("1") + margin)).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
 
 
 def get_all_products():
@@ -61,6 +70,7 @@ def create_product(data):
         is_weighted=data.get("is_weighted", False),
         weight=data.get("weight"),
         margin=margin,
+        category_id=data.get("category_id"),
     )
 
     db.session.add(product)
@@ -81,6 +91,7 @@ def update_product(product, data):
         "is_weighted",
         "weight",
         "margin",
+        "category_id",
     }
 
     # 🔥 aplicar cambios básicos
@@ -93,8 +104,8 @@ def update_product(product, data):
     margin = data.get("margin", product.margin)
 
     # ⚠️ solo recalculamos si NO viene price explícito
-    if "price" not in data and cost is not None:
-        product.price = calculate_price(cost, margin)
+    # if "price" not in data and cost is not None:
+    #     product.price = calculate_price(cost, margin)
 
     db.session.commit()
 
