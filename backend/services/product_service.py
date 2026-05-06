@@ -50,26 +50,17 @@ def upsert_product(data):
 
     return product
 
-# 🔹 CREATE
 def create_product(data):
-    cost = data.get("cost")
-    margin = data.get("margin", 0.3)
-    price = data.get("price")
-
-    # 🔥 lógica de negocio
-    if price is None and cost is not None:
-        price = calculate_price(cost, margin)
-
     product = Product(
         name=data.get("name"),
-        price=price,
+        price=data.get("price"),
         barcode=data.get("barcode"),
-        cost=cost,
+        cost=data.get("cost"),
         stock=data.get("stock", 0),
         min_stock=data.get("min_stock", 5),
         is_weighted=data.get("is_weighted", False),
         weight=data.get("weight"),
-        margin=margin,
+        margin=data.get("margin", 0.3),
         category_id=data.get("category_id"),
     )
 

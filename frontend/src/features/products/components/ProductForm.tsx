@@ -1,10 +1,13 @@
 import { useState, useCallback } from "react";
-import { updateProduct } from "../services/productApi";
+import { createProduct, updateProduct } from "../services/productApi";
 import type { Product } from "../types/product";
 
 interface Props {
-  product: Product;
+  product?: Product | null;
+  mode: "create" | "edit";
+  onCreated?: (product: Product) => void;
   onUpdated?: (product: Product) => void;
+  onCancel?: () => void;
 }
 
 interface FormState {
@@ -16,14 +19,20 @@ interface FormState {
   category_id?: number | null;
 }
 
-export const ProductForm = ({ product, onUpdated }: Props) => {
+export const ProductForm = ({
+  product,
+  mode,
+  onCreated,
+  onUpdated,
+  onCancel,
+}: Props) => {
   const [form, setForm] = useState<FormState>({
-    name: product.name ?? "",
-    price: product.price != null ? String(product.price) : "",
-    cost: product.cost != null ? String(product.cost) : "",
-    stock: product.stock != null ? String(product.stock) : "",
-    barcode: product.barcode ?? "",
-    category_id: product.category_id,
+    name: product?.name ?? "",
+    price: product?.price != null ? String(product.price) : "",
+    cost: product?.cost != null ? String(product.cost) : "",
+    stock: product?.stock != null ? String(product.stock) : "0",
+    barcode: product?.barcode ?? "",
+    category_id: product?.category_id ?? null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -40,21 +49,34 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
     if (!form.name.trim()) return "El nombre es obligatorio";
 
     const price = form.price.trim() === "" ? null : Number(form.price);
-    const stock = Number(form.stock);
     const cost = form.cost.trim() === "" ? null : Number(form.cost);
+    const stock = Number(form.stock);
 
     if (price !== null && (Number.isNaN(price) || price < 0)) {
       return "Precio inválido";
     }
 
-    if (Number.isNaN(stock) || stock < 0) return "Stock inválido";
-
     if (cost !== null && (Number.isNaN(cost) || cost < 0)) {
       return "Costo inválido";
     }
 
+    if (Number.isNaN(stock) || stock < 0) return "Stock inválido";
+
     return null;
   };
+
+  const buildPayload = () => ({
+    name: form.name.trim(),
+    price: form.price.trim() === "" ? null : Number(form.price),
+    cost: form.cost.trim() === "" ? null : Number(form.cost),
+    stock: Number(form.stock),
+    barcode: form.barcode.trim() === "" ? null : form.barcode.trim(),
+    category_id: form.category_id ?? null,
+    min_stock: product?.min_stock ?? 5,
+    margin: product?.margin ?? 0.3,
+    is_weighted: product?.is_weighted ?? false,
+    weight: product?.weight ?? null,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,17 +91,16 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
     setError(null);
 
     try {
-      const payload = {
-        name: form.name.trim(),
-        price: form.price.trim() === "" ? null : Number(form.price),
-        cost: form.cost.trim() === "" ? null : Number(form.cost),
-        stock: Number(form.stock),
-        barcode: form.barcode.trim() === "" ? null : form.barcode.trim(),
-        category_id: form.category_id ?? null,
-      };
+      const payload = buildPayload();
 
-      const updated = await updateProduct(product.id, payload);
-      onUpdated?.(updated);
+      if (mode === "create") {
+        const created = await createProduct(payload);
+        onCreated?.(created);
+      } else {
+        if (!product) return;
+        const updated = await updateProduct(product.id, payload);
+        onUpdated?.(updated);
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -94,8 +115,12 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
   return (
     <form onSubmit={handleSubmit} className="product-form-card">
       <div className="product-form-header">
-        <h2>Editar producto</h2>
-        <p>Actualiza precio, costo, stock o código de barras.</p>
+        <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
+        <p>
+          {mode === "create"
+            ? "Ingresa los datos básicos del nuevo producto."
+            : "Actualiza precio, costo, stock o código de barras."}
+        </p>
       </div>
 
       {error && <div className="error">{error}</div>}
@@ -148,9 +173,29 @@ export const ProductForm = ({ product, onUpdated }: Props) => {
         </div>
       </div>
 
-      <button type="submit" disabled={loading} className="product-save-button">
-        {loading ? "Guardando..." : "Guardar cambios"}
-      </button>
+      <div className="product-form-actions">
+        {onCancel && (
+          <button
+            type="button"
+            className="product-cancel-button"
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="product-save-button"
+        >
+          {loading
+            ? "Guardando..."
+            : mode === "create"
+              ? "Crear producto"
+              : "Guardar cambios"}
+        </button>
+      </div>
     </form>
   );
 };

@@ -3,9 +3,12 @@ import { ProductList } from "../components/ProductList";
 import { ProductForm } from "../components/ProductForm";
 import type { Product } from "../types/product";
 
+type FormMode = "create" | "edit" | null;
+
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [formMode, setFormMode] = useState<FormMode>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,11 +60,29 @@ const ProductsPage = () => {
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
+    setFormMode("edit");
+  };
+
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setFormMode("create");
+  };
+
+  const handleProductCreated = (created: Product) => {
+    setProducts((prev) => [created, ...prev]);
+    setSelectedProduct(created);
+    setFormMode("edit");
   };
 
   const handleProductUpdated = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setSelectedProduct(updated);
+    setFormMode("edit");
+  };
+
+  const handleCancelForm = () => {
+    setFormMode(null);
+    setSelectedProduct(null);
   };
 
   return (
@@ -71,6 +92,10 @@ const ProductsPage = () => {
           <h1>Gestión de Productos</h1>
           <p>Administra costos, precios, stock e inventario.</p>
         </div>
+
+        <button className="add-product-button" onClick={handleAddProduct}>
+          + Agregar producto
+        </button>
       </div>
 
       <input
@@ -95,16 +120,28 @@ const ProductsPage = () => {
         </div>
 
         <div className="products-form-panel">
-          {selectedProduct ? (
+          {formMode === "create" && (
+            <ProductForm
+              mode="create"
+              onCreated={handleProductCreated}
+              onCancel={handleCancelForm}
+            />
+          )}
+
+          {formMode === "edit" && selectedProduct && (
             <ProductForm
               key={selectedProduct.id}
+              mode="edit"
               product={selectedProduct}
               onUpdated={handleProductUpdated}
+              onCancel={handleCancelForm}
             />
-          ) : (
+          )}
+
+          {!formMode && (
             <div className="empty-product-form">
               <h2>Selecciona un producto</h2>
-              <p>Haz clic en una fila para editar sus datos.</p>
+              <p>Haz clic en una fila para editar o agrega uno nuevo.</p>
             </div>
           )}
         </div>

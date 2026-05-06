@@ -8,13 +8,13 @@ export interface Product {
   min_stock?: number;
   margin?: number;
   is_weighted?: boolean;
-  weight?: number;
+  weight?: number | null;
   iva?: number;
   category_id?: number | null;
 }
 
-export interface UpdateProductDTO {
-  name?: string;
+export interface ProductPayload {
+  name: string;
   price?: number | null;
   stock?: number;
   barcode?: string | null;
@@ -22,5 +22,10 @@ export interface UpdateProductDTO {
   cost?: number | null;
   margin?: number;
   min_stock?: number;
+  is_weighted?: boolean;
+  weight?: number | null;
   iva?: number;
 }
+
+export type UpdateProductDTO = Partial<ProductPayload>;
+export type CreateProductDTO = ProductPayload;
