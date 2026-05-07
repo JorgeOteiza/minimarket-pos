@@ -1,104 +1,75 @@
-import { useState, useCallback } from "react";
-import { createProduct, updateProduct } from "../services/productApi";
-import type { Product } from "../types/product";
+import { useState } from "react";
+import type {
+  Product,
+  CreateProductDTO,
+  UpdateProductDTO,
+} from "../types/product";
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "../services/productApi";
 
-interface Props {
-  product?: Product | null;
+type Props = {
   mode: "create" | "edit";
+  product?: Product;
   onCreated?: (product: Product) => void;
   onUpdated?: (product: Product) => void;
-  onCancel?: () => void;
-}
-
-interface FormState {
-  name: string;
-  price: string;
-  cost: string;
-  stock: string;
-  barcode: string;
-  category_id?: number | null;
-}
+  onDeleted?: (productId: number) => void;
+  onCancel: () => void;
+};
 
 export const ProductForm = ({
-  product,
   mode,
+  product,
   onCreated,
   onUpdated,
+  onDeleted,
   onCancel,
 }: Props) => {
-  const [form, setForm] = useState<FormState>({
+  const [formData, setFormData] = useState<CreateProductDTO>({
     name: product?.name ?? "",
-    price: product?.price != null ? String(product.price) : "",
-    cost: product?.cost != null ? String(product.cost) : "",
-    stock: product?.stock != null ? String(product.stock) : "0",
+    price: product?.price ?? null,
+    cost: product?.cost ?? null,
     barcode: product?.barcode ?? "",
-    category_id: product?.category_id ?? null,
+    stock: product?.stock ?? 0,
+    margin: product?.margin ?? 0,
+    min_stock: product?.min_stock ?? 0,
+    iva: product?.iva ?? 0.19,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = useCallback((field: keyof FormState, value: string) => {
-    setForm((prev) => ({
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [name]:
+        name === "name" || name === "barcode"
+          ? value
+          : value === ""
+            ? null
+            : Number(value),
     }));
-  }, []);
-
-  const validate = (): string | null => {
-    if (!form.name.trim()) return "El nombre es obligatorio";
-
-    const price = form.price.trim() === "" ? null : Number(form.price);
-    const cost = form.cost.trim() === "" ? null : Number(form.cost);
-    const stock = Number(form.stock);
-
-    if (price !== null && (Number.isNaN(price) || price < 0)) {
-      return "Precio inválido";
-    }
-
-    if (cost !== null && (Number.isNaN(cost) || cost < 0)) {
-      return "Costo inválido";
-    }
-
-    if (Number.isNaN(stock) || stock < 0) return "Stock inválido";
-
-    return null;
   };
-
-  const buildPayload = () => ({
-    name: form.name.trim(),
-    price: form.price.trim() === "" ? null : Number(form.price),
-    cost: form.cost.trim() === "" ? null : Number(form.cost),
-    stock: Number(form.stock),
-    barcode: form.barcode.trim() === "" ? null : form.barcode.trim(),
-    category_id: form.category_id ?? null,
-    min_stock: product?.min_stock ?? 5,
-    margin: product?.margin ?? 0.3,
-    is_weighted: product?.is_weighted ?? false,
-    weight: product?.weight ?? null,
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
 
     setLoading(true);
     setError(null);
 
     try {
-      const payload = buildPayload();
-
       if (mode === "create") {
-        const created = await createProduct(payload);
+        const created = await createProduct(formData);
         onCreated?.(created);
-      } else {
-        if (!product) return;
-        const updated = await updateProduct(product.id, payload);
+      } else if (mode === "edit" && product) {
+        const updated = await updateProduct(
+          product.id,
+          formData as UpdateProductDTO,
+        );
         onUpdated?.(updated);
       }
     } catch (err: unknown) {
@@ -112,90 +83,147 @@ export const ProductForm = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!product || mode !== "edit") return;
+
+    const confirmed = window.confirm(
+      `¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`,
+    );
+
+    if (!confirmed) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteProduct(product.id);
+      onDeleted?.(product.id);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("No se pudo eliminar el producto");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="product-form-card">
+    <div className="product-form">
       <div className="product-form-header">
-        <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
-        <p>
-          {mode === "create"
-            ? "Ingresa los datos básicos del nuevo producto."
-            : "Actualiza precio, costo, stock o código de barras."}
-        </p>
-      </div>
-
-      {error && <div className="error">{error}</div>}
-
-      <div className="product-form-grid">
-        <div className="form-field full">
-          <label>Nombre</label>
-          <input
-            value={form.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-          />
+        <div>
+          <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
+          <p>
+            {mode === "create"
+              ? "Ingresa los datos del producto."
+              : "Modifica precio, margen o stock."}
+          </p>
         </div>
 
-        <div className="form-field">
-          <label>Precio venta</label>
-          <input
-            type="number"
-            value={form.price}
-            placeholder="-"
-            onChange={(e) => handleChange("price", e.target.value)}
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Costo caja</label>
-          <input
-            type="number"
-            value={form.cost}
-            placeholder="-"
-            onChange={(e) => handleChange("cost", e.target.value)}
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Stock</label>
-          <input
-            type="number"
-            value={form.stock}
-            onChange={(e) => handleChange("stock", e.target.value)}
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Barcode</label>
-          <input
-            value={form.barcode}
-            placeholder="-"
-            onChange={(e) => handleChange("barcode", e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="product-form-actions">
-        {onCancel && (
+        {mode === "edit" && product && (
           <button
             type="button"
-            className="product-cancel-button"
-            onClick={onCancel}
+            className="product-delete-button"
+            onClick={handleDelete}
+            disabled={loading}
           >
-            Cancelar
+            Eliminar
           </button>
         )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="product-save-button"
-        >
-          {loading
-            ? "Guardando..."
-            : mode === "create"
-              ? "Crear producto"
-              : "Guardar cambios"}
-        </button>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit} className="product-form-body">
+        <div className="form-grid">
+          <div className="form-field">
+            <label>Nombre</label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Código de barras</label>
+            <input
+              name="barcode"
+              value={formData.barcode ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Costo caja</label>
+            <input
+              name="cost"
+              type="number"
+              value={formData.cost ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Stock (unidades por caja)</label>
+            <input
+              name="stock"
+              type="number"
+              value={formData.stock ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Precio venta</label>
+            <input
+              name="price"
+              type="number"
+              value={formData.price ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Margen (%)</label>
+            <input
+              type="number"
+              value={
+                formData.margin != null ? Math.round(formData.margin * 100) : ""
+              }
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  margin:
+                    e.target.value === "" ? 0 : Number(e.target.value) / 100,
+                }))
+              }
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Stock mínimo</label>
+            <input
+              name="min_stock"
+              type="number"
+              value={formData.min_stock ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {error && <div className="error">{error}</div>}
+
+        <div className="product-form-actions">
+          <button type="submit" disabled={loading} className="primary-btn">
+            {mode === "create" ? "Crear" : "Guardar"}
+          </button>
+
+          <button type="button" onClick={onCancel} className="secondary-btn">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };

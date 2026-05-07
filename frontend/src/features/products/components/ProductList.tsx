@@ -1,11 +1,13 @@
 import { useState } from "react";
 import type { Product } from "../types/product";
 import {
-  calculateNetPrice,
   calculateProfit,
   calculateMargin,
+  calculateCostWithIva,
 } from "../../../utils/pricing";
 import { updateProduct } from "../services/productApi";
+
+type EditingField = "price" | "margin" | "stock" | "unitCost";
 
 interface Props {
   products: Product[];
@@ -22,15 +24,19 @@ export const ProductList = ({
   onSelectProduct,
   onProductUpdated,
 }: Props) => {
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [tempPrice, setTempPrice] = useState("");
+  const [editing, setEditing] = useState<{
+    productId: number;
+    field: EditingField;
+  } | null>(null);
+
+  const [tempValue, setTempValue] = useState("");
 
   const formatCLP = (value: number) =>
     new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
       maximumFractionDigits: 0,
-    }).format(value);
+    }).format(Math.round(value));
 
   const formatOptionalCLP = (value: number | null | undefined) => {
     if (value === null || value === undefined || Number.isNaN(value))
@@ -55,26 +61,69 @@ export const ProductList = ({
     }
   };
 
-  const handleSavePrice = async (product: Product) => {
-    const value = tempPrice.trim();
+  const startEditing = (
+    product: Product,
+    field: EditingField,
+    initialValue: string,
+  ) => {
+    onSelectProduct(product);
+    setEditing({ productId: product.id, field });
+    setTempValue(initialValue);
+  };
 
-    if (value !== "" && Number(value) < 0) {
-      setEditingId(null);
-      setTempPrice("");
+  const cancelEditing = () => {
+    setEditing(null);
+    setTempValue("");
+  };
+
+  const saveInlineEdit = async (product: Product) => {
+    if (!editing) return;
+
+    const rawValue = tempValue.trim();
+    const numericValue = rawValue === "" ? null : Number(rawValue);
+
+    if (
+      numericValue !== null &&
+      (Number.isNaN(numericValue) || numericValue < 0)
+    ) {
+      cancelEditing();
       return;
     }
 
     try {
-      const updated = await updateProduct(product.id, {
-        price: value === "" ? null : Number(value),
-      });
+      if (editing.field === "price") {
+        const updated = await updateProduct(product.id, {
+          price: numericValue,
+        });
+        onProductUpdated(updated);
+      }
 
-      onProductUpdated(updated);
+      if (editing.field === "margin") {
+        const updated = await updateProduct(product.id, {
+          margin: numericValue === null ? 0 : numericValue / 100,
+        });
+        onProductUpdated(updated);
+      }
+
+      if (editing.field === "stock") {
+        const updated = await updateProduct(product.id, {
+          stock: numericValue === null ? 0 : Math.floor(numericValue),
+        });
+        onProductUpdated(updated);
+      }
+
+      if (editing.field === "unitCost") {
+        const safeStock = product.stock > 0 ? product.stock : 1;
+
+        const updated = await updateProduct(product.id, {
+          cost: numericValue === null ? null : numericValue * safeStock,
+        });
+        onProductUpdated(updated);
+      }
     } catch (err) {
-      console.error("Error actualizando precio", err);
+      console.error("Error actualizando producto", err);
     } finally {
-      setEditingId(null);
-      setTempPrice("");
+      cancelEditing();
     }
   };
 
@@ -89,12 +138,12 @@ export const ProductList = ({
         <table className="products-table">
           <thead>
             <tr>
-              <th>Nombre</th>
+              <th>Nombre del producto</th>
               <th>Barcode</th>
               <th>Costo caja</th>
               <th>Costo unidad</th>
+              <th>Precio con IVA</th>
               <th>Precio venta</th>
-              <th>Precio sin IVA</th>
               <th>Utilidad</th>
               <th>Margen</th>
               <th>Stock</th>
@@ -112,23 +161,35 @@ export const ProductList = ({
               const unitCost =
                 boxCost !== null && stock > 0 ? boxCost / stock : null;
 
-              const netPrice =
-                finalPrice !== null ? calculateNetPrice(finalPrice, iva) : null;
+              const costWithIva =
+                unitCost !== null ? calculateCostWithIva(unitCost, iva) : null;
 
               const profit =
                 finalPrice !== null && unitCost !== null
                   ? calculateProfit(finalPrice, unitCost, iva)
                   : null;
 
-              const marginPercent =
+              const realMarginPercent =
                 profit !== null && unitCost !== null
-                  ? calculateMargin(profit, unitCost).toFixed(0)
+                  ? calculateMargin(profit, unitCost)
                   : null;
 
               const status = getStockStatus(product);
               const badge = getStockBadge(status);
               const isSelected = selectedProductId === product.id;
-              const isEditing = editingId === product.id;
+
+              const isEditingPrice =
+                editing?.productId === product.id && editing.field === "price";
+
+              const isEditingMargin =
+                editing?.productId === product.id && editing.field === "margin";
+
+              const isEditingStock =
+                editing?.productId === product.id && editing.field === "stock";
+
+              const isEditingUnitCost =
+                editing?.productId === product.id &&
+                editing.field === "unitCost";
 
               return (
                 <tr
@@ -139,36 +200,60 @@ export const ProductList = ({
                   <td>{product.name}</td>
                   <td>{product.barcode || "-"}</td>
                   <td>{formatOptionalCLP(boxCost)}</td>
-                  <td>{formatOptionalCLP(unitCost)}</td>
 
                   <td
                     className="editable-price-cell"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectProduct(product);
-                      setEditingId(product.id);
-                      setTempPrice(
+                      startEditing(
+                        product,
+                        "unitCost",
+                        unitCost !== null ? String(Math.round(unitCost)) : "",
+                      );
+                    }}
+                  >
+                    {isEditingUnitCost ? (
+                      <input
+                        type="number"
+                        value={tempValue}
+                        autoFocus
+                        className="inline-price-input"
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={() => saveInlineEdit(product)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveInlineEdit(product);
+                          if (e.key === "Escape") cancelEditing();
+                        }}
+                      />
+                    ) : (
+                      formatOptionalCLP(unitCost)
+                    )}
+                  </td>
+
+                  <td>{formatOptionalCLP(costWithIva)}</td>
+
+                  <td
+                    className="editable-price-cell"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditing(
+                        product,
+                        "price",
                         finalPrice !== null ? String(finalPrice) : "",
                       );
                     }}
                   >
-                    {isEditing ? (
+                    {isEditingPrice ? (
                       <input
                         type="number"
-                        value={tempPrice}
+                        value={tempValue}
                         autoFocus
                         className="inline-price-input"
-                        onChange={(e) => setTempPrice(e.target.value)}
-                        onBlur={() => handleSavePrice(product)}
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={() => saveInlineEdit(product)}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSavePrice(product);
-                          }
-
-                          if (e.key === "Escape") {
-                            setEditingId(null);
-                            setTempPrice("");
-                          }
+                          if (e.key === "Enter") saveInlineEdit(product);
+                          if (e.key === "Escape") cancelEditing();
                         }}
                       />
                     ) : finalPrice !== null ? (
@@ -177,8 +262,6 @@ export const ProductList = ({
                       "-"
                     )}
                   </td>
-
-                  <td>{formatOptionalCLP(netPrice)}</td>
 
                   <td
                     className={
@@ -190,8 +273,63 @@ export const ProductList = ({
                     {formatOptionalCLP(profit)}
                   </td>
 
-                  <td>{marginPercent !== null ? `${marginPercent}%` : "-"}</td>
-                  <td>{stock}</td>
+                  <td
+                    className="editable-price-cell"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditing(
+                        product,
+                        "margin",
+                        realMarginPercent !== null
+                          ? realMarginPercent.toFixed(0)
+                          : "",
+                      );
+                    }}
+                  >
+                    {isEditingMargin ? (
+                      <input
+                        type="number"
+                        value={tempValue}
+                        autoFocus
+                        className="inline-price-input"
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={() => saveInlineEdit(product)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveInlineEdit(product);
+                          if (e.key === "Escape") cancelEditing();
+                        }}
+                      />
+                    ) : realMarginPercent !== null ? (
+                      `${realMarginPercent.toFixed(0)}%`
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td
+                    className="editable-price-cell"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditing(product, "stock", String(stock));
+                    }}
+                  >
+                    {isEditingStock ? (
+                      <input
+                        type="number"
+                        value={tempValue}
+                        autoFocus
+                        className="inline-price-input"
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={() => saveInlineEdit(product)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveInlineEdit(product);
+                          if (e.key === "Escape") cancelEditing();
+                        }}
+                      />
+                    ) : (
+                      stock
+                    )}
+                  </td>
 
                   <td>
                     <span

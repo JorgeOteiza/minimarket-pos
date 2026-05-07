@@ -1,21 +1,12 @@
 export const DEFAULT_IVA = 0.19;
 
-/**
- * En este POS, price representa el precio final que cobra el negocio,
- * es decir, precio con IVA incluido.
- */
-export const calculateFinalPrice = (price: number) => price;
+export const calculateCostWithIva = (unitCost: number, iva = DEFAULT_IVA) => {
+  return unitCost * (1 + iva);
+};
 
-/**
- * Calcula el valor neto desde un precio final con IVA incluido.
- */
 export const calculateNetPrice = (price: number, iva = DEFAULT_IVA) =>
   price / (1 + iva);
 
-/**
- * Utilidad real:
- * precio neto - costo unitario.
- */
 export const calculateProfit = (
   finalPrice: number,
   unitCost: number,
@@ -28,4 +19,18 @@ export const calculateProfit = (
 export const calculateMargin = (profit: number, unitCost: number) => {
   if (unitCost <= 0) return 0;
   return (profit / unitCost) * 100;
+};
+
+export const normalizeMargin = (margin?: number | null) => {
+  if (margin == null || Number.isNaN(margin)) return 0;
+  return margin > 1 ? margin / 100 : margin;
+};
+
+export const calculateSuggestedPriceWithIva = (
+  unitCost: number,
+  margin?: number | null,
+  iva = DEFAULT_IVA,
+) => {
+  const normalizedMargin = normalizeMargin(margin);
+  return unitCost * (1 + normalizedMargin) * (1 + iva);
 };

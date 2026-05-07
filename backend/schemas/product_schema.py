@@ -1,7 +1,10 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, EXCLUDE
 
 
 class ProductSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
     id = fields.Int(dump_only=True)
 
     name = fields.Str(
@@ -28,16 +31,18 @@ class ProductSchema(Schema):
     )
 
     stock = fields.Int(
+        required=False,
         load_default=0,
         validate=validate.Range(min=0),
     )
 
     min_stock = fields.Int(
+        required=False,
         load_default=5,
         validate=validate.Range(min=0),
     )
 
-    is_weighted = fields.Bool(load_default=False)
+    is_weighted = fields.Bool(required=False, load_default=False)
 
     weight = fields.Float(
         required=False,
@@ -46,6 +51,7 @@ class ProductSchema(Schema):
     )
 
     margin = fields.Float(
+        required=False,
         load_default=0.3,
         validate=validate.Range(min=0),
     )

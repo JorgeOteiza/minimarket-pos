@@ -1,16 +1,59 @@
-body {
-  margin: 0;
-  font-family: sans-serif;
+* {
+  box-sizing: border-box;
 }
 
-/* LAYOUT GENERAL */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: #111827;
+  background: #f9fafb;
+}
+
+/* No usar estilos globales agresivos para button.
+   Cada botón debe tener su propia clase para no romper formularios/tablas/POS. */
+button {
+  font-family: inherit;
+}
+
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* =========================
+   POS
+========================= */
+
 .pos-container {
   display: grid;
   grid-template-rows: 60px 1fr 40px;
   height: 100vh;
 }
 
-/* HEADER */
 .pos-header {
   display: flex;
   align-items: center;
@@ -20,16 +63,14 @@ body {
   font-weight: bold;
 }
 
-/* MAIN */
 .pos-main {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
   gap: 12px;
   padding: 12px;
   overflow: hidden;
 }
 
-/* LEFT (CART) */
 .pos-left {
   display: flex;
   flex-direction: column;
@@ -39,7 +80,10 @@ body {
   overflow: hidden;
 }
 
-/* INPUT */
+.pos-left > div {
+  overflow-y: auto;
+}
+
 .pos-input {
   padding: 14px;
   font-size: 30px;
@@ -48,20 +92,16 @@ body {
   margin-bottom: 10px;
 }
 
-/* CART LIST SCROLL */
-.pos-left > div {
-  overflow-y: auto;
-}
-
-/* RIGHT (SUMMARY) */
 .pos-right {
-  background: #112712;
+  background: #111827;
   color: white;
   border-radius: 8px;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* FOOTER */
 .pos-footer {
   display: flex;
   justify-content: space-around;
@@ -70,7 +110,6 @@ body {
   font-size: 14px;
 }
 
-/* CART ITEM */
 .cart-item {
   display: flex;
   justify-content: space-between;
@@ -80,13 +119,15 @@ body {
   transition: all 0.15s ease;
 }
 
-/* HIGHLIGHT (preparado para siguiente paso) */
 .cart-item.highlight {
   background: #dcfce7;
   transform: scale(1.02);
 }
 
-/* TOTAL */
+.cart-item.flash {
+  animation: flash-highlight 0.4s ease;
+}
+
 .total {
   font-size: 36px;
   font-weight: bold;
@@ -96,26 +137,6 @@ body {
 .total-amount {
   font-size: 42px;
   font-weight: bold;
-}
-
-/* BUTTONS */
-button {
-  width: 100%;
-  padding: 30px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  border-radius: 112px;
-  font-size: 33px;
-  cursor: pointer;
-}
-
-/* ERROR */
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
 }
 
 .cart-empty {
@@ -153,17 +174,6 @@ button {
   opacity: 0.6;
 }
 
-.pos-right {
-  background: #111827;
-  color: white;
-  border-radius: 8px;
-  padding: 20px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .last-item {
   margin: 20px 0;
   padding: 12px;
@@ -187,16 +197,6 @@ button {
   opacity: 0.6;
 }
 
-/* highlight persistente */
-.cart-item.highlight {
-  background: #dcfce7;
-}
-
-/* 🔥 animación tipo flash */
-.cart-item.flash {
-  animation: flash-highlight 0.4s ease;
-}
-
 .hidden-input {
   position: absolute;
   opacity: 0;
@@ -208,18 +208,28 @@ button {
     background: #22c55e;
     transform: scale(1.04);
   }
+
   50% {
     background: #bbf7d0;
   }
+
   100% {
     background: #dcfce7;
     transform: scale(1);
   }
 }
 
+/* Botones grandes SOLO para POS, no globales */
+.pos-container button,
+.pos-main button,
+.pos-footer button {
+  cursor: pointer;
+}
+
 /* =========================
    NAVBAR
 ========================= */
+
 .navbar {
   height: 60px;
   background: #0f172a;
@@ -261,13 +271,13 @@ button {
 /* =========================
    DASHBOARD LAYOUT
 ========================= */
+
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   height: calc(100vh - 60px);
 }
 
-/* SIDEBAR */
 .sidebar {
   background: #02060e;
   color: white;
@@ -308,11 +318,10 @@ button {
   font-weight: 600;
 }
 
-/* MAIN */
 .dashboard-main {
   padding: 20px;
   background: #f9fafb;
-  overflow-y: auto;
+  overflow: auto;
 }
 
 /* =========================
@@ -328,6 +337,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 16px;
 }
 
@@ -341,9 +351,31 @@ button {
   color: #6b7280;
 }
 
+.products-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.add-product-button {
+  width: auto;
+  margin: 0;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #111827;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.add-product-button:hover {
+  background: #1f2937;
+}
+
 .products-search {
   width: 100%;
-  box-sizing: border-box;
   padding: 12px 14px;
   margin-bottom: 18px;
   border: 1px solid #d1d5db;
@@ -360,9 +392,16 @@ button {
 
 .products-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) 420px;
-  gap: 20px;
-  align-items: start;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.products-layout.with-form-panel {
+  grid-template-columns: minmax(0, 1fr) 28px 360px;
+}
+
+.products-layout.without-form-panel {
+  grid-template-columns: minmax(0, 1fr) 28px;
 }
 
 .products-list-panel,
@@ -372,33 +411,46 @@ button {
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+}
+
+.products-form-panel {
+  align-self: start;
 }
 
 .products-table-wrapper {
+  width: 100%;
   overflow-x: auto;
 }
 
 .products-table {
   width: 100%;
+  min-width: 1060px;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.products-table th,
+.products-table td {
+  padding: 7px 8px;
+  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .products-table th {
   text-align: left;
-  padding: 12px 10px;
   border-bottom: 2px solid #e5e7eb;
-  color: #374151;
-  white-space: nowrap;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .products-table td {
-  padding: 12px 10px;
   border-bottom: 1px solid #f1f5f9;
-  white-space: nowrap;
 }
 
 .product-row {
+  height: 36px;
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -426,12 +478,12 @@ button {
 }
 
 .inline-price-input {
-  width: 90px;
-  padding: 6px 8px;
+  width: 86px;
+  padding: 4px 6px;
   border: 1px solid #2563eb;
-  border-radius: 8px;
+  border-radius: 7px;
   outline: none;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .profit-positive {
@@ -445,27 +497,67 @@ button {
 }
 
 .stock-badge {
-  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
 }
 
-.product-form-card {
+/* Toggle vertical del panel */
+.product-sidebar-toggle {
+  width: 28px;
+  min-height: 100%;
   margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  cursor: pointer;
+  font-size: 22px;
+  opacity: 0.75;
+}
+
+.product-sidebar-toggle:hover {
+  opacity: 1;
+  background: #d1d5db;
+}
+
+/* =========================
+   PRODUCT FORM
+========================= */
+
+/* Soporta tanto ProductForm nuevo (.product-form)
+   como versión anterior (.product-form-card). */
+.product-form,
+.product-form-card {
   width: 100%;
   max-width: 100%;
-  box-sizing: border-box;
+  margin: 0;
   overflow: hidden;
 }
 
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .product-form-header {
-  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .product-form-header h2 {
   margin: 0;
   font-size: 22px;
+  line-height: 1.1;
 }
 
 .product-form-header p {
@@ -474,16 +566,23 @@ button {
   font-size: 14px;
 }
 
+.product-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-grid,
 .product-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 14px;
+  gap: 12px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -491,20 +590,22 @@ button {
   grid-column: 1 / -1;
 }
 
-.form-field label {
-  font-size: 13px;
+.form-field label,
+.form-field > label {
+  font-size: 12px;
   font-weight: 700;
   color: #374151;
 }
 
 .form-field input {
-  padding: 11px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 15px;
-  outline: none;
   width: 100%;
-  box-sizing: border-box;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: white;
+  font-size: 14px;
+  outline: none;
 }
 
 .form-field input:focus {
@@ -512,24 +613,75 @@ button {
   box-shadow: 0 0 0 3px #dbeafe;
 }
 
-.product-save-button {
-  width: 100%;
-  margin-top: 18px;
-  padding: 13px 16px;
-  border: none;
-  border-radius: 12px;
-  background: #111827;
-  color: white;
-  font-size: 15px;
+.product-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Botones nuevos */
+.primary-btn,
+.secondary-btn,
+.product-save-button,
+.product-cancel-button {
+  width: auto;
+  margin: 0;
+  padding: 8px 13px;
+  border-radius: 9px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
 }
 
+.primary-btn,
+.product-save-button {
+  border: none;
+  background: #111827;
+  color: white;
+}
+
+.primary-btn:hover,
 .product-save-button:hover {
   background: #1f2937;
 }
 
+.primary-btn:disabled,
 .product-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn,
+.product-cancel-button {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+}
+
+.secondary-btn:hover,
+.product-cancel-button:hover {
+  background: #f3f4f6;
+}
+
+.product-delete-button {
+  width: auto;
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.product-delete-button:hover {
+  background: #fee2e2;
+}
+
+.product-delete-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -545,53 +697,25 @@ button {
   color: #111827;
 }
 
-.add-product-button {
-  width: auto;
-  padding: 12px 18px;
-  margin: 0;
-  border: none;
-  border-radius: 12px;
-  background: #111827;
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.add-product-button:hover {
-  background: #1f2937;
-}
-
-.product-form-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.product-cancel-button {
-  width: 100%;
-  margin-top: 18px;
-  padding: 13px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background: white;
-  color: #374151;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.product-cancel-button:hover {
-  background: #f3f4f6;
-}
-
 @media (max-width: 1100px) {
-  .products-layout {
+  .products-layout.with-form-panel,
+  .products-layout.without-form-panel {
     grid-template-columns: 1fr;
+  }
+
+  .product-sidebar-toggle {
+    width: 100%;
+    min-height: 32px;
   }
 }
 
 @media (max-width: 520px) {
+  .products-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid,
   .product-form-grid {
     grid-template-columns: 1fr;
   }

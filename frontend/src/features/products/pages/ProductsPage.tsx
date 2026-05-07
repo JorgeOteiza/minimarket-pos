@@ -9,6 +9,7 @@ const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [formMode, setFormMode] = useState<FormMode>(null);
+  const [isFormPanelOpen, setIsFormPanelOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,12 +67,14 @@ const ProductsPage = () => {
   const handleAddProduct = () => {
     setSelectedProduct(null);
     setFormMode("create");
+    setIsFormPanelOpen(true);
   };
 
   const handleProductCreated = (created: Product) => {
     setProducts((prev) => [created, ...prev]);
     setSelectedProduct(created);
     setFormMode("edit");
+    setIsFormPanelOpen(true);
   };
 
   const handleProductUpdated = (updated: Product) => {
@@ -80,9 +83,21 @@ const ProductsPage = () => {
     setFormMode("edit");
   };
 
+  const handleProductDeleted = (productId: number) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+    setSelectedProduct(null);
+    setFormMode(null);
+    setIsFormPanelOpen(false);
+  };
+
   const handleCancelForm = () => {
     setFormMode(null);
     setSelectedProduct(null);
+    setIsFormPanelOpen(false);
+  };
+
+  const toggleFormPanel = () => {
+    setIsFormPanelOpen((prev) => !prev);
   };
 
   return (
@@ -108,7 +123,11 @@ const ProductsPage = () => {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="products-layout">
+      <div
+        className={`products-layout ${
+          isFormPanelOpen ? "with-form-panel" : "without-form-panel"
+        }`}
+      >
         <div className="products-list-panel">
           <ProductList
             products={products}
@@ -119,32 +138,44 @@ const ProductsPage = () => {
           />
         </div>
 
-        <div className="products-form-panel">
-          {formMode === "create" && (
-            <ProductForm
-              mode="create"
-              onCreated={handleProductCreated}
-              onCancel={handleCancelForm}
-            />
-          )}
+        <button
+          type="button"
+          className="product-sidebar-toggle"
+          onClick={toggleFormPanel}
+          title={isFormPanelOpen ? "Ocultar panel" : "Mostrar panel"}
+        >
+          {isFormPanelOpen ? "›" : "‹"}
+        </button>
 
-          {formMode === "edit" && selectedProduct && (
-            <ProductForm
-              key={selectedProduct.id}
-              mode="edit"
-              product={selectedProduct}
-              onUpdated={handleProductUpdated}
-              onCancel={handleCancelForm}
-            />
-          )}
+        {isFormPanelOpen && (
+          <div className="products-form-panel">
+            {formMode === "create" && (
+              <ProductForm
+                mode="create"
+                onCreated={handleProductCreated}
+                onCancel={handleCancelForm}
+              />
+            )}
 
-          {!formMode && (
-            <div className="empty-product-form">
-              <h2>Selecciona un producto</h2>
-              <p>Haz clic en una fila para editar o agrega uno nuevo.</p>
-            </div>
-          )}
-        </div>
+            {formMode === "edit" && selectedProduct && (
+              <ProductForm
+                key={selectedProduct.id}
+                mode="edit"
+                product={selectedProduct}
+                onUpdated={handleProductUpdated}
+                onDeleted={handleProductDeleted}
+                onCancel={handleCancelForm}
+              />
+            )}
+
+            {!formMode && (
+              <div className="empty-product-form">
+                <h2>Panel de producto</h2>
+                <p>Selecciona un producto o agrega uno nuevo.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
