@@ -28,14 +28,20 @@ def build_cart_response(cart: Cart):
         if not product:
             continue
 
-        subtotal = float(product.price) * item.quantity
+        if product.price is None:
+            unit_price = 0
+            subtotal = 0
+        else:
+            unit_price = float(product.price)
+            subtotal = unit_price * item.quantity
 
         items.append({
             "product_id": product.id,
             "name": product.name,
             "quantity": item.quantity,
-            "unit_price": float(product.price),
-            "subtotal": subtotal
+            "unit_price": unit_price,
+            "subtotal": subtotal,
+            "has_price": product.price is not None,
         })
 
         total += subtotal
@@ -44,7 +50,6 @@ def build_cart_response(cart: Cart):
         "items": items,
         "total": total
     }
-
 
 # 🔹 GET
 def get_cart():

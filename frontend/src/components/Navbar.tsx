@@ -8,12 +8,12 @@ export const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <span className="logo">MiniMarket POS</span>
+        <span className="logo">MINIMARKET GOGI</span>
       </div>
 
       <div className="navbar-right">
         <Link to="/" className={isActive("/") ? "nav-link active" : "nav-link"}>
-          POS
+          Punto de venta
         </Link>
 
         <Link
@@ -24,7 +24,7 @@ export const Navbar = () => {
               : "nav-link"
           }
         >
-          Dashboard
+          Administración
         </Link>
       </div>
     </nav>

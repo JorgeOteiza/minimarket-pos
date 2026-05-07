@@ -14,7 +14,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
     try {
       const error = await res.json();
       errorMessage = error.error || error.message || errorMessage;
-    } catch {}
+    } catch {
+      errorMessage = "Unexpected error";
+    }
 
     throw new Error(errorMessage);
   }
@@ -30,22 +32,53 @@ async function safeFetch(input: RequestInfo, init?: RequestInit) {
   }
 }
 
+export async function getCart(): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart`);
+  return handleResponse<Cart>(res);
+}
+
 export async function scanProduct(barcode: string): Promise<Cart> {
   const res = await safeFetch(`${API_URL}/cart/scan/${barcode}`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
   });
 
   return handleResponse<Cart>(res);
 }
 
-export async function getCart(): Promise<Cart> {
-  const res = await safeFetch(`${API_URL}/cart`);
+export async function increaseCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+  });
+
+  return handleResponse<Cart>(res);
+}
+
+export async function decreaseCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/decrease`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+  });
+
+  return handleResponse<Cart>(res);
+}
+
+export async function removeCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/${productId}`, {
+    method: "DELETE",
+  });
+
   return handleResponse<Cart>(res);
 }
 
 export async function checkout(): Promise<CheckoutResponse> {
   const res = await safeFetch(`${API_URL}/cart/checkout`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
 
@@ -55,6 +88,7 @@ export async function checkout(): Promise<CheckoutResponse> {
 export async function clearCart(): Promise<Cart> {
   const res = await safeFetch(`${API_URL}/cart/clear`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
 

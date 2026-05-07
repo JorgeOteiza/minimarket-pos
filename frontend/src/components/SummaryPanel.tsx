@@ -21,7 +21,7 @@ export default function SummaryPanel({
   lastItem,
 }: Props) {
   return (
-    <div>
+    <div className="summary-panel">
       <div>
         <h2 className="total">Total</h2>
         <div className="total-amount">{formatCurrency(total)}</div>
@@ -35,12 +35,22 @@ export default function SummaryPanel({
         </div>
       )}
 
-      <div>
-        <button onClick={onCheckout} disabled={loading}>
+      <div className="summary-actions">
+        <button
+          type="button"
+          className="checkout-button"
+          onClick={onCheckout}
+          disabled={loading}
+        >
           {loading ? "Procesando..." : "Cobrar"}
         </button>
 
-        <button onClick={onClear} disabled={loading}>
+        <button
+          type="button"
+          className="clear-cart-button"
+          onClick={onClear}
+          disabled={loading}
+        >
           Vaciar carrito
         </button>
       </div>

@@ -4,6 +4,7 @@ export interface CartItem {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  has_price?: boolean;
 }
 
 export interface Cart {

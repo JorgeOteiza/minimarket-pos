@@ -1,10 +1,20 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Cart } from "../types/cart";
-import { getCart, scanProduct, checkout, clearCart } from "../api/cartApi";
+import {
+  getCart,
+  scanProduct,
+  checkout,
+  clearCart,
+  increaseCartItem,
+  decreaseCartItem,
+  removeCartItem,
+} from "../api/cartApi";
 import CartList from "../components/CartList";
 import SummaryPanel from "../components/SummaryPanel";
 import { useScanner } from "../hooks/useScanner";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
+
+const EMPTY_CART: Cart = { items: [], total: 0 };
 
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
@@ -12,7 +22,7 @@ const getErrorMessage = (err: unknown): string => {
 };
 
 export default function POS() {
-  const [cart, setCart] = useState<Cart>({ items: [], total: 0 });
+  const [cart, setCart] = useState<Cart>(EMPTY_CART);
   const [loading, setLoading] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,33 +30,35 @@ export default function POS() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // 🔊 AUDIO PRE-CARGADO
-  const scanAudio = useMemo(() => new Audio("/sounds/scan.mp3"), []);
-  const errorAudio = useMemo(() => new Audio("/sounds/error.mp3"), []);
+  const playSound = useCallback((type: "ok" | "error") => {
+    const src = type === "ok" ? "/sounds/scan.mp3" : "/sounds/error.mp3";
+    const audio = new Audio(src);
 
-  const playSound = (type: "ok" | "error") => {
-    const audio = type === "ok" ? scanAudio : errorAudio;
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  };
-
-  // 🔄 cargar carrito
-  const loadCart = async () => {
-    try {
-      const data = await getCart();
-      setCart(data);
-      setError(null);
-    } catch (err: unknown) {
-      console.error(err);
-      setError("Error cargando carrito");
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
+    audio.play().catch(() => {
+      // El navegador puede bloquear sonidos sin interacción previa.
+    });
   }, []);
 
-  // 🔥 mantener foco en scanner (sin robar foco al input manual)
+  useEffect(() => {
+    let isMounted = true;
+
+    void getCart()
+      .then((data) => {
+        if (!isMounted) return;
+        setCart(data);
+        setError(null);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        console.error(err);
+        setError("Error cargando carrito");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     const focusInput = () => {
       if (document.activeElement?.tagName !== "INPUT") {
@@ -55,7 +67,6 @@ export default function POS() {
     };
 
     focusInput();
-
     window.addEventListener("click", focusInput);
 
     return () => {
@@ -63,95 +74,142 @@ export default function POS() {
     };
   }, []);
 
-  // 🔍 escaneo
-  const handleScan = async (barcode: string) => {
-    if (loading) return;
+  const reloadCart = useCallback(async () => {
+    const data = await getCart();
+    setCart(data);
+    setError(null);
+    return data;
+  }, []);
 
-    try {
-      const updatedCart = await scanProduct(barcode);
-      setCart(updatedCart);
+  const handleScan = useCallback(
+    async (barcode: string) => {
+      if (loading) return;
 
-      const lastItem = updatedCart.items[updatedCart.items.length - 1];
-      if (lastItem) {
-        setLastScannedId(lastItem.product_id);
+      const cleanBarcode = barcode.trim();
+      if (!cleanBarcode) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const updatedCart = await scanProduct(cleanBarcode);
+        setCart(updatedCart);
+
+        const lastItem = updatedCart.items[updatedCart.items.length - 1];
+
+        if (lastItem) {
+          setLastScannedId(lastItem.product_id);
+        }
+
+        playSound("ok");
+      } catch (err: unknown) {
+        console.error(err);
+        playSound("error");
+        setError(getErrorMessage(err));
+      } finally {
+        setLoading(false);
+        inputRef.current?.focus();
       }
-
-      playSound("ok");
-      setError(null);
-    } catch (err: unknown) {
-      console.error(err);
-      playSound("error");
-      setError(getErrorMessage(err));
-    }
-  };
+    },
+    [loading, playSound],
+  );
 
   useScanner(handleScan);
 
-  // 💰 checkout
+  const handleIncreaseItem = async (productId: number) => {
+    try {
+      setError(null);
+
+      const updatedCart = await increaseCartItem(productId);
+      setCart(updatedCart);
+      setLastScannedId(productId);
+      playSound("ok");
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getErrorMessage(err));
+      playSound("error");
+    } finally {
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleDecreaseItem = async (productId: number) => {
+    try {
+      setError(null);
+
+      const updatedCart = await decreaseCartItem(productId);
+      setCart(updatedCart);
+      setLastScannedId(productId);
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getErrorMessage(err));
+      playSound("error");
+    } finally {
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleRemoveItem = async (productId: number) => {
+    try {
+      setError(null);
+
+      const updatedCart = await removeCartItem(productId);
+      setCart(updatedCart);
+
+      if (lastScannedId === productId) {
+        setLastScannedId(null);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      setError(getErrorMessage(err));
+      playSound("error");
+    } finally {
+      inputRef.current?.focus();
+    }
+  };
+
   const handleCheckout = async () => {
     try {
       setLoading(true);
       setError(null);
 
       await checkout();
-      await loadCart();
+      await reloadCart();
+      setLastScannedId(null);
+      playSound("ok");
     } catch (err: unknown) {
       console.error(err);
       setError(getErrorMessage(err));
       playSound("error");
     } finally {
       setLoading(false);
+      inputRef.current?.focus();
     }
   };
 
-  // 🧹 limpiar carrito
-// SOLO CAMBIA ESTA PARTE
-
-const handleClear = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-
-    const updatedCart = await clearCart();
-    setCart(updatedCart);
-
-  } catch (err: unknown) {
-    console.error(err);
-    setError(getErrorMessage(err));
-    playSound("error");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // ⬅️ eliminar último
-  const handleRemoveLast = async () => {
-    if (cart.items.length === 0) return;
-
-    const lastItem = cart.items[cart.items.length - 1];
-
+  const handleClear = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      await fetch(`/api/cart/decrease`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_id: lastItem.product_id,
-          quantity: 1,
-        }),
-      });
-
-      await loadCart();
+      const updatedCart = await clearCart();
+      setCart(updatedCart);
+      setLastScannedId(null);
     } catch (err: unknown) {
+      console.error(err);
       setError(getErrorMessage(err));
       playSound("error");
     } finally {
       setLoading(false);
+      inputRef.current?.focus();
     }
+  };
+
+  const handleRemoveLast = async () => {
+    if (cart.items.length === 0) return;
+
+    const lastItem = cart.items[cart.items.length - 1];
+    await handleDecreaseItem(lastItem.product_id);
   };
 
   useKeyboardShortcuts({
@@ -161,52 +219,68 @@ const handleClear = async () => {
     disabled: loading,
   });
 
-  const lastScannedItem = cart.items.find(
-    (item) => item.product_id === lastScannedId,
-  );
+  const lastScannedItem =
+    lastScannedId !== null
+      ? cart.items.find((item) => item.product_id === lastScannedId)
+      : undefined;
 
   return (
     <div className="pos-container">
-      <header className="pos-header">
-        <h1>POS Minimarket</h1>
+      <header className="pos-header pos-header-modern">
+        <div>
+          <h1>Punto de venta</h1>
+        </div>
+
+        <div className="pos-status-pill">
+          <span className="status-dot" />
+          Listo para vender
+        </div>
       </header>
 
       <main className="pos-main">
         <section className="pos-left">
           {error && <div className="error">{error}</div>}
 
-          {/* 🔴 INPUT VISIBLE (fallback manual) */}
           <input
             className="pos-input"
             type="text"
             placeholder="Buscar producto manualmente..."
+            disabled={loading}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                const value = (e.target as HTMLInputElement).value.trim();
+                const input = e.currentTarget;
+                const value = input.value.trim();
+
                 if (value) {
-                  handleScan(value);
-                  (e.target as HTMLInputElement).value = "";
+                  void handleScan(value);
+                  input.value = "";
                 }
               }
             }}
           />
 
-          {/* 🟢 INPUT OCULTO (scanner real) */}
           <input
             ref={inputRef}
             className="hidden-input"
             type="text"
             value={manualCode}
+            disabled={loading}
             onChange={(e) => setManualCode(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && manualCode.trim()) {
-                handleScan(manualCode);
+                void handleScan(manualCode);
                 setManualCode("");
               }
             }}
           />
 
-          <CartList items={cart.items} lastScannedId={lastScannedId} />
+          <CartList
+            items={cart.items}
+            lastScannedId={lastScannedId}
+            onIncrease={handleIncreaseItem}
+            onDecrease={handleDecreaseItem}
+            onRemove={handleRemoveItem}
+          />
         </section>
 
         <aside className="pos-right">
@@ -214,7 +288,7 @@ const handleClear = async () => {
             total={cart.total}
             onCheckout={handleCheckout}
             onClear={handleClear}
-            loading={loading}
+            loading={loading || cart.items.length === 0}
             lastItem={lastScannedItem}
           />
         </aside>
