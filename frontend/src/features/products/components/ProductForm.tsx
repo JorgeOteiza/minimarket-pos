@@ -9,6 +9,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../services/productApi";
+import { calculatePriceFromMargin } from "../../../utils/pricing";
 
 type Props = {
   mode: "create" | "edit";
@@ -52,6 +53,32 @@ export const ProductForm = ({
           : value === ""
             ? null
             : Number(value),
+    }));
+  };
+
+  // 🔥 Cambio importante: margen controla precio
+  const handleMarginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/^0+(?=\d)/, "");
+    const marginPercent = raw === "" ? 0 : Number(raw);
+    const marginDecimal = marginPercent / 100;
+
+    const stock = formData.stock ?? 0;
+    const cost = formData.cost ?? null;
+    const iva = formData.iva ?? 0.19;
+
+    let newPrice = formData.price;
+
+    if (cost !== null && stock > 0) {
+      const unitCost = cost / stock;
+      const calculated = calculatePriceFromMargin(unitCost, marginPercent, iva);
+
+      newPrice = Math.round(calculated);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      margin: marginDecimal,
+      price: newPrice,
     }));
   };
 
@@ -189,15 +216,11 @@ export const ProductForm = ({
             <input
               type="number"
               value={
-                formData.margin != null ? Math.round(formData.margin * 100) : ""
+                formData.margin && formData.margin > 0
+                  ? Math.round(formData.margin * 100)
+                  : ""
               }
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  margin:
-                    e.target.value === "" ? 0 : Number(e.target.value) / 100,
-                }))
-              }
+              onChange={handleMarginChange}
             />
           </div>
 

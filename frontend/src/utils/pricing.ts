@@ -34,3 +34,12 @@ export const calculateSuggestedPriceWithIva = (
   const normalizedMargin = normalizeMargin(margin);
   return unitCost * (1 + normalizedMargin) * (1 + iva);
 };
+
+export const calculatePriceFromMargin = (
+  unitCost: number,
+  marginPercent: number,
+  iva = DEFAULT_IVA,
+) => {
+  const margin = marginPercent / 100;
+  return unitCost * (1 + margin) * (1 + iva);
+};

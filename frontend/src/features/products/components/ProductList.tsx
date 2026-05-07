@@ -4,6 +4,7 @@ import {
   calculateProfit,
   calculateMargin,
   calculateCostWithIva,
+  calculatePriceFromMargin,
 } from "../../../utils/pricing";
 import { updateProduct } from "../services/productApi";
 
@@ -99,9 +100,24 @@ export const ProductList = ({
       }
 
       if (editing.field === "margin") {
+        const stock = product.stock ?? 0;
+        const boxCost = product.cost ?? null;
+        const iva = product.iva ?? 0.19;
+
+        const unitCost = boxCost !== null && stock > 0 ? boxCost / stock : null;
+
+        if (numericValue === null || unitCost === null) {
+          cancelEditing();
+          return;
+        }
+
+        const newPrice = calculatePriceFromMargin(unitCost, numericValue, iva);
+
         const updated = await updateProduct(product.id, {
-          margin: numericValue === null ? 0 : numericValue / 100,
+          margin: numericValue / 100,
+          price: Math.round(newPrice),
         });
+
         onProductUpdated(updated);
       }
 
