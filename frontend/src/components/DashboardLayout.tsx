@@ -9,7 +9,7 @@ export const DashboardLayout = () => {
     <div className="dashboard-layout">
       {/* SIDEBAR */}
       <aside className="sidebar">
-        <h2 className="sidebar-title">Admin</h2>
+        <h2 className="sidebar-title">Menú</h2>
 
         <nav className="sidebar-nav">
           <Link
@@ -23,7 +23,7 @@ export const DashboardLayout = () => {
             to="/dashboard/analytics"
             className={isActive("/dashboard/analytics") ? "active" : ""}
           >
-            Analytics
+            Analítica de Datos
           </Link>
         </nav>
       </aside>
