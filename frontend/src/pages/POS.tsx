@@ -30,13 +30,23 @@ export default function POS() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const hasProductsWithoutPrice = cart.items.some(
+    (item) => item.has_price === false || item.unit_price === 0,
+  );
+
+  const posStatus = error
+    ? { label: "No disponible", className: "danger" }
+    : hasProductsWithoutPrice
+      ? { label: "Revisar productos", className: "warning" }
+      : loading
+        ? { label: "Procesando", className: "neutral" }
+        : { label: "Listo para vender", className: "success" };
+
   const playSound = useCallback((type: "ok" | "error") => {
     const src = type === "ok" ? "/sounds/scan.mp3" : "/sounds/error.mp3";
     const audio = new Audio(src);
 
-    audio.play().catch(() => {
-      // El navegador puede bloquear sonidos sin interacción previa.
-    });
+    audio.play().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -119,7 +129,6 @@ export default function POS() {
   const handleIncreaseItem = async (productId: number) => {
     try {
       setError(null);
-
       const updatedCart = await increaseCartItem(productId);
       setCart(updatedCart);
       setLastScannedId(productId);
@@ -136,7 +145,6 @@ export default function POS() {
   const handleDecreaseItem = async (productId: number) => {
     try {
       setError(null);
-
       const updatedCart = await decreaseCartItem(productId);
       setCart(updatedCart);
       setLastScannedId(productId);
@@ -152,7 +160,6 @@ export default function POS() {
   const handleRemoveItem = async (productId: number) => {
     try {
       setError(null);
-
       const updatedCart = await removeCartItem(productId);
       setCart(updatedCart);
 
@@ -169,6 +176,12 @@ export default function POS() {
   };
 
   const handleCheckout = async () => {
+    if (hasProductsWithoutPrice) {
+      setError("Hay productos sin precio. No se puede completar la venta.");
+      playSound("error");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -228,18 +241,25 @@ export default function POS() {
     <div className="pos-container">
       <header className="pos-header pos-header-modern">
         <div>
-          <h1>Punto de venta</h1>
+          <h1>POS Minimarket</h1>
+          <p>Caja activa · Modo offline</p>
         </div>
 
-        <div className="pos-status-pill">
+        <div className={`pos-status-pill ${posStatus.className}`}>
           <span className="status-dot" />
-          Listo para vender
+          {posStatus.label}
         </div>
       </header>
 
       <main className="pos-main">
         <section className="pos-left">
           {error && <div className="error">{error}</div>}
+
+          {hasProductsWithoutPrice && (
+            <div className="warning">
+              ⚠️ Hay productos sin precio. No puedes cobrar hasta corregirlos.
+            </div>
+          )}
 
           <input
             className="pos-input"
@@ -288,17 +308,13 @@ export default function POS() {
             total={cart.total}
             onCheckout={handleCheckout}
             onClear={handleClear}
-            loading={loading || cart.items.length === 0}
+            loading={
+              loading || cart.items.length === 0 || hasProductsWithoutPrice
+            }
             lastItem={lastScannedItem}
           />
         </aside>
       </main>
-
-      <footer className="pos-footer">
-        <span>F2: Checkout</span>
-        <span>F4: Vaciar</span>
-        <span>F8: Eliminar último</span>
-      </footer>
     </div>
   );
 }
