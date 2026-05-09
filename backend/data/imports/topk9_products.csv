@@ -1,0 +1,24 @@
+name,barcode,cost,price,margin,stock,min_stock,is_weighted,weight,category
+Pack Turbo Clean Adult ODOR CONT 10x2kg Lavanda,2248,11579,,0,10,5,false,2000,top-k9
+Pack Turbo Clean Adult ODOR CONT 5x4kg Lavanda,2253,11498,,0,5,5,false,4000,top-k9
+Pack TopK9 Ecologica 10x2kg Berries,2002,15364,,0,10,5,false,2000,top-k9
+Turbo Clean Adult ODOR CONT 10kg Lavanda,2258,10014,,0,2,5,false,10000,top-k9
+Pack Turbo Clean Adult ODOR CONT 10x2kg Cafe Moka,2252,10855,,0,10,5,false,2000,top-k9
+Shampoo Grooming Adv Blanco Keratin Caj 6x500ml,2211,12711,,0,6,5,false,500,top-k9
+Shampoo Grooming Adv Uso Frec/Carbon Caj 6x500ml,2210,12711,,0,6,5,false,500,top-k9
+Pack Misfus Adult 38x60g Lavanda,2273,10009,,0,38,5,false,60,top-k9
+Pack Misfus Adult 38x60g Cafe Moka,2277,10009,,0,38,5,false,60,top-k9
+Pack Misfus Adult 38x60g Talco Bebe,2276,10009,,0,38,5,false,60,top-k9
+Pack Turbo Clean Adult ODOR CONT 5x4kg Cafe Moka,2257,10060,,0,5,5,false,4000,top-k9
+Snack Trocitos Deli Vacuno 20x85g,3216,8263,,0,20,5,false,85,top-k9
+Snack Trocitos Deli Pollo 20x85g,3215,8263,,0,20,5,false,85,top-k9
+Snack Trocitos Deli Cordero 20x85g,3217,8263,,0,20,5,false,85,top-k9
+Snack Pate Deli Pollo 20x85g,3213,8263,,0,20,5,false,85,top-k9
+Snack Pate Deli Atun 20x85g,3214,8263,,0,20,5,false,85,top-k9
+Misfus Adult 20kg Cafe Moka,2282,8340,,0,1,5,false,20000,top-k9
+Pack TopK9 Ecologica 10x2kg Manzana,2003,14510,,0,10,5,false,2000,top-k9
+Snack Pate Deli Atun/Ostion 20x85g,3212,8263,,0,20,5,false,85,top-k9
+Detergente Liquido 5 Lts,D008,18780,,0,15,5,false,5000,top-k9
+Lavalozas Eco 5 Lts,D011,4765,,0,3,5,false,5000,top-k9
+Cloro 5 Lts,D007,3655,,0,3,5,false,5000,top-k9
+Limpiapisos Lavanda 5 Lts,D012,3655,,0,3,5,false,5000,top-k9

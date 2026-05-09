@@ -1,0 +1,89 @@
+name,barcode,cost,price,margin,stock,min_stock,is_weighted,weight,category
+Duraznos en mitades Wasil 500grs,7801305005584,,1950,0,4,5,false,500,no perecibles
+Duraznos cubitos Wasil 500grs,7801305004167,,1950,0,3,5,false,500,no perecibles
+Frutillas enteras Wasil 500grs,7801305005560,,2450,0,2,5,false,500,no perecibles
+Piñas en rodajas Wasil 560grs,7801305100050,,2850,0,3,5,false,560,no perecibles
+Piñas en trozos Wasil 565grs,7801305001517,,2650,0,3,5,false,565,no perecibles
+Crema de leche Nestle 236grs,7613032415679,,2250,0,3,5,false,236,no perecibles
+Crema de leche Nestle 157grs,7613032414580,,1620,0,5,5,false,157,no perecibles
+Leche Evaporada Ideal Nestle 390grs,8445291028081,,1980,0,2,5,false,390,no perecibles
+Leche Condensada Nestle 397grs,7613030049883,,2620,0,4,5,false,397,no perecibles
+Duraznos en mitades Esmeralda 425grs,7802420008498,,1850,0,6,5,false,425,no perecibles
+Queso Rallado Parmesano Soprole 40grs,7802900001278,,1000,0,18,5,false,40,no perecibles
+Queso Reggianito Colun 40grs,7802920423609,,1000,0,7,5,false,40,no perecibles
+Lasagna Precocida Lucchetti 200grs,7802500112923,,1200,0,3,5,false,200,no perecibles
+Lasagna Tradicional Carozzi 400grs,7802575007261,,2720,0,1,5,false,400,no perecibles
+Ravioli Carne Carozzi 400grs,7802575040206,,2800,0,2,5,false,400,no perecibles
+Salsa Tuco Carne Maggi 245grs,7802950012316,,1960,0,1,5,false,245,no perecibles
+Salsa Tomate Pomarola Ital Carozzi 200grs,7802575353047,,750,0,27,5,false,200,no perecibles
+Salsa Tomate Italiana Malloa 200grs,7802300000154,,750,0,6,5,false,200,no perecibles
+Salsa Tomate Italiana San Remo 200grs,7802575365026,,550,0,23,5,false,200,no perecibles
+Naturals Fideos y verdura Nestle 205grs,8445291770027,,2350,0,4,5,false,205,no perecibles
+Colado Pollo y Verdura Nestle 215grs,7802950003550,,2350,0,1,5,false,215,no perecibles
+Colado Res y Verdura Nestle 215grs,7613030264088,,2350,0,1,5,false,215,no perecibles
+Colado Carne y Verdura Nestle 205grs,8445291769885,,2350,0,6,5,false,205,no perecibles
+Spaghetti 5 Carozzi 400grs,7802575004437,,1250,0,4,5,false,400,no perecibles
+Corbatitas Carozzi 400grs,7802575006035,,1250,0,2,5,false,400,no perecibles
+Caracoles Carozzi 400grs,7802575002433,,1250,0,3,5,false,400,no perecibles
+Mostaccioli Carozzi 400grs,7802575001832,,1250,0,3,5,false,400,no perecibles
+Corbatitas Carozzi 400grs,7802575066233,,1250,0,1,5,false,400,no perecibles
+Cabellos de Angel Carozzi 400grs,7802575001030,,1250,0,2,5,false,400,no perecibles
+Fettuccine 88 Carozzi 400grs,7802575004833,,1250,0,5,5,false,400,no perecibles
+Tallarines 87 Carozzi 400grs,7802575004635,,1250,0,4,5,false,400,no perecibles
+Capellini Carozzi 400grs,7802575001849,,1250,0,3,5,false,400,no perecibles
+Espirales Lucchetti 400grs,7802500001081,,1050,0,2,5,false,400,no perecibles
+Mostacholi Lucchetti 400grs,7802500001067,,1050,0,4,5,false,400,no perecibles
+Corbatitas Lucchetti 400grs,7802500003016,,1050,0,1,5,false,400,no perecibles
+Canutos Lucchetti 400grs,7802500001050,,1050,0,1,5,false,400,no perecibles
+Cabellitos Lucchetti 400grs,7802500001029,,1050,0,5,5,false,400,no perecibles
+Spaghetti 5 Lucchetti 400grs,7802500100053,,1050,0,5,5,false,400,no perecibles
+Spaghetti 5 San Remo 400grs,7802575203007,,850,0,4,5,false,400,no perecibles
+Espirales San Remo 400grs,7802575202628,,850,0,2,5,false,400,no perecibles
+Corbatas San Remo 400grs,7802575204271,,850,0,5,5,false,400,no perecibles
+Cabellos de Angel San Remo 400grs,7802575203335,,850,0,3,5,false,400,no perecibles
+Mariposas Lucchetti 250grs,7802500002026,,950,0,2,5,false,250,no perecibles
+Dedalitos Lucchetti 250grs,7802500182315,,950,0,2,5,false,250,no perecibles
+Sucedaneo Limon Traverso 250ml,7802337801014,,950,0,1,5,false,250,no perecibles
+Sucedaneo Limon Traverso 500ml,7802337801038,,1480,0,2,5,false,500,no perecibles
+Jugo de Limon Don Juan 250ml,7802351534509,,880,0,6,5,false,250,no perecibles
+Jugo de Limon Don Juan 500ml,7802351534707,,1360,0,6,5,false,500,no perecibles
+Vinagre Blanco Don Juan 250ml,7802351524500,,800,0,5,5,false,250,no perecibles
+Vinagre Tinto Don Juan 250ml,7802351524609,,800,0,1,5,false,250,no perecibles
+Vinagre Tinto Don Juan 500ml,7802351524807,,1450,0,6,5,false,500,no perecibles
+Vinagre Blanco Don Juan 500ml,7802351524708,,1450,0,3,5,false,500,no perecibles
+Vinagre Blanco Traverso 250ml,7802337101015,,850,0,1,5,false,250,no perecibles
+Vinagre Tinto Traverso 250ml,7802337101022,,850,0,5,5,false,250,no perecibles
+Vinagre Blanco Traverso 500ml,7802337101039,,1350,0,3,5,false,500,no perecibles
+Vinagre Tinto Traverso 500ml,7802337101040,,1350,0,3,5,false,500,no perecibles
+Endulzante Stevia Daily 180ml,7809558101947,,3900,0,3,5,false,180,no perecibles
+Endulzante Stevia Daily 100ml,7809558106324,,2900,0,4,5,false,100,no perecibles
+Ecco Nestle Bebida Cebada 100grs,7802950002317,,3340,0,3,5,false,100,no perecibles
+Ecco Nestle Bebida Cebada 50grs,7802950008715,,2000,0,2,5,false,50,no perecibles
+Nescafe Tarro 50grs,782950002119,,3950,0,4,5,false,50,no perecibles
+Te Supremo La Rendidora 20 bols,7801875032010,,750,0,4,5,false,20,no perecibles
+Te Supremo Brasil 20 bols,7801875041012,,1100,0,14,5,false,20,no perecibles
+Te Supremo Oro 20 bols,7801875047014,,1330,0,9,5,false,20,no perecibles
+Te Supremo Ceylon Premium 20 bols,7801875047113,,1650,0,6,5,false,20,no perecibles
+Te Emblem Tea 20 bols,7802420009501,,1200,0,3,5,false,20,no perecibles
+Te Club Ceylon Original 20 bols,7802420008825,,980,0,8,5,false,20,no perecibles
+Te Club Ceylon Classic 40 bols,7802420008627,,1200,0,8,5,false,40,no perecibles
+Te Emblem Ceylon Granel 230grs,7805000314774,,2800,0,7,5,false,230,no perecibles
+Te Menta Supremo 20 bols,7801875058072,,1380,0,1,5,false,20,no perecibles
+Hierbas Surtidas Supremo 20 bols,7801875061010,,1380,0,1,5,false,20,no perecibles
+Arroz Tucapel Gran Seleccion 1000grs,7801420002277,,2500,0,5,5,false,1000,no perecibles
+Te Toro G-2 1000grs,7804687540063,,1150,0,7,5,false,1000,no perecibles
+Arroz Monarca G-2 900grs,7804658860473,,1150,0,5,5,false,900,no perecibles
+Arroz Tucapel Blue Bonnet 900grs,7801420001850,,1550,0,5,5,false,900,no perecibles
+Azucar El Monarca 900grs,7804658860480,,1150,0,6,5,false,900,no perecibles
+Atun Desmenuzado Agua San Remo 140grs,7804461000431,,980,0,4,5,false,140,no perecibles
+Atun Desmenuzado Aceite San Remo 140grs,7804461000424,,980,0,3,5,false,140,no perecibles
+Lomitos Atun Agua Angelmo 140grs,7804660230011,,1730,0,5,5,false,140,no perecibles
+Lomitos Atun Aceite Angelmo 140grs,7804660230028,,1730,0,9,5,false,140,no perecibles
+Atun Lomitos Van Camp's 160grs,7702367003900,,2100,0,1,5,false,160,no perecibles
+Atun Lomitos Agua San Remo 140grs,8852084507027,,1550,0,4,5,false,140,no perecibles
+Atun Lomitos Aceite San Remo 140grs,8852084507034,,1550,0,1,5,false,140,no perecibles
+Vinagre de Manzana Don Juan 500ml,7802351000585,,2050,0,4,5,false,500,no perecibles
+Mostaza JB Doypack 250grs,7802640810161,,1590,0,2,5,false,250,no perecibles
+Mostaza JB 100grs,7802640600076,,650,0,4,5,false,100,no perecibles
+Ketchup JB Doypack 100grs,7802640600090,,650,0,9,5,false,100,no perecibles
+Ketchup JB 250grs,7802640810178,,1590,0,3,5,false,250,no perecibles
