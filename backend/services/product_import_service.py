@@ -44,7 +44,8 @@ def import_products_from_csv(file_path: str):
                     product = _find_product(data)
 
                     if product:
-                        product.update_from_dict(data)
+                        update_data = _clean_update_data(data)
+                        product.update_from_dict(update_data)
                         result["updated"] += 1
                     else:
                         product = Product(**data)
@@ -72,7 +73,7 @@ def import_products_from_csv(file_path: str):
 def _validate_headers(headers):
     headers = set(headers or [])
 
-    required = {"name", "cost", "stock"}
+    required = {"name", "stock"}
     missing = required - headers
 
     if missing:
@@ -88,13 +89,13 @@ def _parse_row(row: dict) -> dict:
 
     barcode = _clean(row.get("barcode"))
 
-    cost = _parse_money(row.get("cost"), "cost", required=True)
+    cost = _parse_money(row.get("cost"), "cost", required=False)
     price = _parse_money(row.get("price"), "price", required=False)
 
-    margin = _parse_margin(row.get("margin"))
+    if cost is None and price is None:
+        raise ProductImportError("El producto debe tener cost o price")
 
-    # if price is None:
-    #     price = _calculate_price(cost, margin)
+    margin = _parse_margin(row.get("margin"))
 
     stock = _parse_int(row.get("stock"), "stock", default=0, min_value=0)
     min_stock = _parse_int(row.get("min_stock"), "min_stock", default=5, min_value=0)
@@ -110,6 +111,28 @@ def _parse_row(row: dict) -> dict:
         "weight": _parse_float(row.get("weight")),
         "margin": float(margin),
         "category": _clean(row.get("category")),
+    }
+
+
+def _clean_update_data(data: dict) -> dict:
+    """
+    Evita borrar datos importantes cuando un CSV trae campos vacíos.
+    Ejemplo:
+    - Inventario manual trae cost vacío, pero price lleno.
+    - Factura trae price vacío, pero cost lleno.
+    """
+    protected_nullable_fields = {
+        "barcode",
+        "cost",
+        "price",
+        "weight",
+        "category_id",
+    }
+
+    return {
+        key: value
+        for key, value in data.items()
+        if not (key in protected_nullable_fields and value is None)
     }
 
 
