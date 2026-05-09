@@ -67,3 +67,40 @@ export const deleteProduct = async (id: number): Promise<void> => {
     throw new Error(error?.message || error?.error || "Error deleting product");
   }
 };
+
+export type PaginatedProductsResponse = {
+  items: Product[];
+  total: number;
+  page: number;
+  per_page: number;
+  pages: number;
+};
+
+type GetProductsParams = {
+  query?: string;
+  page?: number;
+  perPage?: number;
+};
+
+export const getProducts = async ({
+  query = "",
+  page = 1,
+  perPage = 100,
+}: GetProductsParams): Promise<PaginatedProductsResponse> => {
+  const params = new URLSearchParams({
+    page: String(page),
+    per_page: String(perPage),
+  });
+
+  const endpoint = query.trim()
+    ? `${API_URL}/products/search?name=${encodeURIComponent(query)}&${params}`
+    : `${API_URL}/products?${params}`;
+
+  const res = await fetch(endpoint);
+
+  if (!res.ok) {
+    throw new Error("Error fetching products");
+  }
+
+  return res.json();
+};

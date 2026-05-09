@@ -69,6 +69,22 @@ def create_product(data):
 
     return product
 
+def get_paginated_products(page=1, per_page=100):
+    return (
+        Product.query
+        .order_by(Product.id.desc())
+        .paginate(page=page, per_page=per_page, error_out=False)
+    )
+
+
+def search_products_paginated(name, page=1, per_page=100):
+    return (
+        Product.query
+        .filter(Product.name.ilike(f"%{name}%"))
+        .order_by(Product.id.desc())
+        .paginate(page=page, per_page=per_page, error_out=False)
+    )
+
 
 # 🔹 UPDATE
 def update_product(product, data):

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ProductList } from "../components/ProductList";
 import { ProductForm } from "../components/ProductForm";
+import { getProducts } from "../services/productApi";
 import type { Product } from "../types/product";
 
 type FormMode = "create" | "edit" | null;
@@ -16,6 +17,11 @@ const ProductsPage = () => {
 
   const [query, setQuery] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(100);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -24,22 +30,19 @@ const ProductsPage = () => {
       setError(null);
 
       try {
-        const url = query
-          ? `http://localhost:5000/api/products/search?name=${query}`
-          : "http://localhost:5000/api/products";
-
-        const res = await fetch(url, {
-          signal: controller.signal,
+        const data = await getProducts({
+          query,
+          page,
+          perPage,
         });
 
-        if (!res.ok) {
-          throw new Error("Error al obtener productos");
-        }
+        if (controller.signal.aborted) return;
 
-        const data = await res.json();
-        setProducts(data);
+        setProducts(data.items);
+        setTotalPages(data.pages || 1);
+        setTotalProducts(data.total);
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (controller.signal.aborted) return;
 
         if (err instanceof Error) {
           setError(err.message);
@@ -47,7 +50,9 @@ const ProductsPage = () => {
           setError("Error desconocido");
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -57,7 +62,7 @@ const ProductsPage = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [query]);
+  }, [query, page, perPage]);
 
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -75,6 +80,7 @@ const ProductsPage = () => {
     setSelectedProduct(created);
     setFormMode("edit");
     setIsFormPanelOpen(true);
+    setTotalProducts((prev) => prev + 1);
   };
 
   const handleProductUpdated = (updated: Product) => {
@@ -88,6 +94,7 @@ const ProductsPage = () => {
     setSelectedProduct(null);
     setFormMode(null);
     setIsFormPanelOpen(false);
+    setTotalProducts((prev) => Math.max(0, prev - 1));
   };
 
   const handleCancelForm = () => {
@@ -117,7 +124,10 @@ const ProductsPage = () => {
         type="text"
         placeholder="Buscar por nombre..."
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setPage(1);
+        }}
         className="products-search"
       />
 
@@ -136,6 +146,45 @@ const ProductsPage = () => {
             onSelectProduct={handleSelectProduct}
             onProductUpdated={handleProductUpdated}
           />
+
+          <div className="products-pagination">
+            <span>
+              Mostrando página {page} de {totalPages} · {totalProducts}{" "}
+              productos
+            </span>
+
+            <div className="pagination-controls">
+              <select
+                value={perPage}
+                onChange={(e) => {
+                  setPerPage(Number(e.target.value));
+                  setPage(1);
+                }}
+              >
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
+              </select>
+
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              >
+                Anterior
+              </button>
+
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
 
         <button

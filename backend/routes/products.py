@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify
 from backend.services.product_service import (
     get_all_products,
+    get_paginated_products,
     get_product_by_id,
     create_product as create_product_service,
     update_product as update_product_service,
     delete_product,
     get_product_by_barcode,
     search_products_by_name,
+    search_products_paginated,
 )
 from backend.schemas.product_schema import ProductSchema
 
@@ -15,11 +17,26 @@ product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
 
 
+def pagination_response(pagination):
+    return {
+        "items": products_schema.dump(pagination.items),
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "pages": pagination.pages,
+    }
+
 # 🔹 GET ALL
 @products_bp.route("/products", methods=["GET"])
 def get_products():
-    products = get_all_products()
-    return jsonify(products_schema.dump(products)), 200
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=100, type=int)
+
+    per_page = min(per_page, 200)
+
+    pagination = get_paginated_products(page=page, per_page=per_page)
+
+    return jsonify(pagination_response(pagination)), 200
 
 
 # 🔹 GET BY ID
@@ -47,13 +64,21 @@ def get_product_by_barcode_route(barcode):
 @products_bp.route("/products/search", methods=["GET"])
 def search_products():
     name = request.args.get("name")
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=100, type=int)
+
+    per_page = min(per_page, 200)
 
     if not name:
         return jsonify({"error": "Query param 'name' is required"}), 400
 
-    products = search_products_by_name(name)
+    pagination = search_products_paginated(
+        name,
+        page=page,
+        per_page=per_page,
+    )
 
-    return jsonify(products_schema.dump(products)), 200
+    return jsonify(pagination_response(pagination)), 200
 
 
 # 🔹 CREATE

@@ -1074,3 +1074,41 @@ textarea {
   color: #94a3b8;
   font-size: 0.95rem;
 }
+
+.products-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  margin-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-controls select,
+.pagination-controls button {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #111827;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 14px;
+}
+
+.pagination-controls button {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
