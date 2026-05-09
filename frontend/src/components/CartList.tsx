@@ -32,7 +32,13 @@ export default function CartList({
   }
 
   return (
-    <div>
+    <div className="cart-list">
+      <div className="cart-list-header">
+        <span>Producto</span>
+        <span>Cantidad</span>
+        <span>Subtotal</span>
+      </div>
+
       {items.map((item) => (
         <CartItemRow
           key={item.product_id}

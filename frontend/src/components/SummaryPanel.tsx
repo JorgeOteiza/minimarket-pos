@@ -5,6 +5,7 @@ type Props = {
   onCheckout: () => Promise<void>;
   onClear: () => Promise<void>;
   loading: boolean;
+  disabled?: boolean;
   lastItem?:
     | {
         name: string;
@@ -18,8 +19,11 @@ export default function SummaryPanel({
   onCheckout,
   onClear,
   loading,
+  disabled = false,
   lastItem,
 }: Props) {
+  const actionsDisabled = loading || disabled;
+
   return (
     <div className="summary-panel">
       <div>
@@ -40,7 +44,7 @@ export default function SummaryPanel({
           type="button"
           className="checkout-button"
           onClick={onCheckout}
-          disabled={loading}
+          disabled={actionsDisabled}
         >
           {loading ? "Procesando..." : "Cobrar"}
         </button>
@@ -49,7 +53,7 @@ export default function SummaryPanel({
           type="button"
           className="clear-cart-button"
           onClick={onClear}
-          disabled={loading}
+          disabled={actionsDisabled}
         >
           Vaciar carrito
         </button>

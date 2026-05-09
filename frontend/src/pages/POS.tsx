@@ -308,9 +308,8 @@ export default function POS() {
             total={cart.total}
             onCheckout={handleCheckout}
             onClear={handleClear}
-            loading={
-              loading || cart.items.length === 0 || hasProductsWithoutPrice
-            }
+            loading={loading}
+            disabled={cart.items.length === 0 || hasProductsWithoutPrice}
             lastItem={lastScannedItem}
           />
         </aside>
