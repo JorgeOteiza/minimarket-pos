@@ -5,6 +5,7 @@ export interface Product {
   cost?: number | null;
   barcode?: string | null;
   stock: number;
+  pack_units?: number | null;
   min_stock?: number;
   margin?: number;
   is_weighted?: boolean;
@@ -17,6 +18,7 @@ export interface ProductPayload {
   name: string;
   price?: number | null;
   stock?: number;
+  pack_units?: number | null;
   barcode?: string | null;
   category_id?: number | null;
   cost?: number | null;

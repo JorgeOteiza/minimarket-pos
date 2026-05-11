@@ -23,6 +23,12 @@ class ProductSchema(Schema):
         allow_none=True,
         validate=validate.Length(max=50),
     )
+    
+    pack_units = fields.Int(
+        required=False,
+        allow_none=True,
+        validate=validate.Range(min=1),
+    )
 
     cost = fields.Float(
         required=False,

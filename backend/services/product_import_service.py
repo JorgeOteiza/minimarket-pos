@@ -98,11 +98,20 @@ def _parse_row(row: dict) -> dict:
     margin = _parse_margin(row.get("margin"))
 
     stock = _parse_int(row.get("stock"), "stock", default=0, min_value=0)
+    
+    pack_units = _parse_int(
+    row.get("pack_units"),
+    "pack_units",
+    default=stock,
+    min_value=1,
+    )
+    
     min_stock = _parse_int(row.get("min_stock"), "min_stock", default=5, min_value=0)
 
     return {
         "name": name,
         "barcode": barcode,
+        "pack_units": pack_units,
         "cost": cost,
         "price": price,
         "stock": stock,

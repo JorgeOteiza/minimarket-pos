@@ -30,6 +30,7 @@ export const ProductForm = ({
 }: Props) => {
   const [formData, setFormData] = useState<CreateProductDTO>({
     name: product?.name ?? "",
+    pack_units: product?.pack_units ?? product?.stock ?? null,
     price: product?.price ?? null,
     cost: product?.cost ?? null,
     barcode: product?.barcode ?? "",
@@ -62,14 +63,14 @@ export const ProductForm = ({
     const marginPercent = raw === "" ? 0 : Number(raw);
     const marginDecimal = marginPercent / 100;
 
-    const stock = formData.stock ?? 0;
+    const packUnits = formData.pack_units ?? formData.stock ?? 0;
     const cost = formData.cost ?? null;
     const iva = formData.iva ?? 0.19;
 
     let newPrice = formData.price;
 
-    if (cost !== null && stock > 0) {
-      const unitCost = cost / stock;
+    if (cost !== null && packUnits > 0) {
+      const unitCost = cost / packUnits;
       const calculated = calculatePriceFromMargin(unitCost, marginPercent, iva);
 
       newPrice = Math.round(calculated);
@@ -192,7 +193,17 @@ export const ProductForm = ({
           </div>
 
           <div className="form-field">
-            <label>Stock (unidades por caja)</label>
+            <label>Unidades por caja</label>
+            <input
+              name="pack_units"
+              type="number"
+              value={formData.pack_units ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label>Stock disponible</label>
             <input
               name="stock"
               type="number"

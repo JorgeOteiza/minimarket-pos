@@ -8,6 +8,8 @@ class Product(db.Model):
     name = db.Column(db.String(150), nullable=False)
 
     barcode = db.Column(db.String(50), unique=True, nullable=True, index=True)
+    
+    pack_units = db.Column(db.Integer, nullable=True)
 
     price = db.Column(db.Numeric(10, 2), nullable=True)
     cost = db.Column(db.Numeric(10, 2), nullable=True)
@@ -35,7 +37,7 @@ class Product(db.Model):
 
     def update_from_dict(self, data: dict):
        for field in [
-        "name", "barcode", "price", "cost",
+        "name", "barcode", "pack_units", "price", "cost",
         "stock", "min_stock", "is_weighted",
         "weight", "margin", "category_id"
     ]:
@@ -50,6 +52,7 @@ class Product(db.Model):
             "id": self.id,
             "name": self.name,
             "barcode": self.barcode,
+            "pack_units": self.pack_units,
             "price": float(self.price) if self.price is not None else None,
             "cost": float(self.cost) if self.cost else None,
             "stock": self.stock,

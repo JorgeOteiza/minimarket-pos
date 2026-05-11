@@ -8,7 +8,7 @@ import {
 } from "../../../utils/pricing";
 import { updateProduct } from "../services/productApi";
 
-type EditingField = "price" | "margin" | "stock" | "unitCost";
+type EditingField = "price" | "margin" | "stock" | "unitCost" | "packUnits";
 
 interface Props {
   products: Product[];
@@ -92,6 +92,13 @@ export const ProductList = ({
     }
 
     try {
+      if (editing.field === "packUnits") {
+        const updated = await updateProduct(product.id, {
+          pack_units: numericValue === null ? null : Math.floor(numericValue),
+        });
+        onProductUpdated(updated);
+      }
+
       if (editing.field === "price") {
         const updated = await updateProduct(product.id, {
           price: numericValue,
@@ -100,11 +107,12 @@ export const ProductList = ({
       }
 
       if (editing.field === "margin") {
-        const stock = product.stock ?? 0;
+        const packUnits = product.pack_units ?? product.stock ?? 0;
         const boxCost = product.cost ?? null;
         const iva = product.iva ?? 0.19;
 
-        const unitCost = boxCost !== null && stock > 0 ? boxCost / stock : null;
+        const unitCost =
+          boxCost !== null && packUnits > 0 ? boxCost / packUnits : null;
 
         if (numericValue === null || unitCost === null) {
           cancelEditing();
@@ -129,10 +137,10 @@ export const ProductList = ({
       }
 
       if (editing.field === "unitCost") {
-        const safeStock = product.stock > 0 ? product.stock : 1;
+        const safePackUnits = product.pack_units ?? product.stock ?? 1;
 
         const updated = await updateProduct(product.id, {
-          cost: numericValue === null ? null : numericValue * safeStock,
+          cost: numericValue === null ? null : numericValue * safePackUnits,
         });
         onProductUpdated(updated);
       }
@@ -157,6 +165,7 @@ export const ProductList = ({
               <th>Nombre del producto</th>
               <th>Barcode</th>
               <th>Costo caja</th>
+              <th>Unid. caja</th>
               <th>Costo unidad</th>
               <th>Precio con IVA</th>
               <th>Precio venta</th>
@@ -172,10 +181,11 @@ export const ProductList = ({
               const finalPrice = product.price ?? null;
               const boxCost = product.cost ?? null;
               const stock = product.stock ?? 0;
+              const packUnits = product.pack_units ?? stock;
               const iva = product.iva ?? 0.19;
 
               const unitCost =
-                boxCost !== null && stock > 0 ? boxCost / stock : null;
+                boxCost !== null && packUnits > 0 ? boxCost / packUnits : null;
 
               const costWithIva =
                 unitCost !== null ? calculateCostWithIva(unitCost, iva) : null;
@@ -207,6 +217,10 @@ export const ProductList = ({
                 editing?.productId === product.id &&
                 editing.field === "unitCost";
 
+              const isEditingPackUnits =
+                editing?.productId === product.id &&
+                editing.field === "packUnits";
+
               return (
                 <tr
                   key={product.id}
@@ -216,6 +230,31 @@ export const ProductList = ({
                   <td>{product.name}</td>
                   <td>{product.barcode || "-"}</td>
                   <td>{formatOptionalCLP(boxCost)}</td>
+
+                  <td
+                    className="editable-price-cell"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditing(product, "packUnits", String(packUnits));
+                    }}
+                  >
+                    {isEditingPackUnits ? (
+                      <input
+                        type="number"
+                        value={tempValue}
+                        autoFocus
+                        className="inline-price-input"
+                        onChange={(e) => setTempValue(e.target.value)}
+                        onBlur={() => saveInlineEdit(product)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveInlineEdit(product);
+                          if (e.key === "Escape") cancelEditing();
+                        }}
+                      />
+                    ) : (
+                      packUnits || "-"
+                    )}
+                  </td>
 
                   <td
                     className="editable-price-cell"
