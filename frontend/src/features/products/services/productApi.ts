@@ -9,7 +9,7 @@ const API_URL = "http://localhost:5000/api";
 export const searchProducts = async (query: string): Promise<Product[]> => {
   if (!query) return [];
 
-  const res = await fetch(`${API_URL}/products/search?name=${query}`);
+  const res = await fetch(`${API_URL}/products/search?q=${query}`);
 
   if (!res.ok) {
     throw new Error("Error fetching products");
@@ -93,7 +93,7 @@ export const getProducts = async ({
   });
 
   const endpoint = query.trim()
-    ? `${API_URL}/products/search?name=${encodeURIComponent(query)}&${params}`
+    ? `${API_URL}/products/search?q=${encodeURIComponent(query)}&${params}`
     : `${API_URL}/products?${params}`;
 
   const res = await fetch(endpoint);

@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from datetime import date
 from decimal import Decimal
+from backend.services.inventory_service import register_inventory_movement
 
 
 def get_all_sales():
@@ -68,7 +69,11 @@ def create_sale(data):
                 subtotal=subtotal
             )
 
-            product.stock -= quantity
+            register_inventory_movement(
+            product=product,
+            quantity=-quantity,
+            movement_type="SALE",
+            )
 
             sale.items.append(sale_item)
 

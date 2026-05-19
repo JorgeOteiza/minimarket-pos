@@ -1,6 +1,7 @@
 from backend.models import Product
 from backend.extensions import db
 from decimal import Decimal, ROUND_HALF_UP
+from sqlalchemy import or_
 
 
 # 🔹 helper: calcular precio desde costo + margen
@@ -78,12 +79,21 @@ def get_paginated_products(page=1, per_page=100):
     )
 
 
-def search_products_paginated(name, page=1, per_page=100):
+def search_products_paginated(query, page=1, per_page=100):
     return (
         Product.query
-        .filter(Product.name.ilike(f"%{name}%"))
+        .filter(
+            or_(
+                Product.name.ilike(f"%{query}%"),
+                Product.barcode.ilike(f"%{query}%"),
+            )
+        )
         .order_by(Product.id.desc())
-        .paginate(page=page, per_page=per_page, error_out=False)
+        .paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False,
+        )
     )
 
 

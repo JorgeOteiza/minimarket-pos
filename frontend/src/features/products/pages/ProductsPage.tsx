@@ -65,8 +65,21 @@ const ProductsPage = () => {
   }, [query, page, perPage]);
 
   const handleSelectProduct = (product: Product) => {
+    const formElement = document.querySelector(".product-form");
+
+    const isDirty = formElement?.getAttribute("data-dirty") === "true";
+
+    if (isDirty) {
+      const confirmed = window.confirm(
+        "Tienes cambios sin guardar. ¿Cambiar de producto igualmente?",
+      );
+
+      if (!confirmed) return;
+    }
+
     setSelectedProduct(product);
     setFormMode("edit");
+    setIsFormPanelOpen(true);
   };
 
   const handleAddProduct = () => {
@@ -87,6 +100,7 @@ const ProductsPage = () => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setSelectedProduct(updated);
     setFormMode("edit");
+    setIsFormPanelOpen(true);
   };
 
   const handleProductDeleted = (productId: number) => {
@@ -122,7 +136,7 @@ const ProductsPage = () => {
 
       <input
         type="text"
-        placeholder="Buscar por nombre..."
+        placeholder="Buscar por nombre o código..."
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -144,7 +158,6 @@ const ProductsPage = () => {
             loading={loading}
             selectedProductId={selectedProduct?.id ?? null}
             onSelectProduct={handleSelectProduct}
-            onProductUpdated={handleProductUpdated}
           />
 
           <div className="products-pagination">

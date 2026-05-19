@@ -46,8 +46,8 @@ export function useScanner(onScan: (barcode: string) => void) {
       }
 
       // 🔹 Solo números (códigos de barras reales)
-      if (/^[0-9]$/.test(e.key)) {
-        buffer.current += e.key;
+      if (/^[a-zA-Z0-9]$/.test(e.key)) {
+        buffer.current += e.key.toUpperCase();
       }
     };
 

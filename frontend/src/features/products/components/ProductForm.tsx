@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   Product,
   CreateProductDTO,
@@ -42,6 +42,23 @@ export const ProductForm = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialData = useMemo(
+    () => ({
+      name: product?.name ?? "",
+      pack_units: product?.pack_units ?? product?.stock ?? null,
+      price: product?.price ?? null,
+      cost: product?.cost ?? null,
+      barcode: product?.barcode ?? "",
+      stock: product?.stock ?? 0,
+      margin: product?.margin ?? 0,
+      min_stock: product?.min_stock ?? 0,
+      iva: product?.iva ?? 0.19,
+    }),
+    [product],
+  );
+
+  const hasUnsavedChanges =
+    JSON.stringify(formData) !== JSON.stringify(initialData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -138,7 +155,7 @@ export const ProductForm = ({
   };
 
   return (
-    <div className="product-form">
+    <div className="product-form" data-dirty={hasUnsavedChanges}>
       <div className="product-form-header">
         <div>
           <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
@@ -253,7 +270,21 @@ export const ProductForm = ({
             {mode === "create" ? "Crear" : "Guardar"}
           </button>
 
-          <button type="button" onClick={onCancel} className="secondary-btn">
+          <button
+            type="button"
+            onClick={() => {
+              if (hasUnsavedChanges) {
+                const confirmed = window.confirm(
+                  "Tienes cambios sin guardar. ¿Cerrar igualmente?",
+                );
+
+                if (!confirmed) return;
+              }
+
+              onCancel();
+            }}
+            className="secondary-btn"
+          >
             Cancelar
           </button>
         </div>

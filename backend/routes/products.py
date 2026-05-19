@@ -63,22 +63,27 @@ def get_product_by_barcode_route(barcode):
 
 @products_bp.route("/products/search", methods=["GET"])
 def search_products():
-    name = request.args.get("name")
+    query = request.args.get("q")
+
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=100, type=int)
 
     per_page = min(per_page, 200)
 
-    if not name:
-        return jsonify({"error": "Query param 'name' is required"}), 400
+    if not query:
+        return jsonify({
+            "error": "Query param 'q' is required"
+        }), 400
 
     pagination = search_products_paginated(
-        name,
+        query,
         page=page,
         per_page=per_page,
     )
 
-    return jsonify(pagination_response(pagination)), 200
+    return jsonify(
+        pagination_response(pagination)
+    ), 200
 
 
 # 🔹 CREATE
