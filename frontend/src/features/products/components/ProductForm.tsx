@@ -10,6 +10,7 @@ import {
   deleteProduct,
 } from "../services/productApi";
 import { calculatePriceFromMargin } from "../../../utils/pricing";
+import toast from "react-hot-toast";
 
 type Props = {
   mode: "create" | "edit";
@@ -110,18 +111,34 @@ export const ProductForm = ({
       if (mode === "create") {
         const created = await createProduct(formData);
         onCreated?.(created);
+        toast.success("Producto creado correctamente");
+        setError(null);
       } else if (mode === "edit" && product) {
         const updated = await updateProduct(
           product.id,
           formData as UpdateProductDTO,
         );
         onUpdated?.(updated);
+        toast.success("Producto actualizado correctamente");
+        setError(null);
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        const message = err.message;
+
+        setError(message);
+
+        if (
+          message.toLowerCase().includes("barcode") ||
+          message.toLowerCase().includes("unique")
+        ) {
+          toast.error("El código de barras ya existe");
+        } else {
+          toast.error(message);
+        }
       } else {
         setError("Error desconocido");
+        toast.error("Error desconocido");
       }
     } finally {
       setLoading(false);
@@ -143,11 +160,25 @@ export const ProductForm = ({
     try {
       await deleteProduct(product.id);
       onDeleted?.(product.id);
+      toast.success("Producto eliminado correctamente");
+      setError(null);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        const message = err.message;
+
+        setError(message);
+
+        if (
+          message.toLowerCase().includes("barcode") ||
+          message.toLowerCase().includes("unique")
+        ) {
+          toast.error("El código de barras ya existe");
+        } else {
+          toast.error(message);
+        }
       } else {
         setError("No se pudo eliminar el producto");
+        toast.error("No se pudo eliminar el producto");
       }
     } finally {
       setLoading(false);
