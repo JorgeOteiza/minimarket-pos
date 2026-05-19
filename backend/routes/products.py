@@ -11,6 +11,8 @@ from backend.services.product_service import (
     search_products_paginated,
 )
 from backend.schemas.product_schema import ProductSchema
+from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 products_bp = Blueprint("products", __name__)
 product_schema = ProductSchema()
@@ -91,11 +93,28 @@ def search_products():
 def create_product():
     data = request.get_json()
 
-    validated_data = product_schema.load(data)
+    try:
+        validated_data = product_schema.load(data)
 
-    product = create_product_service(validated_data)
+        product = create_product_service(validated_data)
 
-    return jsonify(product_schema.dump(product)), 201
+        return jsonify(product_schema.dump(product)), 201
+
+    except ValidationError as err:
+        return jsonify({
+            "error": "Validation error",
+            "details": err.messages,
+        }), 400
+
+    except IntegrityError:
+        return jsonify({
+            "error": "El código de barras ya existe",
+        }), 400
+
+    except Exception as err:
+        return jsonify({
+            "error": str(err),
+        }), 500
 
 
 # 🔹 UPDATE
@@ -108,11 +127,31 @@ def update_product(id):
 
     data = request.get_json()
 
-    validated_data = product_schema.load(data, partial=True)
+    try:
+        validated_data = product_schema.load(data, partial=True)
 
-    updated_product = update_product_service(product, validated_data)
+        updated_product = update_product_service(
+            product,
+            validated_data,
+        )
 
-    return jsonify(product_schema.dump(updated_product)), 200
+        return jsonify(product_schema.dump(updated_product)), 200
+
+    except ValidationError as err:
+        return jsonify({
+            "error": "Validation error",
+            "details": err.messages,
+        }), 400
+
+    except IntegrityError:
+        return jsonify({
+            "error": "El código de barras ya existe",
+        }), 400
+
+    except Exception as err:
+        return jsonify({
+            "error": str(err),
+        }), 500
 
 
 # 🔹 DELETE

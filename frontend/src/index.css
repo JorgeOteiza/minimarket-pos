@@ -1112,3 +1112,46 @@ textarea {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.form-success-message {
+  background: #dcfce7;
+  color: #166534;
+
+  border: 1px solid #86efac;
+
+  padding: 12px 14px;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  margin-top: 16px;
+}
+
+.form-error-message {
+  background: #fee2e2;
+  color: #991b1b;
+
+  border: 1px solid #fca5a5;
+
+  padding: 12px 14px;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  margin-top: 16px;
+}
+
+.input-error {
+  border: 1px solid #dc2626 !important;
+  background: #fff5f5;
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 500;
+}

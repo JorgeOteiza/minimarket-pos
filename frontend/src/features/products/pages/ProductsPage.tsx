@@ -90,10 +90,14 @@ const ProductsPage = () => {
 
   const handleProductCreated = (created: Product) => {
     setProducts((prev) => [created, ...prev]);
-    setSelectedProduct(created);
-    setFormMode("edit");
-    setIsFormPanelOpen(true);
+
     setTotalProducts((prev) => prev + 1);
+
+    setSelectedProduct(null);
+
+    setFormMode("create");
+
+    setIsFormPanelOpen(true);
   };
 
   const handleProductUpdated = (updated: Product) => {
