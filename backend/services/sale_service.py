@@ -55,7 +55,7 @@ def create_sale(data):
 
             if product.stock < quantity:
                 raise InsufficientStockError(
-                    f"Not enough stock for {product.name}"
+                    f" {product.name}"
                 )
 
             unit_price = product.price
