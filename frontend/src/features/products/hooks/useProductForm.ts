@@ -57,7 +57,7 @@ export const useProductForm = ({
 }: UseProductFormProps) => {
   const initialFormData: CreateProductDTO = {
     name: product?.name ?? "",
-    pack_units: product?.pack_units ?? product?.stock ?? null,
+    pack_units: product?.pack_units ?? null,
     price: product?.price ?? null,
     cost: product?.cost ?? null,
     barcode: product?.barcode ?? "",
@@ -129,7 +129,7 @@ export const useProductForm = ({
 
     const newPrice = calculateSalePrice({
       cost: formData.cost ?? null,
-      packUnits: formData.pack_units ?? formData.stock ?? 0,
+      packUnits: formData.pack_units ?? 0,
       marginPercent,
       iva: formData.iva ?? 0.19,
     });

@@ -3,13 +3,14 @@ import { ProductList } from "../components/ProductList";
 import { ProductForm } from "../components/ProductForm";
 import { getProducts } from "../services/productApi";
 import type { Product } from "../types/product";
+import InventoryAdjustmentForm from "../components/InventoryAdjustmentForm";
 
-type FormMode = "create" | "edit" | null;
+type PanelMode = "create" | "edit" | "inventory" | null;
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [formMode, setFormMode] = useState<FormMode>(null);
+  const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [isFormPanelOpen, setIsFormPanelOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -78,13 +79,21 @@ const ProductsPage = () => {
     }
 
     setSelectedProduct(product);
-    setFormMode("edit");
+    setPanelMode("edit");
+    setIsFormPanelOpen(true);
+  };
+
+  const handleInventoryAdjust = (product: Product) => {
+    setSelectedProduct(product);
+
+    setPanelMode("inventory");
+
     setIsFormPanelOpen(true);
   };
 
   const handleAddProduct = () => {
     setSelectedProduct(null);
-    setFormMode("create");
+    setPanelMode("create");
     setIsFormPanelOpen(true);
   };
 
@@ -95,7 +104,7 @@ const ProductsPage = () => {
 
     setSelectedProduct(null);
 
-    setFormMode("create");
+    setPanelMode("create");
 
     setIsFormPanelOpen(true);
   };
@@ -103,20 +112,20 @@ const ProductsPage = () => {
   const handleProductUpdated = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setSelectedProduct(updated);
-    setFormMode("edit");
+    setPanelMode("edit");
     setIsFormPanelOpen(true);
   };
 
   const handleProductDeleted = (productId: number) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
     setSelectedProduct(null);
-    setFormMode(null);
+    setPanelMode(null);
     setIsFormPanelOpen(false);
     setTotalProducts((prev) => Math.max(0, prev - 1));
   };
 
   const handleCancelForm = () => {
-    setFormMode(null);
+    setPanelMode(null);
     setSelectedProduct(null);
     setIsFormPanelOpen(false);
   };
@@ -162,6 +171,7 @@ const ProductsPage = () => {
             loading={loading}
             selectedProductId={selectedProduct?.id ?? null}
             onSelectProduct={handleSelectProduct}
+            onAdjustInventory={handleInventoryAdjust}
           />
 
           <div className="products-pagination">
@@ -215,7 +225,7 @@ const ProductsPage = () => {
 
         {isFormPanelOpen && (
           <div className="products-form-panel">
-            {formMode === "create" && (
+            {panelMode === "create" && (
               <ProductForm
                 mode="create"
                 onCreated={handleProductCreated}
@@ -223,7 +233,7 @@ const ProductsPage = () => {
               />
             )}
 
-            {formMode === "edit" && selectedProduct && (
+            {panelMode === "edit" && selectedProduct && (
               <ProductForm
                 key={selectedProduct.id}
                 mode="edit"
@@ -234,7 +244,23 @@ const ProductsPage = () => {
               />
             )}
 
-            {!formMode && (
+            {panelMode === "inventory" && selectedProduct && (
+              <InventoryAdjustmentForm
+                product={selectedProduct}
+                onClose={handleCancelForm}
+                onSuccess={async () => {
+                  const data = await getProducts({
+                    query,
+                    page,
+                    perPage,
+                  });
+
+                  setProducts(data.items);
+                }}
+              />
+            )}
+
+            {!panelMode && (
               <div className="empty-product-form">
                 <h2>Panel de producto</h2>
                 <p>Selecciona un producto o agrega uno nuevo.</p>

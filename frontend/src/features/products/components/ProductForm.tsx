@@ -33,7 +33,6 @@ export const ProductForm = ({
     hasUnsavedChanges,
 
     handleChange,
-    handleMarginChange,
     handleSubmit,
     handleDelete,
   } = useProductForm({
@@ -114,15 +113,17 @@ export const ProductForm = ({
             error={fieldErrors.pack_units}
           />
 
-          <FormField
-            label="Stock disponible"
-            name="stock"
-            type="number"
-            value={formData.stock}
-            onChange={handleChange}
-            error={fieldErrors.stock}
-            warning={warnings.stock}
-          />
+          {mode === "create" && (
+            <FormField
+              label="Stock inicial"
+              name="stock"
+              type="number"
+              value={formData.stock}
+              onChange={handleChange}
+              error={fieldErrors.stock}
+              warning={warnings.stock}
+            />
+          )}
 
           <FormField
             label="Precio venta"
@@ -132,18 +133,6 @@ export const ProductForm = ({
             onChange={handleChange}
             error={fieldErrors.price}
             warning={warnings.price}
-          />
-
-          <FormField
-            label="Margen (%)"
-            type="number"
-            value={
-              formData.margin && formData.margin > 0
-                ? Math.round(formData.margin * 100)
-                : ""
-            }
-            onChange={handleMarginChange}
-            warning={warnings.margin}
           />
 
           <FormField

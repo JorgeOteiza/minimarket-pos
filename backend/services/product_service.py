@@ -105,7 +105,6 @@ def update_product(product, data):
         "barcode",
         "pack_units",
         "cost",
-        "stock",
         "min_stock",
         "is_weighted",
         "weight",

@@ -184,9 +184,18 @@ def checkout():
         for item in cart_items
     ]
 
-    sale = create_sale({"items": items})
+    with db.session.begin():
 
-    db.session.query(CartItem).filter(CartItem.cart_id == cart.id).delete()
-    db.session.commit()
+        sale = create_sale({
+            "items": items
+        })
+
+        (
+            db.session.query(CartItem)
+            .filter(
+                CartItem.cart_id == cart.id
+            )
+            .delete()
+        )
 
     return sale

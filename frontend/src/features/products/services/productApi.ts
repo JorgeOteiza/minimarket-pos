@@ -150,3 +150,34 @@ export const getProducts = async ({
 
   return res.json();
 };
+
+export type InventoryAdjustmentPayload = {
+  product_id: number;
+  quantity: number;
+  movement_type: "ADJUSTMENT_ADD" | "ADJUSTMENT_REMOVE" | "ADJUSTMENT_SET";
+  note: string;
+};
+
+export type InventoryAdjustmentResponse = {
+  message: string;
+  product_id: number;
+  new_stock: number;
+};
+
+export const adjustInventory = async (
+  data: InventoryAdjustmentPayload,
+): Promise<InventoryAdjustmentResponse> => {
+  const res = await fetch(`${API_URL}/inventory/adjust`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    await parseErrorResponse(res, "Error ajustando inventario");
+  }
+
+  return res.json();
+};

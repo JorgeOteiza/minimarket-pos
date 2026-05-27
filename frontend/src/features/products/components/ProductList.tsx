@@ -10,6 +10,7 @@ interface Props {
   loading?: boolean;
   selectedProductId?: number | null;
   onSelectProduct: (product: Product) => void;
+  onAdjustInventory: (product: Product) => void;
 }
 
 export const ProductList = ({
@@ -17,6 +18,7 @@ export const ProductList = ({
   loading = false,
   selectedProductId = null,
   onSelectProduct,
+  onAdjustInventory,
 }: Props) => {
   const formatCLP = (value: number) =>
     new Intl.NumberFormat("es-CL", {
@@ -184,6 +186,17 @@ export const ProductList = ({
                       }}
                     >
                       Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="inventory-product-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        onAdjustInventory(product);
+                      }}
+                    >
+                      Inventario
                     </button>
                   </td>
                 </tr>

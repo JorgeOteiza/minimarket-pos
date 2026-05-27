@@ -27,61 +27,126 @@ def create_sale(data):
     items_data = data.get("items")
 
     if not items_data:
-        raise ValidationError("Sale must have at least one item")
+        raise ValidationError(
+            "Sale must have at least one item"
+        )
 
     grouped_items = defaultdict(float)
-    for item in items_data:
-        product_id = item.get("product_id")
-        quantity = item.get("quantity")
 
-        grouped_items[product_id] += quantity
+    for item in items_data:
+        product_id = item.get(
+            "product_id"
+        )
+
+        quantity = item.get(
+            "quantity"
+        )
+
+        grouped_items[
+            product_id
+        ] += quantity
 
     with db.session.begin():
 
-        sale = Sale(total_amount=0)
+        # =========================
+        # CREATE SALE FIRST
+        # =========================
+
+        sale = Sale(
+            total_amount=0
+        )
+
+        db.session.add(sale)
+
+        # 🔥 GENERA sale.id
+        db.session.flush()
+
         total_amount = 0
 
-        for product_id, quantity in grouped_items.items():
+        # =========================
+        # PROCESS ITEMS
+        # =========================
 
-            product = db.session.get(Product, product_id)
+        for (
+            product_id,
+            quantity,
+        ) in grouped_items.items():
+
+            product = (
+                db.session.query(
+                    Product
+                )
+                .filter(
+                    Product.id
+                    == product_id
+                )
+                .with_for_update()
+                .first()
+            )
 
             if not product:
-                raise NotFoundError(f"Product {product_id} not found")
+                raise NotFoundError(
+                    f"Product {product_id} not found"
+                )
 
-            if not product.is_weighted and not float(quantity).is_integer():
+            if (
+                not product.is_weighted
+                and not float(
+                    quantity
+                ).is_integer()
+            ):
                 raise ValidationError(
                     f"Product {product.name} must have integer quantity"
                 )
 
-            if product.stock < quantity:
+            if (
+                product.stock
+                < quantity
+            ):
                 raise InsufficientStockError(
-                    f" {product.name}"
+                    f"{product.name}"
                 )
 
-            unit_price = product.price
-            quantity_dec = Decimal(str(quantity))
-            subtotal = unit_price * quantity_dec
+            unit_price = (
+                product.price
+            )
+
+            quantity_dec = Decimal(
+                str(quantity)
+            )
+
+            subtotal = (
+                unit_price
+                * quantity_dec
+            )
 
             sale_item = SaleItem(
                 product_id=product.id,
                 quantity=quantity,
                 unit_price=unit_price,
-                subtotal=subtotal
+                subtotal=subtotal,
             )
+
+            # =========================
+            # INVENTORY MOVEMENT
+            # =========================
 
             register_inventory_movement(
-            product=product,
-            quantity=-quantity,
-            movement_type="SALE",
+                product=product,
+                quantity=-quantity,
+                movement_type="SALE",
+                reference_id=sale.id,
             )
 
-            sale.items.append(sale_item)
+            sale.items.append(
+                sale_item
+            )
 
             total_amount += subtotal
 
-        sale.total_amount = total_amount
-
-        db.session.add(sale)
+        sale.total_amount = (
+            total_amount
+        )
 
     return sale
 

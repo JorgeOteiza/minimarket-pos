@@ -9,6 +9,7 @@ from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.exceptions import HTTPException
 from backend.routes.cart import cart_bp
 import traceback
+from backend.routes.inventory import inventory_bp
 
 from flask_cors import CORS 
 
@@ -54,6 +55,7 @@ def create_app():
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sales_bp, url_prefix="/api")
     app.register_blueprint(cart_bp, url_prefix="/api")
+    app.register_blueprint(inventory_bp, url_prefix="/api",)
 
     register_error_handlers(app)
 
