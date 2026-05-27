@@ -1352,3 +1352,9 @@ textarea {
   color: #991b1b;
   border: 1px solid #fecaca;
 }
+
+.field-help {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 500;
+}

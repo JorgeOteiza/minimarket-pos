@@ -12,10 +12,18 @@ type Props = {
 type MovementType = "ADJUSTMENT_ADD" | "ADJUSTMENT_REMOVE" | "ADJUSTMENT_SET";
 
 const movementLabels: Record<MovementType, string> = {
-  ADJUSTMENT_ADD: "Agregar stock",
-  ADJUSTMENT_REMOVE: "Quitar stock",
-  ADJUSTMENT_SET: "Ajustar stock final",
+  ADJUSTMENT_ADD: "Sumar stock",
+  ADJUSTMENT_REMOVE: "Restar stock",
+  ADJUSTMENT_SET: "Dejar stock en",
 };
+
+const movementDescriptions: Record<MovementType, string> = {
+  ADJUSTMENT_ADD: "Aumenta la cantidad disponible.",
+  ADJUSTMENT_REMOVE: "Disminuye la cantidad disponible.",
+  ADJUSTMENT_SET: "Define el stock final exacto.",
+};
+
+const DEFAULT_NOTE = "Ajuste manual desde panel de inventario";
 
 export default function InventoryAdjustmentForm({
   product,
@@ -26,7 +34,6 @@ export default function InventoryAdjustmentForm({
     useState<MovementType>("ADJUSTMENT_ADD");
 
   const [quantity, setQuantity] = useState("");
-  const [note, setNote] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -57,8 +64,7 @@ export default function InventoryAdjustmentForm({
 
   const willBeNegative = projectedStock < 0;
 
-  const canSubmit =
-    !loading && !isInvalidQuantity && !willBeNegative && note.trim().length > 0;
+  const canSubmit = !loading && !isInvalidQuantity && !willBeNegative;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,11 +82,6 @@ export default function InventoryAdjustmentForm({
       return;
     }
 
-    if (!note.trim()) {
-      setError("Debes ingresar una nota para auditar el movimiento.");
-      return;
-    }
-
     try {
       setLoading(true);
 
@@ -88,12 +89,11 @@ export default function InventoryAdjustmentForm({
         product_id: product.id,
         quantity: parsedQuantity,
         movement_type: movementType,
-        note: note.trim(),
+        note: DEFAULT_NOTE,
       });
 
-      setSuccess("Inventario actualizado correctamente.");
+      setSuccess("Stock actualizado correctamente.");
       setQuantity("");
-      setNote("");
 
       await onSuccess?.();
     } catch (err: unknown) {
@@ -107,7 +107,7 @@ export default function InventoryAdjustmentForm({
     <div className="product-form">
       <div className="product-form-header">
         <div>
-          <h2>Ajustar inventario</h2>
+          <h2>Ajustar stock</h2>
           <p>{product.name}</p>
         </div>
       </div>
@@ -120,16 +120,20 @@ export default function InventoryAdjustmentForm({
 
         <div className="form-grid">
           <div className="form-field full">
-            <label>Tipo de ajuste</label>
+            <label>Acción</label>
 
             <select
               value={movementType}
               onChange={(e) => setMovementType(e.target.value as MovementType)}
             >
-              <option value="ADJUSTMENT_ADD">Agregar stock</option>
-              <option value="ADJUSTMENT_REMOVE">Quitar stock</option>
-              <option value="ADJUSTMENT_SET">Ajustar stock final</option>
+              <option value="ADJUSTMENT_ADD">Sumar stock</option>
+              <option value="ADJUSTMENT_REMOVE">Restar stock</option>
+              <option value="ADJUSTMENT_SET">Dejar stock en</option>
             </select>
+
+            <span className="field-help">
+              {movementDescriptions[movementType]}
+            </span>
           </div>
 
           <div className="form-field full">
@@ -142,6 +146,7 @@ export default function InventoryAdjustmentForm({
               onChange={(e) => setQuantity(e.target.value)}
               className={willBeNegative ? "input-error" : ""}
               placeholder="Ej: 10"
+              autoFocus
             />
 
             {willBeNegative && (
@@ -149,16 +154,6 @@ export default function InventoryAdjustmentForm({
                 El stock proyectado no puede ser negativo.
               </span>
             )}
-          </div>
-
-          <div className="form-field full">
-            <label>Nota obligatoria</label>
-
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Ej: ingreso de mercadería, merma, corrección por conteo físico..."
-            />
           </div>
         </div>
 
@@ -181,7 +176,7 @@ export default function InventoryAdjustmentForm({
 
         <div className="product-form-actions">
           <button type="submit" disabled={!canSubmit} className="primary-btn">
-            {loading ? "Guardando..." : "Guardar ajuste"}
+            {loading ? "Guardando..." : "Guardar"}
           </button>
 
           <button type="button" className="secondary-btn" onClick={onClose}>
