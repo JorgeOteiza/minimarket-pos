@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
+
 import SalesChart from "../components/charts/SalesChart";
+import TopProductsChart from "../components/charts/TopProductsChart";
+import InventoryStatusChart from "../components/charts/InventoryStatusChart";
+
 import "../../styles/analytics.css";
 
 import {
@@ -18,9 +22,11 @@ const formatCLP = (value: number) =>
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsSummary | null>(null);
+
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("summary");
 
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -33,14 +39,21 @@ export default function AnalyticsPage() {
   }, []);
 
   if (loading) return <p>Cargando analytics...</p>;
-  if (error) return <div className="error">{error}</div>;
-  if (!data) return <p>No hay datos disponibles.</p>;
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!data) {
+    return <p>No hay datos disponibles.</p>;
+  }
 
   return (
     <div className="analytics-page">
       <div className="analytics-header">
         <div>
           <h1>Analítica de Datos</h1>
+
           <p>Resumen comercial e inventario del minimarket.</p>
         </div>
       </div>
@@ -84,88 +97,46 @@ export default function AnalyticsPage() {
           <div className="analytics-kpi-grid">
             <div className="analytics-card">
               <span>Ventas hoy</span>
+
               <strong>{data.today.sales_count}</strong>
+
               <small>{formatCLP(data.today.total_sales)}</small>
             </div>
 
             <div className="analytics-card">
               <span>Ventas últimos 30 días</span>
+
               <strong>{data.last_30_days.sales_count}</strong>
+
               <small>{formatCLP(data.last_30_days.total_sales)}</small>
             </div>
 
             <div className="analytics-card">
               <span>Productos con bajo stock</span>
+
               <strong>{data.low_stock_products.length}</strong>
+
               <small>Revisar reposición</small>
             </div>
 
             <div className="analytics-card">
               <span>Productos sin precio</span>
+
               <strong>{data.products_without_price.length}</strong>
+
               <small>No se pueden vender</small>
             </div>
           </div>
 
           <SalesChart data={data.sales_by_day} />
 
-          <div className="analytics-grid">
-            <section className="analytics-panel">
-              <h2>Productos más vendidos</h2>
+          <div className="analytics-grid analytics-grid-two">
+            <TopProductsChart data={data.top_products} />
 
-              {data.top_products.length === 0 ? (
-                <p>No hay ventas registradas.</p>
-              ) : (
-                data.top_products.map((product) => (
-                  <div key={product.id} className="analytics-row">
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.quantity_sold} unidades</span>
-                    </div>
-
-                    <b>{formatCLP(product.total_sold)}</b>
-                  </div>
-                ))
-              )}
-            </section>
-
-            <section className="analytics-panel">
-              <h2>Stock bajo</h2>
-
-              {data.low_stock_products.length === 0 ? (
-                <p>No hay productos críticos.</p>
-              ) : (
-                data.low_stock_products.slice(0, 6).map((product) => (
-                  <div key={product.id} className="analytics-row">
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>Mínimo: {product.min_stock}</span>
-                    </div>
-
-                    <b>{product.stock}</b>
-                  </div>
-                ))
-              )}
-            </section>
-
-            <section className="analytics-panel">
-              <h2>Productos sin precio</h2>
-
-              {data.products_without_price.length === 0 ? (
-                <p>Todos los productos tienen precio.</p>
-              ) : (
-                data.products_without_price.slice(0, 6).map((product) => (
-                  <div key={product.id} className="analytics-row">
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.barcode || "Sin código"}</span>
-                    </div>
-
-                    <b>Sin precio</b>
-                  </div>
-                ))
-              )}
-            </section>
+            <InventoryStatusChart
+              lowStockCount={data.low_stock_products.length}
+              productsWithoutPriceCount={data.products_without_price.length}
+            />
           </div>
         </>
       )}
@@ -178,6 +149,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Ventas de hoy</strong>
+
                 <span>Cantidad de ventas registradas</span>
               </div>
 
@@ -187,6 +159,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Total vendido hoy</strong>
+
                 <span>Monto acumulado del día</span>
               </div>
 
@@ -196,6 +169,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Ventas últimos 30 días</strong>
+
                 <span>Cantidad de ventas recientes</span>
               </div>
 
@@ -205,6 +179,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Total últimos 30 días</strong>
+
                 <span>Monto acumulado reciente</span>
               </div>
 
@@ -222,6 +197,7 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
+
                     <span>{product.quantity_sold} unidades</span>
                   </div>
 
@@ -245,6 +221,7 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
+
                     <span>Mínimo: {product.min_stock}</span>
                   </div>
 
@@ -264,6 +241,7 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
+
                     <span>{product.barcode || "Sin código"}</span>
                   </div>
 
@@ -287,6 +265,7 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
+
                     <span>{product.quantity_sold} unidades vendidas</span>
                   </div>
 
@@ -302,6 +281,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Productos con bajo stock</strong>
+
                 <span>Requieren reposición</span>
               </div>
 
@@ -311,6 +291,7 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Productos sin precio</strong>
+
                 <span>No pueden venderse en POS</span>
               </div>
 
