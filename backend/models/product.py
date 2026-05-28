@@ -8,8 +8,10 @@ class Product(db.Model):
     name = db.Column(db.String(150), nullable=False)
 
     barcode = db.Column(db.String(50), unique=True, nullable=True, index=True)
+    
+    pack_units = db.Column(db.Integer, nullable=True)
 
-    price = db.Column(db.Numeric(10, 2), nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=True)
     cost = db.Column(db.Numeric(10, 2), nullable=True)
 
     stock = db.Column(db.Integer, default=0)
@@ -33,6 +35,15 @@ class Product(db.Model):
         back_populates="products"
     )
 
+    def update_from_dict(self, data: dict):
+       for field in [
+        "name", "barcode", "pack_units", "price", "cost",
+        "stock", "min_stock", "is_weighted",
+        "weight", "margin", "category_id"
+    ]:
+        if field in data:
+            setattr(self, field, data[field])
+
     def __repr__(self):
         return f"<Product id={self.id} name={self.name}>"
 
@@ -41,7 +52,8 @@ class Product(db.Model):
             "id": self.id,
             "name": self.name,
             "barcode": self.barcode,
-            "price": float(self.price),
+            "pack_units": self.pack_units,
+            "price": float(self.price) if self.price is not None else None,
             "cost": float(self.cost) if self.cost else None,
             "stock": self.stock,
             "min_stock": self.min_stock,

@@ -1,25 +1,44 @@
 from flask import Blueprint, request, jsonify
 from backend.services.product_service import (
     get_all_products,
+    get_paginated_products,
     get_product_by_id,
     create_product as create_product_service,
     update_product as update_product_service,
     delete_product,
     get_product_by_barcode,
     search_products_by_name,
+    search_products_paginated,
 )
 from backend.schemas.product_schema import ProductSchema
+from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 products_bp = Blueprint("products", __name__)
 product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
 
 
+def pagination_response(pagination):
+    return {
+        "items": products_schema.dump(pagination.items),
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "pages": pagination.pages,
+    }
+
 # 🔹 GET ALL
 @products_bp.route("/products", methods=["GET"])
 def get_products():
-    products = get_all_products()
-    return jsonify(products_schema.dump(products)), 200
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=100, type=int)
+
+    per_page = min(per_page, 200)
+
+    pagination = get_paginated_products(page=page, per_page=per_page)
+
+    return jsonify(pagination_response(pagination)), 200
 
 
 # 🔹 GET BY ID
@@ -46,14 +65,27 @@ def get_product_by_barcode_route(barcode):
 
 @products_bp.route("/products/search", methods=["GET"])
 def search_products():
-    name = request.args.get("name")
+    query = request.args.get("q")
 
-    if not name:
-        return jsonify({"error": "Query param 'name' is required"}), 400
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=100, type=int)
 
-    products = search_products_by_name(name)
+    per_page = min(per_page, 200)
 
-    return jsonify(products_schema.dump(products)), 200
+    if not query:
+        return jsonify({
+            "error": "Query param 'q' is required"
+        }), 400
+
+    pagination = search_products_paginated(
+        query,
+        page=page,
+        per_page=per_page,
+    )
+
+    return jsonify(
+        pagination_response(pagination)
+    ), 200
 
 
 # 🔹 CREATE
@@ -61,11 +93,28 @@ def search_products():
 def create_product():
     data = request.get_json()
 
-    validated_data = product_schema.load(data)
+    try:
+        validated_data = product_schema.load(data)
 
-    product = create_product_service(validated_data)
+        product = create_product_service(validated_data)
 
-    return jsonify(product_schema.dump(product)), 201
+        return jsonify(product_schema.dump(product)), 201
+
+    except ValidationError as err:
+        return jsonify({
+            "error": "Validation error",
+            "details": err.messages,
+        }), 400
+
+    except IntegrityError:
+        return jsonify({
+            "error": "El código de barras ya existe",
+        }), 400
+
+    except Exception as err:
+        return jsonify({
+            "error": str(err),
+        }), 500
 
 
 # 🔹 UPDATE
@@ -78,11 +127,31 @@ def update_product(id):
 
     data = request.get_json()
 
-    validated_data = product_schema.load(data, partial=True)
+    try:
+        validated_data = product_schema.load(data, partial=True)
 
-    updated_product = update_product_service(product, validated_data)
+        updated_product = update_product_service(
+            product,
+            validated_data,
+        )
 
-    return jsonify(product_schema.dump(updated_product)), 200
+        return jsonify(product_schema.dump(updated_product)), 200
+
+    except ValidationError as err:
+        return jsonify({
+            "error": "Validation error",
+            "details": err.messages,
+        }), 400
+
+    except IntegrityError:
+        return jsonify({
+            "error": "El código de barras ya existe",
+        }), 400
+
+    except Exception as err:
+        return jsonify({
+            "error": str(err),
+        }), 500
 
 
 # 🔹 DELETE

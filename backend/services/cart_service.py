@@ -1,58 +1,102 @@
-from collections import defaultdict
 from backend.models import Product
+from backend.models.cart import Cart
+from backend.models.cart_item import CartItem
 from backend.extensions import db
 from backend.exceptions import NotFoundError, ValidationError
 from backend.services.sale_service import create_sale
 
-# 🔹 Carrito en memoria
-cart = defaultdict(float)
+
+def get_or_create_cart():
+    cart = db.session.query(Cart).first()
+
+    if not cart:
+        cart = Cart()
+        db.session.add(cart)
+        db.session.commit()
+
+    return cart
 
 
-# 🔹 Obtener carrito actual
-def get_cart():
+def get_cart_item(cart_id, product_id):
+    return (
+        db.session.query(CartItem)
+        .filter(
+            CartItem.cart_id == cart_id,
+            CartItem.product_id == product_id,
+        )
+        .first()
+    )
+
+
+def validate_quantity(product, quantity):
+    quantity = float(quantity)
+
+    if quantity <= 0:
+        raise ValidationError("Quantity must be greater than 0")
+
+    if not product.is_weighted and not quantity.is_integer():
+        raise ValidationError(f"Product {product.name} must have integer quantity")
+
+    return quantity
+
+
+def build_cart_response(cart: Cart):
     items = []
     total = 0
 
-    for product_id, quantity in cart.items():
-        product = db.session.get(Product, product_id)
+    cart_items = (
+        db.session.query(CartItem)
+        .filter(CartItem.cart_id == cart.id)
+        .order_by(CartItem.id.asc())
+        .all()
+    )
+
+    for item in cart_items:
+        product = db.session.get(Product, item.product_id)
 
         if not product:
             continue
 
-        subtotal = float(product.price) * quantity
+        has_price = product.price is not None
+        unit_price = float(product.price) if has_price else 0
+        subtotal = unit_price * item.quantity
 
         items.append({
             "product_id": product.id,
             "name": product.name,
-            "quantity": quantity,
-            "unit_price": float(product.price),
-            "subtotal": subtotal
+            "quantity": int(item.quantity)
+            if float(item.quantity).is_integer()
+            else item.quantity,
+            "unit_price": unit_price,
+            "subtotal": subtotal,
+            "has_price": has_price,
         })
 
         total += subtotal
 
     return {
         "items": items,
-        "total": total
+        "total": total,
     }
 
 
-# 🔹 Agregar producto
+def get_cart():
+    cart = get_or_create_cart()
+    return build_cart_response(cart)
+
+
 def add_to_cart(product_id, quantity):
+    cart = get_or_create_cart()
     product = db.session.get(Product, product_id)
 
     if not product:
         raise NotFoundError(f"Product {product_id} not found")
 
-    if quantity <= 0:
-        raise ValidationError("Quantity must be greater than 0")
+    quantity = validate_quantity(product, quantity)
 
-    if not product.is_weighted and not float(quantity).is_integer():
-        raise ValidationError(
-            f"Product {product.name} must have integer quantity"
-        )
+    cart_item = get_cart_item(cart.id, product_id)
 
-    current_quantity = cart.get(product_id, 0)
+    current_quantity = cart_item.quantity if cart_item else 0
     new_quantity = current_quantity + quantity
 
     if product.stock < new_quantity:
@@ -60,57 +104,101 @@ def add_to_cart(product_id, quantity):
             f"Not enough stock for {product.name}. Available: {product.stock}"
         )
 
-    cart[product_id] = new_quantity
+    if cart_item:
+        cart_item.quantity = new_quantity
+    else:
+        db.session.add(
+            CartItem(
+                cart_id=cart.id,
+                product_id=product_id,
+                quantity=quantity,
+            )
+        )
 
-    return get_cart()
+    db.session.commit()
+    return build_cart_response(cart)
 
 
-# 🔹 Remover producto
 def remove_from_cart(product_id):
-    if product_id not in cart:
+    cart = get_or_create_cart()
+    cart_item = get_cart_item(cart.id, product_id)
+
+    if not cart_item:
         raise NotFoundError(f"Product {product_id} not in cart")
 
-    del cart[product_id]
-    return get_cart()
+    db.session.delete(cart_item)
+    db.session.commit()
+
+    return build_cart_response(cart)
 
 
-# 🔹 Disminuir cantidad
 def decrease_quantity(product_id, quantity):
-    if product_id not in cart:
+    cart = get_or_create_cart()
+    product = db.session.get(Product, product_id)
+
+    if not product:
+        raise NotFoundError(f"Product {product_id} not found")
+
+    quantity = validate_quantity(product, quantity)
+
+    cart_item = get_cart_item(cart.id, product_id)
+
+    if not cart_item:
         raise NotFoundError(f"Product {product_id} not in cart")
 
-    if quantity <= 0:
-        raise ValidationError("Quantity must be greater than 0")
+    cart_item.quantity -= quantity
 
-    cart[product_id] -= quantity
+    if cart_item.quantity <= 0:
+        db.session.delete(cart_item)
 
-    if cart[product_id] <= 0:
-        del cart[product_id]
-
-    return get_cart()
+    db.session.commit()
+    return build_cart_response(cart)
 
 
-# 🔹 Vaciar carrito (🔥 FIX IMPORTANTE)
 def clear_cart():
-    cart.clear()
-    return get_cart()  # 🔥 antes devolvías message → rompía frontend
+    cart = get_or_create_cart()
+
+    db.session.query(CartItem).filter(CartItem.cart_id == cart.id).delete()
+    db.session.commit()
+
+    return build_cart_response(cart)
 
 
-# 🔹 Checkout
 def checkout():
-    if not cart:
+    cart = get_or_create_cart()
+
+    cart_items = (
+        db.session.query(CartItem)
+        .filter(CartItem.cart_id == cart.id)
+        .all()
+    )
+
+    if not cart_items:
         raise ValidationError("Cart is empty")
 
     items = [
         {
-            "product_id": product_id,
-            "quantity": quantity
+            "product_id": item.product_id,
+            "quantity": item.quantity,
         }
-        for product_id, quantity in cart.items()
+        for item in cart_items
     ]
 
-    sale = create_sale({"items": items})
+    try:
+        sale = create_sale({
+            "items": items
+        })
 
-    cart.clear()
+        (
+            db.session.query(CartItem)
+            .filter(CartItem.cart_id == cart.id)
+            .delete()
+        )
 
-    return sale
+        db.session.commit()
+
+        return sale
+
+    except Exception:
+        db.session.rollback()
+        raise

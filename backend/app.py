@@ -2,12 +2,15 @@ from flask import Flask, jsonify
 from backend.config import Config
 from backend.extensions import db, migrate
 from backend.routes.products import products_bp
+from backend.routes.cart import cart_bp
+from backend.routes.inventory import inventory_bp
+from backend.routes.analytics import analytics_bp
 from backend.routes.sales import sales_bp
 from backend.models import Product, Sale, SaleItem
 from backend.exceptions import AppError
 from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.exceptions import HTTPException
-from backend.routes.cart import cart_bp
+
 import traceback
 
 from flask_cors import CORS 
@@ -54,6 +57,8 @@ def create_app():
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sales_bp, url_prefix="/api")
     app.register_blueprint(cart_bp, url_prefix="/api")
+    app.register_blueprint(inventory_bp, url_prefix="/api",)
+    app.register_blueprint(analytics_bp, url_prefix="/api")
 
     register_error_handlers(app)
 

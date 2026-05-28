@@ -2,19 +2,11 @@ import type { Cart } from "../types/cart";
 
 const API_URL = "/api";
 
-// 🔹 Tipos para respuestas del backend
 type CheckoutResponse = {
-  message: string;
   sale_id: number;
   total: number;
 };
 
-type ClearCartResponse = {
-  message: string;
-  cart: Cart;
-};
-
-// 🔹 Helper centralizado (nivel pro)
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let errorMessage = "Unexpected error";
@@ -23,7 +15,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
       const error = await res.json();
       errorMessage = error.error || error.message || errorMessage;
     } catch {
-      // fallback si no viene JSON
+      errorMessage = "Unexpected error";
     }
 
     throw new Error(errorMessage);
@@ -32,7 +24,6 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
-// 🔹 Wrapper seguro para fetch (maneja errores de red)
 async function safeFetch(input: RequestInfo, init?: RequestInit) {
   try {
     return await fetch(input, init);
@@ -41,46 +32,65 @@ async function safeFetch(input: RequestInfo, init?: RequestInit) {
   }
 }
 
-// 🔹 Escanear producto
-export async function scanProduct(barcode: string): Promise<Cart> {
-  const res = await safeFetch(`${API_URL}/cart/scan/${barcode}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return handleResponse<Cart>(res);
-}
-
-// 🔹 Obtener carrito
 export async function getCart(): Promise<Cart> {
   const res = await safeFetch(`${API_URL}/cart`);
   return handleResponse<Cart>(res);
 }
 
-// 🔹 Checkout
+export async function scanProduct(barcode: string): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/scan/${barcode}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+
+  return handleResponse<Cart>(res);
+}
+
+export async function increaseCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+  });
+
+  return handleResponse<Cart>(res);
+}
+
+export async function decreaseCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/decrease`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId, quantity: 1 }),
+  });
+
+  return handleResponse<Cart>(res);
+}
+
+export async function removeCartItem(productId: number): Promise<Cart> {
+  const res = await safeFetch(`${API_URL}/cart/${productId}`, {
+    method: "DELETE",
+  });
+
+  return handleResponse<Cart>(res);
+}
+
 export async function checkout(): Promise<CheckoutResponse> {
   const res = await safeFetch(`${API_URL}/cart/checkout`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({}), // evita 422 en Flask
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
   });
 
   return handleResponse<CheckoutResponse>(res);
 }
 
-// 🔹 Vaciar carrito
-export async function clearCart(): Promise<ClearCartResponse> {
+export async function clearCart(): Promise<Cart> {
   const res = await safeFetch(`${API_URL}/cart/clear`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   });
 
-  return handleResponse<ClearCartResponse>(res);
+  return handleResponse<Cart>(res);
 }

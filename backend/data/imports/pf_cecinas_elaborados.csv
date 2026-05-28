@@ -1,0 +1,21 @@
+name,barcode,cost,price,margin,stock,min_stock,is_weighted,weight,category
+SALCHICHA TRAD. PF (24x250gr),,20563,,0.30,24,5,false,250,cecinas y elaborados
+PATE SABOR TERNERA PF (16x125g),,6600,,0.30,16,5,false,125,cecinas y elaborados
+SALAME T. ITALIANO PF (12x100gr),,13150,,0.30,12,5,false,100,cecinas y elaborados
+LONGANIZA PARRILLERA PF (9x250g),,9600,,0.30,9,5,false,250,cecinas y elaborados
+SALCH. SURENA POLLO PF (24x250g),,18197,,0.30,24,5,false,250,cecinas y elaborados
+CHURR. VAC. RDA (36x120g),,32390,,0.30,36,5,false,120,cecinas y elaborados
+APANADO POLLO PF (66x100gr),,20490,,0.30,66,5,false,100,cecinas y elaborados
+POLLO A LA PLANCHA PF (70x80gr),,30300,,0.30,70,5,false,80,cecinas y elaborados
+MOLIDA FLOWPACK (24x250g),,29258,,0.30,24,5,false,250,cecinas y elaborados
+HAMB. DE VACUNO RDA (42x100gr),,21490,,0.30,42,5,false,100,cecinas y elaborados
+SALCHICHAS SURENAS PF (24x250g),,20350,,0.30,24,5,false,250,cecinas y elaborados
+COMPOTA MANZ/DUR PF (18x90g),,5290,,0.30,18,5,false,90,cecinas y elaborados
+CHORIZO PARRILLERO PF (9x250g),,8966,,0.30,9,5,false,250,cecinas y elaborados
+HAMBURGUESA T-REX PF (27x185g),,17290,,0.30,27,5,false,185,cecinas y elaborados
+MORT. JAMONADA PF (12x150g),,7690,,0.30,12,5,false,150,cecinas y elaborados
+MINI SNACK SALAMINI RDA (15x50g),,9690,,0.30,15,5,false,50,cecinas y elaborados
+PATE SABOR JAMON PF (16x125g),,7200,,0.30,16,5,false,125,cecinas y elaborados
+HAMBURGUESA PF (42x90g),,14588,,0.30,42,5,false,90,cecinas y elaborados
+HAMBURGUESA DE POLLO PF (42x90g),,14620,,0.30,42,5,false,90,cecinas y elaborados
+POROTO VERDE FRANCES (10x150g),,4190,,0.30,10,5,false,150,cecinas y elaborados

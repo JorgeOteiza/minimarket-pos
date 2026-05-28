@@ -1,210 +1,398 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import type { Cart } from "../types/cart";
-import { getCart, scanProduct, checkout, clearCart } from "../api/cartApi";
+
+import {
+  getCart,
+  scanProduct,
+  checkout,
+  clearCart,
+  increaseCartItem,
+  decreaseCartItem,
+  removeCartItem,
+} from "../api/cartApi";
+
 import CartList from "../components/CartList";
 import SummaryPanel from "../components/SummaryPanel";
-import { useScanner } from "../hooks/useScanner";
+
+import ProductSearchInput from "../components/ProductSearchInput";
+
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
+const EMPTY_CART: Cart = {
+  items: [],
+  total: 0,
+};
+
 const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message;
+  if (err instanceof Error) {
+    return err.message;
+  }
+
   return "Error inesperado";
 };
 
 export default function POS() {
-  const [cart, setCart] = useState<Cart>({ items: [], total: 0 });
+  const [cart, setCart] = useState<Cart>(EMPTY_CART);
+
   const [loading, setLoading] = useState(false);
-  const [manualCode, setManualCode] = useState("");
+
   const [error, setError] = useState<string | null>(null);
+
   const [lastScannedId, setLastScannedId] = useState<number | null>(null);
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  // =========================
+  // VALIDACIONES POS
+  // =========================
 
-  // 🔊 AUDIO PRE-CARGADO
-  const scanAudio = useMemo(() => new Audio("/sounds/scan.mp3"), []);
-  const errorAudio = useMemo(() => new Audio("/sounds/error.mp3"), []);
+  const hasProductsWithoutPrice = cart.items.some(
+    (item) => item.has_price === false || item.unit_price === 0,
+  );
 
-  const playSound = (type: "ok" | "error") => {
-    const audio = type === "ok" ? scanAudio : errorAudio;
-    audio.currentTime = 0;
+  // =========================
+  // STATUS BADGE
+  // =========================
+
+  const posStatus = error
+    ? {
+        label: "No disponible",
+        className: "danger",
+      }
+    : hasProductsWithoutPrice
+      ? {
+          label: "Revisar productos",
+          className: "warning",
+        }
+      : loading
+        ? {
+            label: "Procesando",
+            className: "neutral",
+          }
+        : {
+            label: "Listo para vender",
+            className: "success",
+          };
+
+  // =========================
+  // SOUNDS
+  // =========================
+
+  const playSound = useCallback((type: "ok" | "error") => {
+    const src = type === "ok" ? "/sounds/scan.mp3" : "/sounds/error.mp3";
+
+    const audio = new Audio(src);
+
     audio.play().catch(() => {});
-  };
-
-  // 🔄 cargar carrito
-  const loadCart = async () => {
-    try {
-      const data = await getCart();
-      setCart(data);
-      setError(null);
-    } catch (err: unknown) {
-      console.error(err);
-      setError("Error cargando carrito");
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
   }, []);
 
-  // 🔥 mantener foco en scanner (sin robar foco al input manual)
+  // =========================
+  // INITIAL LOAD
+  // =========================
+
   useEffect(() => {
-    const focusInput = () => {
-      if (document.activeElement?.tagName !== "INPUT") {
-        inputRef.current?.focus();
-      }
-    };
+    let isMounted = true;
 
-    focusInput();
+    void getCart()
+      .then((data) => {
+        if (!isMounted) {
+          return;
+        }
 
-    window.addEventListener("click", focusInput);
+        setCart(data);
+
+        setError(null);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) {
+          return;
+        }
+
+        console.error(err);
+
+        setError("Error cargando carrito");
+      });
 
     return () => {
-      window.removeEventListener("click", focusInput);
+      isMounted = false;
     };
   }, []);
 
-  // 🔍 escaneo
-  const handleScan = async (barcode: string) => {
-    if (loading) return;
+  // =========================
+  // RELOAD CART
+  // =========================
 
-    try {
-      const updatedCart = await scanProduct(barcode);
-      setCart(updatedCart);
+  const reloadCart = useCallback(async () => {
+    const data = await getCart();
 
-      const lastItem = updatedCart.items[updatedCart.items.length - 1];
-      if (lastItem) {
-        setLastScannedId(lastItem.product_id);
+    setCart(data);
+
+    setError(null);
+
+    return data;
+  }, []);
+
+  // =========================
+  // SCAN / SEARCH PRODUCT
+  // =========================
+
+  const handleScan = useCallback(
+    async (barcode: string) => {
+      if (loading) {
+        return;
       }
 
-      playSound("ok");
+      const cleanBarcode = barcode.trim();
+
+      if (!cleanBarcode) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        setError(null);
+
+        const updatedCart = await scanProduct(cleanBarcode);
+
+        setCart(updatedCart);
+
+        const lastItem = updatedCart.items[updatedCart.items.length - 1];
+
+        if (lastItem) {
+          setLastScannedId(lastItem.product_id);
+        }
+
+        playSound("ok");
+      } catch (err: unknown) {
+        console.error(err);
+
+        playSound("error");
+
+        setError(getErrorMessage(err));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loading, playSound],
+  );
+
+  // =========================
+  // CART ACTIONS
+  // =========================
+
+  const handleIncreaseItem = async (productId: number) => {
+    try {
       setError(null);
+
+      const updatedCart = await increaseCartItem(productId);
+
+      setCart(updatedCart);
+
+      setLastScannedId(productId);
+
+      playSound("ok");
     } catch (err: unknown) {
       console.error(err);
-      playSound("error");
+
       setError(getErrorMessage(err));
+
+      playSound("error");
     }
   };
 
-  useScanner(handleScan);
+  const handleDecreaseItem = async (productId: number) => {
+    try {
+      setError(null);
 
-  // 💰 checkout
+      const updatedCart = await decreaseCartItem(productId);
+
+      setCart(updatedCart);
+
+      setLastScannedId(productId);
+    } catch (err: unknown) {
+      console.error(err);
+
+      setError(getErrorMessage(err));
+
+      playSound("error");
+    }
+  };
+
+  const handleRemoveItem = async (productId: number) => {
+    try {
+      setError(null);
+
+      const updatedCart = await removeCartItem(productId);
+
+      setCart(updatedCart);
+
+      if (lastScannedId === productId) {
+        setLastScannedId(null);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+
+      setError(getErrorMessage(err));
+
+      playSound("error");
+    }
+  };
+
+  // =========================
+  // CHECKOUT
+  // =========================
+
   const handleCheckout = async () => {
+    if (hasProductsWithoutPrice) {
+      setError("Hay productos sin precio. No se puede completar la venta.");
+
+      playSound("error");
+
+      return;
+    }
+
     try {
       setLoading(true);
+
       setError(null);
 
       await checkout();
-      await loadCart();
+
+      await reloadCart();
+
+      setLastScannedId(null);
+
+      playSound("ok");
     } catch (err: unknown) {
       console.error(err);
+
       setError(getErrorMessage(err));
+
       playSound("error");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🧹 limpiar carrito
+  // =========================
+  // CLEAR CART
+  // =========================
+
   const handleClear = async () => {
     try {
       setLoading(true);
+
       setError(null);
 
-      const res = await clearCart();
-      setCart(res.cart);
+      const updatedCart = await clearCart();
+
+      setCart(updatedCart);
+
+      setLastScannedId(null);
     } catch (err: unknown) {
       console.error(err);
+
       setError(getErrorMessage(err));
+
       playSound("error");
     } finally {
       setLoading(false);
     }
   };
 
-  // ⬅️ eliminar último
+  // =========================
+  // REMOVE LAST
+  // =========================
+
   const handleRemoveLast = async () => {
-    if (cart.items.length === 0) return;
+    if (cart.items.length === 0) {
+      return;
+    }
 
     const lastItem = cart.items[cart.items.length - 1];
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      await fetch(`/api/cart/decrease`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_id: lastItem.product_id,
-          quantity: 1,
-        }),
-      });
-
-      await loadCart();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
+    await handleDecreaseItem(lastItem.product_id);
   };
+
+  // =========================
+  // KEYBOARD SHORTCUTS
+  // =========================
 
   useKeyboardShortcuts({
     onCheckout: handleCheckout,
+
     onClear: handleClear,
+
     onRemoveLast: handleRemoveLast,
+
     disabled: loading,
   });
 
-  const lastScannedItem = cart.items.find(
-    (item) => item.product_id === lastScannedId,
-  );
+  // =========================
+  // LAST ITEM
+  // =========================
+
+  const lastScannedItem =
+    lastScannedId !== null
+      ? cart.items.find((item) => item.product_id === lastScannedId)
+      : undefined;
+
+  // =========================
+  // RENDER
+  // =========================
 
   return (
     <div className="pos-container">
-      <header className="pos-header">
-        <h1>POS Minimarket</h1>
+      <header className="pos-header pos-header-modern">
+        <div>
+          <h1>POS Minimarket</h1>
+
+          <p>Caja activa · Modo offline</p>
+        </div>
+
+        <div className={`pos-status-pill ${posStatus.className}`}>
+          <span className="status-dot" />
+
+          {posStatus.label}
+        </div>
       </header>
 
       <main className="pos-main">
         <section className="pos-left">
+          {/* =========================
+              ALERTS
+          ========================= */}
+
           {error && <div className="error">{error}</div>}
 
-          {/* 🔴 INPUT VISIBLE (fallback manual) */}
-          <input
-            className="pos-input"
-            type="text"
-            placeholder="Buscar producto manualmente..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                const value = (e.target as HTMLInputElement).value.trim();
-                if (value) {
-                  handleScan(value);
-                  (e.target as HTMLInputElement).value = "";
-                }
-              }
-            }}
-          />
+          {hasProductsWithoutPrice && (
+            <div className="warning">
+              ⚠️ Hay productos sin precio. No puedes cobrar hasta corregirlos.
+            </div>
+          )}
 
-          {/* 🟢 INPUT OCULTO (scanner real) */}
-          <input
-            ref={inputRef}
-            className="hidden-input"
-            type="text"
-            value={manualCode}
-            onChange={(e) => setManualCode(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && manualCode.trim()) {
-                handleScan(manualCode);
-                setManualCode("");
-              }
-            }}
-          />
+          {/* =========================
+              PRODUCT SEARCH INPUT
+          ========================= */}
 
-          <CartList items={cart.items} lastScannedId={lastScannedId} />
+          <ProductSearchInput disabled={loading} onSelect={handleScan} />
+
+          {/* =========================
+              CART
+          ========================= */}
+
+          <CartList
+            items={cart.items}
+            lastScannedId={lastScannedId}
+            onIncrease={handleIncreaseItem}
+            onDecrease={handleDecreaseItem}
+            onRemove={handleRemoveItem}
+          />
         </section>
+
+        {/* =========================
+            SUMMARY
+        ========================= */}
 
         <aside className="pos-right">
           <SummaryPanel
@@ -212,16 +400,11 @@ export default function POS() {
             onCheckout={handleCheckout}
             onClear={handleClear}
             loading={loading}
+            disabled={cart.items.length === 0 || hasProductsWithoutPrice}
             lastItem={lastScannedItem}
           />
         </aside>
       </main>
-
-      <footer className="pos-footer">
-        <span>F2: Checkout</span>
-        <span>F4: Vaciar</span>
-        <span>F8: Eliminar último</span>
-      </footer>
     </div>
   );
 }
