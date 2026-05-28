@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   getInventoryMovements,
   type InventoryMovement,
@@ -27,19 +28,39 @@ const getMovementLabel = (type: string) => {
 
 export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
+    let isMounted = true;
 
-    void getInventoryMovements(50)
-      .then(setMovements)
-      .catch((err: unknown) => {
+    const loadMovements = async () => {
+      try {
+        const data = await getInventoryMovements(50);
+
+        if (!isMounted) return;
+
+        setMovements(data);
+
+        setError("");
+      } catch (err: unknown) {
+        if (!isMounted) return;
+
         setError(err instanceof Error ? err.message : "Error inesperado");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadMovements();
+
+    return () => {
+      isMounted = false;
+    };
   }, [refreshKey]);
 
   if (loading) {
@@ -76,11 +97,17 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
             {movements.map((movement) => (
               <tr key={movement.id}>
                 <td>{formatDate(movement.created_at)}</td>
+
                 <td>{movement.product_name}</td>
+
                 <td>{getMovementLabel(movement.movement_type)}</td>
+
                 <td>{movement.quantity}</td>
+
                 <td>{movement.previous_stock}</td>
+
                 <td>{movement.new_stock}</td>
+
                 <td>{movement.note || "—"}</td>
               </tr>
             ))}
