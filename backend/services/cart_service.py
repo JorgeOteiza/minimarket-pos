@@ -184,18 +184,21 @@ def checkout():
         for item in cart_items
     ]
 
-    with db.session.begin():
-
+    try:
         sale = create_sale({
             "items": items
         })
 
         (
             db.session.query(CartItem)
-            .filter(
-                CartItem.cart_id == cart.id
-            )
+            .filter(CartItem.cart_id == cart.id)
             .delete()
         )
 
-    return sale
+        db.session.commit()
+
+        return sale
+
+    except Exception:
+        db.session.rollback()
+        raise

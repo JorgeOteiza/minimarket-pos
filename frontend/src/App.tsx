@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import { Navbar } from "./components/Navbar";
 import { DashboardLayout } from "./components/DashboardLayout";
 import ProductsPage from "./features/products/pages/ProductsPage";
+import AnalyticsPage from "./features/analytics/pages/AnalyticsPage";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
-          <Route path="analytics" element={<div>Analytics próximamente</div>} />
+          <Route path="analytics" element={<AnalyticsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
