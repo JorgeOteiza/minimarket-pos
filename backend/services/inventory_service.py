@@ -53,3 +53,27 @@ def register_inventory_movement(
     db.session.add(movement)
 
     return movement
+
+def get_inventory_movements(*, limit=50):
+    movements = (
+        db.session.query(InventoryMovement)
+        .order_by(InventoryMovement.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "id": movement.id,
+            "product_id": movement.product_id,
+            "product_name": movement.product.name if movement.product else "Producto eliminado",
+            "movement_type": movement.movement_type,
+            "quantity": movement.quantity,
+            "previous_stock": movement.previous_stock,
+            "new_stock": movement.new_stock,
+            "reference_id": movement.reference_id,
+            "note": movement.note,
+            "created_at": movement.created_at.isoformat(),
+        }
+        for movement in movements
+    ]

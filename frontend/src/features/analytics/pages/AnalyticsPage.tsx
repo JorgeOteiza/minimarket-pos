@@ -97,34 +97,32 @@ export default function AnalyticsPage() {
           <div className="analytics-kpi-grid">
             <div className="analytics-card">
               <span>Ventas hoy</span>
-
               <strong>{data.today.sales_count}</strong>
-
               <small>{formatCLP(data.today.total_sales)}</small>
             </div>
 
             <div className="analytics-card">
-              <span>Ventas últimos 30 días</span>
-
-              <strong>{data.last_30_days.sales_count}</strong>
-
-              <small>{formatCLP(data.last_30_days.total_sales)}</small>
+              <span>Ticket promedio</span>
+              <strong>{formatCLP(data.last_30_days.average_ticket)}</strong>
+              <small>Últimos 30 días</small>
             </div>
 
             <div className="analytics-card">
-              <span>Productos con bajo stock</span>
-
-              <strong>{data.low_stock_products.length}</strong>
-
-              <small>Revisar reposición</small>
+              <span>Unidades vendidas</span>
+              <strong>{data.last_30_days.total_units_sold}</strong>
+              <small>Últimos 30 días</small>
             </div>
 
             <div className="analytics-card">
-              <span>Productos sin precio</span>
-
-              <strong>{data.products_without_price.length}</strong>
-
-              <small>No se pueden vender</small>
+              <span>Producto más vendido</span>
+              <strong className="analytics-card-product">
+                {data.top_product ? data.top_product.name : "Sin ventas"}
+              </strong>
+              <small>
+                {data.top_product
+                  ? `${data.top_product.quantity_sold} unidades`
+                  : "No hay datos"}
+              </small>
             </div>
           </div>
 

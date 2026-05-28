@@ -1358,3 +1358,51 @@ textarea {
   font-size: 0.82rem;
   font-weight: 500;
 }
+
+.inventory-history-panel {
+  margin-top: 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.inventory-history-panel h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.inventory-history-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.inventory-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.inventory-history-table th,
+.inventory-history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  vertical-align: top;
+}
+
+.inventory-history-table th {
+  color: #64748b;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inventory-history-table td {
+  color: #111827;
+}
+
+.inventory-history-table tr:last-child td {
+  border-bottom: none;
+}

@@ -8,6 +8,12 @@ from backend.models.sale import Sale
 from backend.models.sale_item import SaleItem
 
 
+def safe_average(total, count):
+    if not count:
+        return 0
+    return float(total) / count
+
+
 def get_analytics_summary():
     today = date.today()
     last_30_days = today - timedelta(days=30)
@@ -28,6 +34,15 @@ def get_analytics_summary():
         )
         .filter(func.date(Sale.created_at) >= last_30_days)
         .one()
+    )
+
+    units_sold_30_days = (
+        db.session.query(
+            func.coalesce(func.sum(SaleItem.quantity), 0)
+        )
+        .join(Sale, Sale.id == SaleItem.sale_id)
+        .filter(func.date(Sale.created_at) >= last_30_days)
+        .scalar()
     )
 
     sales_by_day_rows = (
@@ -74,15 +89,38 @@ def get_analytics_summary():
         .all()
     )
 
+    today_sales_count = today_sales[0]
+    today_total_sales = float(today_sales[1])
+
+    last_30_sales_count = last_30_sales[0]
+    last_30_total_sales = float(last_30_sales[1])
+
+    top_product = top_products[0] if top_products else None
+
     return {
         "today": {
-            "sales_count": today_sales[0],
-            "total_sales": float(today_sales[1]),
+            "sales_count": today_sales_count,
+            "total_sales": today_total_sales,
+            "average_ticket": safe_average(today_total_sales, today_sales_count),
         },
         "last_30_days": {
-            "sales_count": last_30_sales[0],
-            "total_sales": float(last_30_sales[1]),
+            "sales_count": last_30_sales_count,
+            "total_sales": last_30_total_sales,
+            "average_ticket": safe_average(
+                last_30_total_sales,
+                last_30_sales_count,
+            ),
+            "total_units_sold": float(units_sold_30_days or 0),
+            "average_daily_sales": safe_average(last_30_total_sales, 30),
         },
+        "top_product": {
+            "id": top_product.id,
+            "name": top_product.name,
+            "quantity_sold": float(top_product.quantity_sold or 0),
+            "total_sold": float(top_product.total_sold or 0),
+        }
+        if top_product
+        else None,
         "sales_by_day": [
             {
                 "date": str(row.sale_date),

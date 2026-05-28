@@ -181,3 +181,28 @@ export const adjustInventory = async (
 
   return res.json();
 };
+
+export type InventoryMovement = {
+  id: number;
+  product_id: number;
+  product_name: string;
+  movement_type: string;
+  quantity: number;
+  previous_stock: number;
+  new_stock: number;
+  reference_id: number | null;
+  note: string | null;
+  created_at: string;
+};
+
+export const getInventoryMovements = async (
+  limit = 50,
+): Promise<InventoryMovement[]> => {
+  const res = await fetch(`${API_URL}/inventory/movements?limit=${limit}`);
+
+  if (!res.ok) {
+    await parseErrorResponse(res, "Error obteniendo historial de inventario");
+  }
+
+  return res.json();
+};

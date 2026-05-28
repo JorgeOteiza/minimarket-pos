@@ -4,11 +4,21 @@ export type AnalyticsSummary = {
   today: {
     sales_count: number;
     total_sales: number;
+    average_ticket: number;
   };
   last_30_days: {
     sales_count: number;
     total_sales: number;
+    average_ticket: number;
+    total_units_sold: number;
+    average_daily_sales: number;
   };
+  top_product: {
+    id: number;
+    name: string;
+    quantity_sold: number;
+    total_sold: number;
+  } | null;
   sales_by_day: {
     date: string;
     total_sales: number;

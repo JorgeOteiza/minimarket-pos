@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { ProductList } from "../components/ProductList";
 import { ProductForm } from "../components/ProductForm";
+import InventoryAdjustmentForm from "../components/InventoryAdjustmentForm";
+import InventoryMovementsList from "../components/InventoryMovementsList";
+
 import { getProducts } from "../services/productApi";
 import type { Product } from "../types/product";
-import InventoryAdjustmentForm from "../components/InventoryAdjustmentForm";
 
 type PanelMode = "create" | "edit" | "inventory" | null;
 
@@ -22,6 +25,8 @@ const ProductsPage = () => {
   const [perPage, setPerPage] = useState(100);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [inventoryHistoryRefreshKey, setInventoryHistoryRefreshKey] =
+    useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,11 +50,7 @@ const ProductsPage = () => {
       } catch (err: unknown) {
         if (controller.signal.aborted) return;
 
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Error desconocido");
-        }
+        setError(err instanceof Error ? err.message : "Error desconocido");
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -67,7 +68,6 @@ const ProductsPage = () => {
 
   const handleSelectProduct = (product: Product) => {
     const formElement = document.querySelector(".product-form");
-
     const isDirty = formElement?.getAttribute("data-dirty") === "true";
 
     if (isDirty) {
@@ -85,9 +85,7 @@ const ProductsPage = () => {
 
   const handleInventoryAdjust = (product: Product) => {
     setSelectedProduct(product);
-
     setPanelMode("inventory");
-
     setIsFormPanelOpen(true);
   };
 
@@ -99,13 +97,9 @@ const ProductsPage = () => {
 
   const handleProductCreated = (created: Product) => {
     setProducts((prev) => [created, ...prev]);
-
     setTotalProducts((prev) => prev + 1);
-
     setSelectedProduct(null);
-
     setPanelMode("create");
-
     setIsFormPanelOpen(true);
   };
 
@@ -256,6 +250,7 @@ const ProductsPage = () => {
                   });
 
                   setProducts(data.items);
+                  setInventoryHistoryRefreshKey((prev) => prev + 1);
                 }}
               />
             )}
@@ -269,6 +264,8 @@ const ProductsPage = () => {
           </div>
         )}
       </div>
+
+      <InventoryMovementsList refreshKey={inventoryHistoryRefreshKey} />
     </div>
   );
 };
