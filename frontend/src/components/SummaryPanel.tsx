@@ -6,6 +6,7 @@ type Props = {
   onClear: () => Promise<void>;
   loading: boolean;
   disabled?: boolean;
+  successMessage?: string | null;
   lastItem?:
     | {
         name: string;
@@ -20,6 +21,7 @@ export default function SummaryPanel({
   onClear,
   loading,
   disabled = false,
+  successMessage = null,
   lastItem,
 }: Props) {
   const actionsDisabled = loading || disabled;
@@ -30,6 +32,12 @@ export default function SummaryPanel({
         <h2 className="total">Total</h2>
         <div className="total-amount">{formatCurrency(total)}</div>
       </div>
+
+      {successMessage && (
+        <div className="success-banner summary-success-banner">
+          {successMessage}
+        </div>
+      )}
 
       {lastItem && (
         <div className="last-item">

@@ -126,16 +126,19 @@ type GetProductsParams = {
   query?: string;
   page?: number;
   perPage?: number;
+  sort?: string;
 };
 
 export const getProducts = async ({
   query = "",
   page = 1,
   perPage = 100,
+  sort = "name_asc",
 }: GetProductsParams): Promise<PaginatedProductsResponse> => {
   const params = new URLSearchParams({
     page: String(page),
     per_page: String(perPage),
+    sort,
   });
 
   const endpoint = query.trim()

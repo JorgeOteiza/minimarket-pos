@@ -41,6 +41,8 @@ export default function POS() {
 
   const [lastScannedId, setLastScannedId] = useState<number | null>(null);
 
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   // =========================
   // VALIDACIONES POS
   // =========================
@@ -77,10 +79,8 @@ export default function POS() {
   // SOUNDS
   // =========================
 
-  const playSound = useCallback((type: "ok" | "error") => {
-    const src = type === "ok" ? "/sounds/scan.mp3" : "/sounds/error.mp3";
-
-    const audio = new Audio(src);
+  const playErrorSound = useCallback(() => {
+    const audio = new Audio("/sounds/error.mp3");
 
     audio.play().catch(() => {});
   }, []);
@@ -161,19 +161,17 @@ export default function POS() {
         if (lastItem) {
           setLastScannedId(lastItem.product_id);
         }
-
-        playSound("ok");
       } catch (err: unknown) {
         console.error(err);
 
-        playSound("error");
+        playErrorSound();
 
         setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
     },
-    [loading, playSound],
+    [loading, playErrorSound],
   );
 
   // =========================
@@ -189,14 +187,12 @@ export default function POS() {
       setCart(updatedCart);
 
       setLastScannedId(productId);
-
-      playSound("ok");
     } catch (err: unknown) {
       console.error(err);
 
       setError(getErrorMessage(err));
 
-      playSound("error");
+      playErrorSound();
     }
   };
 
@@ -214,7 +210,7 @@ export default function POS() {
 
       setError(getErrorMessage(err));
 
-      playSound("error");
+      playErrorSound();
     }
   };
 
@@ -234,7 +230,7 @@ export default function POS() {
 
       setError(getErrorMessage(err));
 
-      playSound("error");
+      playErrorSound();
     }
   };
 
@@ -246,8 +242,6 @@ export default function POS() {
     if (hasProductsWithoutPrice) {
       setError("Hay productos sin precio. No se puede completar la venta.");
 
-      playSound("error");
-
       return;
     }
 
@@ -256,19 +250,25 @@ export default function POS() {
 
       setError(null);
 
-      await checkout();
+      const sale = await checkout();
 
       await reloadCart();
 
       setLastScannedId(null);
 
-      playSound("ok");
+      setSuccessMessage(
+        `Venta registrada correctamente · Total: $${sale.total.toLocaleString("es-CL")}`,
+      );
+
+      window.setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     } catch (err: unknown) {
       console.error(err);
 
       setError(getErrorMessage(err));
 
-      playSound("error");
+      playErrorSound();
     } finally {
       setLoading(false);
     }
@@ -294,7 +294,7 @@ export default function POS() {
 
       setError(getErrorMessage(err));
 
-      playSound("error");
+      playErrorSound();
     } finally {
       setLoading(false);
     }
@@ -402,6 +402,7 @@ export default function POS() {
             loading={loading}
             disabled={cart.items.length === 0 || hasProductsWithoutPrice}
             lastItem={lastScannedItem}
+            successMessage={successMessage}
           />
         </aside>
       </main>

@@ -71,29 +71,44 @@ def create_product(data):
 
     return product
 
-def get_paginated_products(page=1, per_page=100):
-    return (
-        Product.query
-        .order_by(Product.id.desc())
-        .paginate(page=page, per_page=per_page, error_out=False)
+def apply_product_sort(query, sort="name_asc"):
+    if sort == "name_desc":
+        return query.order_by(Product.name.desc())
+
+    if sort == "price_asc":
+        return query.order_by(Product.price.asc().nullslast())
+
+    if sort == "price_desc":
+        return query.order_by(Product.price.desc().nullslast())
+
+    return query.order_by(Product.name.asc())
+
+def get_paginated_products(page=1, per_page=100, sort="name_asc"):
+    query = Product.query
+
+    query = apply_product_sort(query, sort)
+
+    return query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
 
-def search_products_paginated(query, page=1, per_page=100):
-    return (
-        Product.query
-        .filter(
-            or_(
-                Product.name.ilike(f"%{query}%"),
-                Product.barcode.ilike(f"%{query}%"),
-            )
+def search_products_paginated(query, page=1, per_page=100, sort="name_asc"):
+    product_query = Product.query.filter(
+        or_(
+            Product.name.ilike(f"%{query}%"),
+            Product.barcode.ilike(f"%{query}%"),
         )
-        .order_by(Product.id.desc())
-        .paginate(
-            page=page,
-            per_page=per_page,
-            error_out=False,
-        )
+    )
+
+    product_query = apply_product_sort(product_query, sort)
+
+    return product_query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
 
 

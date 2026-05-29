@@ -10,6 +10,8 @@ import type { Product } from "../types/product";
 
 type PanelMode = "create" | "edit" | "inventory" | null;
 
+type SortMode = "name_asc" | "name_desc" | "price_asc" | "price_desc";
+
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -20,11 +22,13 @@ const ProductsPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("name_asc");
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(100);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+
   const [inventoryHistoryRefreshKey, setInventoryHistoryRefreshKey] =
     useState(0);
 
@@ -40,6 +44,7 @@ const ProductsPage = () => {
           query,
           page,
           perPage,
+          sort: sortMode,
         });
 
         if (controller.signal.aborted) return;
@@ -64,7 +69,7 @@ const ProductsPage = () => {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [query, page, perPage]);
+  }, [query, page, perPage, sortMode]);
 
   const handleSelectProduct = (product: Product) => {
     const formElement = document.querySelector(".product-form");
@@ -128,6 +133,16 @@ const ProductsPage = () => {
     setIsFormPanelOpen((prev) => !prev);
   };
 
+  const handlePerPageChange = (value: number) => {
+    setPerPage(value);
+    setPage(1);
+  };
+
+  const handleSortChange = (value: SortMode) => {
+    setSortMode(value);
+    setPage(1);
+  };
+
   return (
     <div className="products-page">
       <div className="products-header">
@@ -141,16 +156,46 @@ const ProductsPage = () => {
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre o código..."
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setPage(1);
-        }}
-        className="products-search"
-      />
+      <div className="products-toolbar">
+        <input
+          type="text"
+          placeholder="Buscar por nombre o código..."
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(1);
+          }}
+          className="products-search"
+        />
+
+        <div className="products-toolbar-controls">
+          <label>
+            Ordenar
+            <select
+              value={sortMode}
+              onChange={(e) => handleSortChange(e.target.value as SortMode)}
+            >
+              <option value="name_asc">Nombre A-Z</option>
+              <option value="name_desc">Nombre Z-A</option>
+              <option value="price_desc">Precio mayor a menor</option>
+              <option value="price_asc">Precio menor a mayor</option>
+            </select>
+          </label>
+
+          <label>
+            Mostrar
+            <select
+              value={perPage}
+              onChange={(e) => handlePerPageChange(Number(e.target.value))}
+            >
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+              <option value={300}>300</option>
+            </select>
+          </label>
+        </div>
+      </div>
 
       {error && <div className="error">{error}</div>}
 
@@ -177,14 +222,12 @@ const ProductsPage = () => {
             <div className="pagination-controls">
               <select
                 value={perPage}
-                onChange={(e) => {
-                  setPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
+                onChange={(e) => handlePerPageChange(Number(e.target.value))}
               >
                 <option value={50}>50</option>
                 <option value={100}>100</option>
                 <option value={200}>200</option>
+                <option value={300}>300</option>
               </select>
 
               <button
@@ -247,6 +290,7 @@ const ProductsPage = () => {
                     query,
                     page,
                     perPage,
+                    sort: sortMode,
                   });
 
                   setProducts(data.items);

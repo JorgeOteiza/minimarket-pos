@@ -34,9 +34,15 @@ def get_products():
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=100, type=int)
 
-    per_page = min(per_page, 200)
+    sort = request.args.get("sort", default="name_asc", type=str)
 
-    pagination = get_paginated_products(page=page, per_page=per_page)
+    per_page = min(per_page, 300)
+
+    pagination = get_paginated_products(
+        page=page,
+        per_page=per_page,
+        sort=sort,
+    )
 
     return jsonify(pagination_response(pagination)), 200
 
@@ -70,7 +76,9 @@ def search_products():
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=100, type=int)
 
-    per_page = min(per_page, 200)
+    sort = request.args.get("sort", default="name_asc", type=str)
+
+    per_page = min(per_page, 300)
 
     if not query:
         return jsonify({
@@ -78,9 +86,10 @@ def search_products():
         }), 400
 
     pagination = search_products_paginated(
-        query,
-        page=page,
-        per_page=per_page,
+    query,
+    page=page,
+    per_page=per_page,
+    sort=sort,
     )
 
     return jsonify(
