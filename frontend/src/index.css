@@ -152,7 +152,7 @@ textarea {
 }
 
 .total {
-  font-size: 36px;
+  font-size: xxx-large;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -266,7 +266,7 @@ textarea {
 
 .logo {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 20px;
   letter-spacing: 0.5px;
 }
 
@@ -278,7 +278,7 @@ textarea {
 .nav-link {
   text-decoration: none;
   color: #9ca3af;
-  font-size: 14px;
+  font-size: larger;
   transition: all 0.2s ease;
 }
 
@@ -289,6 +289,7 @@ textarea {
 .nav-link.active {
   color: white;
   font-weight: 600;
+  font-size: larger;
 }
 
 /* =========================
@@ -310,8 +311,8 @@ textarea {
 
 .sidebar-title {
   margin-bottom: 20px;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 300;
   opacity: 0.8;
 }
 
@@ -324,7 +325,7 @@ textarea {
 .sidebar-nav a {
   text-decoration: none;
   color: #9ca3af;
-  font-size: 14px;
+  font-size: 20px;
   padding: 8px 10px;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -339,6 +340,7 @@ textarea {
   background: #111827;
   color: white;
   font-weight: 600;
+  font-size: 20px;
 }
 
 .dashboard-main {
@@ -366,12 +368,13 @@ textarea {
 
 .products-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 33px;
 }
 
 .products-header p {
   margin: 6px 0 0;
   color: #6b7280;
+  font-size: large;
 }
 
 .products-header-actions {
@@ -388,7 +391,7 @@ textarea {
   border-radius: 12px;
   background: #111827;
   color: white;
-  font-size: 15px;
+  font-size: large;
   font-weight: 700;
   cursor: pointer;
 }
@@ -458,6 +461,7 @@ textarea {
   padding: 7px 8px;
   white-space: nowrap;
   line-height: 1.25;
+  font-size: large;
 }
 
 .products-table th {
@@ -525,7 +529,7 @@ textarea {
   justify-content: center;
   padding: 4px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -795,6 +799,7 @@ textarea {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  font-size: 30px;
 }
 
 .pos-header-modern {
@@ -816,7 +821,7 @@ textarea {
 .pos-header-modern p {
   margin: 4px 0 0;
   color: #6b7280;
-  font-size: 0.9rem;
+  font-size: 15px;
 }
 
 .pos-status-pill {
@@ -1426,7 +1431,14 @@ textarea {
 .products-toolbar-controls select,
 .pagination-controls select {
   height: 46px;
-  min-width: 180px;
+  margin-bottom: 0;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding-left: 6px;
+  padding-right: 6px;
 
   /* =========================
    PRODUCT TOOLBAR MODERN CONTROLS
@@ -1446,7 +1458,7 @@ textarea {
     border-radius: 14px;
     border: 1px solid #cbd5e1;
     background: white;
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 600;
   }
 
@@ -1476,7 +1488,7 @@ textarea {
     background-color: white;
     color: #111827;
     padding: 0 42px 0 14px;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 800;
     outline: none;
     cursor: pointer;
@@ -1560,7 +1572,7 @@ textarea {
   border-radius: 14px;
   border: 1px solid #cbd5e1;
   background: white;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -1579,4 +1591,142 @@ textarea {
   font-weight: 900;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+}
+
+.product-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.product-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.product-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.edit-product-btn {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.edit-product-btn:hover {
+  background: #dbeafe;
+}
+
+.inventory-product-btn {
+  background: #ecfdf5;
+  color: #15803d;
+}
+
+.inventory-product-btn:hover {
+  background: #dcfce7;
+}
+
+.products-form-panel {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.product-panel-flash {
+  animation: product-panel-flash 0.45s ease;
+}
+
+@keyframes product-panel-flash {
+  0% {
+    box-shadow:
+      0 0 0 3px #bfdbfe,
+      0 8px 24px rgba(15, 23, 42, 0.08);
+    transform: scale(1.01);
+  }
+
+  100% {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   PRODUCTS TABLE COMPACT MODE
+   Cuando el panel lateral está abierto
+========================= */
+
+.products-layout.with-form-panel .products-table {
+  min-width: 920px;
+  font-size: 12px;
+}
+
+.products-layout.with-form-panel .products-table th,
+.products-layout.with-form-panel .products-table td {
+  padding: 6px 6px;
+}
+
+.products-layout.with-form-panel .products-table th:nth-child(2),
+.products-layout.with-form-panel .products-table td:nth-child(2),
+.products-layout.with-form-panel .products-table th:nth-child(3),
+.products-layout.with-form-panel .products-table td:nth-child(3),
+.products-layout.with-form-panel .products-table th:nth-child(4),
+.products-layout.with-form-panel .products-table td:nth-child(4),
+.products-layout.with-form-panel .products-table th:nth-child(5),
+.products-layout.with-form-panel .products-table td:nth-child(5),
+.products-layout.with-form-panel .products-table th:nth-child(6),
+.products-layout.with-form-panel .products-table td:nth-child(6),
+.products-layout.with-form-panel .products-table th:nth-child(8),
+.products-layout.with-form-panel .products-table td:nth-child(8),
+.products-layout.with-form-panel .products-table th:nth-child(9),
+.products-layout.with-form-panel .products-table td:nth-child(9) {
+  display: none;
+}
+
+.products-layout.with-form-panel .products-table th:first-child,
+.products-layout.with-form-panel .products-table td:first-child {
+  max-width: 260px;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.products-layout.with-form-panel .products-table th:last-child,
+.products-layout.with-form-panel .products-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: white;
+  box-shadow: -8px 0 12px rgba(15, 23, 42, 0.05);
+}
+
+.products-layout.with-form-panel .products-table th:last-child {
+  z-index: 6;
+  background: #f8fafc;
+}
+
+.products-layout.with-form-panel .product-actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.products-layout.with-form-panel .product-action-btn {
+  min-height: 30px;
+  padding: 6px 9px;
+  font-size: 11px;
 }

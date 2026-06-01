@@ -1,4 +1,5 @@
 import type { Product } from "../types/product";
+
 import {
   calculateProfit,
   calculateMargin,
@@ -124,7 +125,6 @@ export const ProductList = ({
 
               const status = getStockStatus(product);
               const badge = getStockBadge(status);
-
               const isSelected = selectedProductId === product.id;
 
               return (
@@ -133,17 +133,11 @@ export const ProductList = ({
                   className={`product-row ${isSelected ? "selected" : ""}`}
                 >
                   <td>{product.name}</td>
-
                   <td>{product.barcode || "-"}</td>
-
                   <td>{formatOptionalCLP(boxCost)}</td>
-
                   <td>{packUnits || "-"}</td>
-
                   <td>{formatOptionalCLP(unitCost)}</td>
-
                   <td>{formatOptionalCLP(costWithIva)}</td>
-
                   <td>{finalPrice !== null ? formatCLP(finalPrice) : "-"}</td>
 
                   <td
@@ -177,27 +171,31 @@ export const ProductList = ({
                   </td>
 
                   <td>
-                    <button
-                      type="button"
-                      className="edit-product-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectProduct(product);
-                      }}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      className="inventory-product-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                    <div className="product-actions">
+                      <button
+                        type="button"
+                        className="product-action-btn edit-product-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectProduct(product);
+                        }}
+                      >
+                        <span>✏️</span>
+                        Editar
+                      </button>
 
-                        onAdjustInventory(product);
-                      }}
-                    >
-                      Inventario
-                    </button>
+                      <button
+                        type="button"
+                        className="product-action-btn inventory-product-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAdjustInventory(product);
+                        }}
+                      >
+                        <span>📦</span>
+                        Inventario
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

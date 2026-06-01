@@ -261,7 +261,10 @@ const ProductsPage = () => {
         </button>
 
         {isFormPanelOpen && (
-          <div className="products-form-panel">
+          <div
+            key={`${panelMode}-${selectedProduct?.id ?? "new"}`}
+            className="products-form-panel product-panel-flash"
+          >
             {panelMode === "create" && (
               <ProductForm
                 mode="create"

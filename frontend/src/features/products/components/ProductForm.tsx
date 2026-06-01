@@ -163,7 +163,11 @@ export const ProductForm = ({
         ========================= */}
 
         <div className="product-form-actions">
-          <button type="submit" disabled={loading} className="primary-btn">
+          <button
+            type="submit"
+            disabled={loading || !hasUnsavedChanges}
+            className="primary-btn"
+          >
             {mode === "create" ? "Guardar producto" : "Guardar cambios"}
           </button>
 
