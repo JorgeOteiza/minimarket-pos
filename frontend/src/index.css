@@ -1626,6 +1626,7 @@ textarea {
 .edit-product-btn {
   background: #eff6ff;
   color: #1d4ed8;
+  border: 1px solid moccasin;
 }
 
 .edit-product-btn:hover {
@@ -1635,6 +1636,7 @@ textarea {
 .inventory-product-btn {
   background: #ecfdf5;
   color: #15803d;
+  border: 1px solid moccasin;
 }
 
 .inventory-product-btn:hover {
@@ -1750,7 +1752,7 @@ textarea {
 }
 
 .inventory-history-header span {
-  background: #fff50052;
+  background: #00c6ff36;
   color: #334155;
   border-radius: 999px;
   padding: 7px 11px;
