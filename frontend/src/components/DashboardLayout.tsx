@@ -23,7 +23,7 @@ export const DashboardLayout = () => {
             to="/dashboard/analytics"
             className={isActive("/dashboard/analytics") ? "active" : ""}
           >
-            Analítica de Datos
+            Análisis de Datos
           </Link>
         </nav>
       </aside>

@@ -345,7 +345,7 @@ export default function POS() {
     <div className="pos-container">
       <header className="pos-header pos-header-modern">
         <div>
-          <h1>POS Minimarket</h1>
+          <h1>PUNTO DE VENTA</h1>
 
           <p>Caja activa · Modo offline</p>
         </div>

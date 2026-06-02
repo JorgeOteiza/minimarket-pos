@@ -52,7 +52,7 @@ export default function AnalyticsPage() {
     <div className="analytics-page">
       <div className="analytics-header">
         <div>
-          <h1>Analítica de Datos</h1>
+          <h1>Análisis de Datos</h1>
 
           <p>Resumen comercial e inventario del minimarket.</p>
         </div>

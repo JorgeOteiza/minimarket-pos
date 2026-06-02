@@ -15,6 +15,10 @@ type SortMode = "name_asc" | "name_desc" | "price_asc" | "price_desc";
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [highlightedProductId, setHighlightedProductId] = useState<
+    number | null
+  >(null);
+
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [isFormPanelOpen, setIsFormPanelOpen] = useState(false);
 
@@ -71,6 +75,10 @@ const ProductsPage = () => {
     };
   }, [query, page, perPage, sortMode]);
 
+  const handleHighlightProduct = (product: Product) => {
+    setHighlightedProductId(product.id);
+  };
+
   const handleSelectProduct = (product: Product) => {
     const formElement = document.querySelector(".product-form");
     const isDirty = formElement?.getAttribute("data-dirty") === "true";
@@ -83,18 +91,21 @@ const ProductsPage = () => {
       if (!confirmed) return;
     }
 
+    setHighlightedProductId(product.id);
     setSelectedProduct(product);
     setPanelMode("edit");
     setIsFormPanelOpen(true);
   };
 
   const handleInventoryAdjust = (product: Product) => {
+    setHighlightedProductId(product.id);
     setSelectedProduct(product);
     setPanelMode("inventory");
     setIsFormPanelOpen(true);
   };
 
   const handleAddProduct = () => {
+    setHighlightedProductId(null);
     setSelectedProduct(null);
     setPanelMode("create");
     setIsFormPanelOpen(true);
@@ -103,6 +114,7 @@ const ProductsPage = () => {
   const handleProductCreated = (created: Product) => {
     setProducts((prev) => [created, ...prev]);
     setTotalProducts((prev) => prev + 1);
+    setHighlightedProductId(created.id);
     setSelectedProduct(null);
     setPanelMode("create");
     setIsFormPanelOpen(true);
@@ -110,6 +122,7 @@ const ProductsPage = () => {
 
   const handleProductUpdated = (updated: Product) => {
     setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    setHighlightedProductId(updated.id);
     setSelectedProduct(updated);
     setPanelMode("edit");
     setIsFormPanelOpen(true);
@@ -118,6 +131,7 @@ const ProductsPage = () => {
   const handleProductDeleted = (productId: number) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
     setSelectedProduct(null);
+    setHighlightedProductId(null);
     setPanelMode(null);
     setIsFormPanelOpen(false);
     setTotalProducts((prev) => Math.max(0, prev - 1));
@@ -208,7 +222,8 @@ const ProductsPage = () => {
           <ProductList
             products={products}
             loading={loading}
-            selectedProductId={selectedProduct?.id ?? null}
+            selectedProductId={highlightedProductId}
+            onHighlightProduct={handleHighlightProduct}
             onSelectProduct={handleSelectProduct}
             onAdjustInventory={handleInventoryAdjust}
           />

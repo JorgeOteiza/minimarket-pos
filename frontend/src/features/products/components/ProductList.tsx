@@ -10,6 +10,7 @@ interface Props {
   products: Product[];
   loading?: boolean;
   selectedProductId?: number | null;
+  onHighlightProduct: (product: Product) => void;
   onSelectProduct: (product: Product) => void;
   onAdjustInventory: (product: Product) => void;
 }
@@ -18,6 +19,7 @@ export const ProductList = ({
   products,
   loading = false,
   selectedProductId = null,
+  onHighlightProduct,
   onSelectProduct,
   onAdjustInventory,
 }: Props) => {
@@ -131,6 +133,7 @@ export const ProductList = ({
                 <tr
                   key={product.id}
                   className={`product-row ${isSelected ? "selected" : ""}`}
+                  onClick={() => onHighlightProduct(product)}
                 >
                   <td>{product.name}</td>
                   <td>{product.barcode || "-"}</td>

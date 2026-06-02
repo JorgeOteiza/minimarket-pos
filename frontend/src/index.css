@@ -187,11 +187,6 @@ textarea {
   font-size: 30px;
 }
 
-.empty-content p {
-  font-size: 20px;
-  margin-bottom: 12px;
-}
-
 .empty-hint {
   font-size: 18px;
   opacity: 0.6;
@@ -266,7 +261,7 @@ textarea {
 
 .logo {
   font-weight: bold;
-  font-size: 20px;
+  font-size: x-large;
   letter-spacing: 0.5px;
 }
 
@@ -369,12 +364,13 @@ textarea {
 .products-header h1 {
   margin: 0;
   font-size: 33px;
+  font-weight: 900;
 }
 
 .products-header p {
   margin: 6px 0 0;
   color: #6b7280;
-  font-size: large;
+  font-size: 20px;
 }
 
 .products-header-actions {
@@ -468,12 +464,12 @@ textarea {
   text-align: left;
   border-bottom: 2px solid #e5e7eb;
   color: #111827;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 750;
 }
 
 .products-table td {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 2px solid #f1f5f9;
 }
 
 .product-row {
@@ -489,8 +485,8 @@ textarea {
 }
 
 .product-row.selected {
-  background: #e0f2fe;
-  box-shadow: inset 4px 0 0 #0284c7;
+  background: #f0fdf4;
+  box-shadow: inset 4px 0 0 #22c55e;
 }
 
 .editable-price-cell {
@@ -814,14 +810,14 @@ textarea {
 
 .pos-header-modern h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 30px;
   font-weight: 900;
 }
 
 .pos-header-modern p {
   margin: 4px 0 0;
   color: #6b7280;
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .pos-status-pill {
@@ -841,6 +837,7 @@ textarea {
   background: #ecfdf5;
   color: #166534;
   border: 1px solid #bbf7d0;
+  font-size: large;
 }
 
 .pos-status-pill.warning {
@@ -1080,14 +1077,15 @@ textarea {
 
 .empty-content p {
   margin: 0 auto 12px;
+  margin-bottom: 12px;
   color: #64748b;
-  font-size: 1.05rem;
+  font-size: larger;
   line-height: 1.4;
 }
 
 .empty-hint {
   color: #94a3b8;
-  font-size: 0.95rem;
+  font-size: 20px;
 }
 
 .products-pagination {
@@ -1098,7 +1096,7 @@ textarea {
   padding-top: 14px;
   margin-top: 12px;
   border-top: 1px solid #e5e7eb;
-  font-size: 14px;
+  font-size: 20px;
   color: #6b7280;
 }
 
@@ -1121,6 +1119,7 @@ textarea {
 .pagination-controls button {
   cursor: pointer;
   font-weight: 700;
+  font-size: large;
 }
 
 .pagination-controls button:disabled {
@@ -1385,7 +1384,8 @@ textarea {
 
 .inventory-history-panel h2 {
   margin: 0 0 14px;
-  font-size: 18px;
+  font-size: xx-large;
+  font-weight: 900;
 }
 
 .inventory-history-table-wrapper {
@@ -1405,11 +1405,11 @@ textarea {
   border-bottom: 1px solid #f1f5f9;
   text-align: left;
   vertical-align: top;
+  font-size: large;
 }
 
 .inventory-history-table th {
   color: #64748b;
-  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1473,7 +1473,7 @@ textarea {
     flex-direction: column;
     gap: 6px;
     color: #64748b;
-    font-size: 12px;
+    font-size: larger;
     font-weight: 900;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -1729,4 +1729,86 @@ textarea {
   min-height: 30px;
   padding: 6px 9px;
   font-size: 11px;
+}
+
+.inventory-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.inventory-history-header h2 {
+  margin: 0;
+}
+
+.inventory-history-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 20px;
+}
+
+.inventory-history-header span {
+  background: #fff50052;
+  color: #334155;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: larger;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.inventory-history-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px 180px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.inventory-history-filters input,
+.inventory-history-filters select {
+  height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 13px;
+  background: white;
+  color: #111827;
+  padding: 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+  outline: none;
+}
+
+.inventory-history-filters input:focus,
+.inventory-history-filters select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #dbeafe;
+}
+
+@media (max-width: 900px) {
+  .inventory-history-header {
+    flex-direction: column;
+  }
+
+  .inventory-history-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   FIX SELECTED PRODUCT ROW
+========================= */
+
+.products-table tbody tr.product-row.selected,
+.products-table tbody tr.product-row.selected td {
+  background-color: #f0fdf4 !important;
+}
+
+.products-table tbody tr.product-row.selected td:first-child {
+  box-shadow: inset 4px 0 0 #22c55e !important;
+}
+
+.products-table tbody tr.product-row.selected:hover,
+.products-table tbody tr.product-row.selected:hover td {
+  background-color: #dcfce7 !important;
 }
