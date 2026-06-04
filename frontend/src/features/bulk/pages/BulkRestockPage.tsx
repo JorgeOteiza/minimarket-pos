@@ -126,22 +126,22 @@ export default function BulkRestockPage() {
 
   const validateSackForm = () => {
     if (!sackForm.name.trim()) {
-      setError("Debes ingresar el nombre del saco.");
+      setError("Debes ingresar el nombre del producto.");
       return false;
     }
 
     if (!sackForm.barcode.trim()) {
-      setError("Debes ingresar o escanear el código del saco.");
+      setError("Debes ingresar o escanear el código del producto.");
       return false;
     }
 
     if (sackForm.package_quantity <= 0) {
-      setError("La cantidad por saco debe ser mayor a 0.");
+      setError("La cantidad por producto debe ser mayor a 0.");
       return false;
     }
 
     if (!isEditing && initialPackages <= 0) {
-      setError("La cantidad inicial de sacos debe ser mayor a 0.");
+      setError("La cantidad inicial de productos debe ser mayor a 0.");
       return false;
     }
 
@@ -171,7 +171,7 @@ export default function BulkRestockPage() {
         );
 
         resetSackForm();
-        setSuccessMessage("Saco actualizado correctamente.");
+        setSuccessMessage("Producto actualizado correctamente.");
         return;
       }
 
@@ -180,7 +180,7 @@ export default function BulkRestockPage() {
       const firstRestock = await createBulkRestock({
         bulk_product_id: created.id,
         quantity_packages: initialPackages,
-        note: "Registro inicial de saco",
+        note: "Registro inicial de producto",
       });
 
       setProducts((prev) =>
@@ -190,12 +190,12 @@ export default function BulkRestockPage() {
       setRestocks((prev) => [firstRestock, ...prev]);
 
       resetSackForm();
-      setSuccessMessage("Saco registrado correctamente en el historial.");
+      setSuccessMessage("Producto registrado correctamente en el historial.");
     } catch (err: unknown) {
       setError(
         err instanceof Error
           ? err.message
-          : "Error guardando información del saco",
+          : "Error guardando información del producto",
       );
     } finally {
       setLoading(false);
@@ -221,17 +221,17 @@ export default function BulkRestockPage() {
     event.preventDefault();
 
     if (!restockBarcode.trim()) {
-      setError("Debes escanear o ingresar el código del saco.");
+      setError("Debes escanear o ingresar el código del producto.");
       return;
     }
 
     if (!selectedProduct) {
-      setError("No se encontró un saco registrado con ese código.");
+      setError("No se encontró un producto registrado con ese código.");
       return;
     }
 
     if (quantityPackages <= 0) {
-      setError("La cantidad de sacos debe ser mayor a 0.");
+      setError("La cantidad de productos debe ser mayor a 0.");
       return;
     }
 
@@ -252,7 +252,7 @@ export default function BulkRestockPage() {
       setQuantityPackages(1);
       setNote("");
 
-      setSuccessMessage("Reposición de saco registrada correctamente.");
+      setSuccessMessage("Reposición de producto registrada correctamente.");
     } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Error registrando reposición",
@@ -265,10 +265,10 @@ export default function BulkRestockPage() {
   return (
     <div className="sack-page">
       <header className="sack-header">
-        <h1>Reposición de sacos</h1>
+        <h1>Reposición de sacos y paquetes</h1>
         <p>
-          Registra la llegada de sacos completos u otros formatos grandes para
-          control administrativo.
+          Registra la llegada de sacos o paquetes completos u otros formatos
+          grandes para control administrativo.
         </p>
       </header>
 
@@ -279,12 +279,12 @@ export default function BulkRestockPage() {
         <main className="sack-main">
           <section className="sack-card">
             <h2>Registrar nueva reposición</h2>
-            <p>Escanea el código del saco cuando llegue mercadería.</p>
+            <p>Escanea el código del producto cuando llegue mercadería.</p>
 
             <form className="sack-form" onSubmit={handleRegisterRestock}>
               <div className="sack-form-grid">
                 <div className="sack-field full">
-                  <label>Código del saco</label>
+                  <label>Código del saco/paquete</label>
                   <input
                     type="text"
                     value={restockBarcode}
@@ -303,13 +303,13 @@ export default function BulkRestockPage() {
                     }
                   >
                     {selectedProduct
-                      ? `Saco detectado: ${selectedProduct.name}`
-                      : "No se encontró un saco registrado con ese código."}
+                      ? `Producto detectado: ${selectedProduct.name}`
+                      : "No se encontró un producto registrado con ese código."}
                   </div>
                 )}
 
                 <div className="sack-field">
-                  <label>Cantidad de sacos</label>
+                  <label>Cantidad de sacos/paquetes</label>
                   <input
                     type="number"
                     min={1}
@@ -334,7 +334,7 @@ export default function BulkRestockPage() {
               {selectedProduct && (
                 <div className="sack-summary">
                   <div>
-                    <span>Saco</span>
+                    <span>Producto</span>
                     <strong>{selectedProduct.name}</strong>
                   </div>
 
@@ -346,7 +346,7 @@ export default function BulkRestockPage() {
                   </div>
 
                   <div>
-                    <span>Costo saco</span>
+                    <span>Costo Producto</span>
                     <strong>{formatCurrency(selectedProduct.cost)}</strong>
                   </div>
                 </div>
@@ -367,18 +367,18 @@ export default function BulkRestockPage() {
           <section className="sack-card">
             <div className="inventory-history-header">
               <div>
-                <h2>Sacos registrados</h2>
-                <p>Tipos de sacos o formatos grandes guardados.</p>
+                <h2>Productos registrados</h2>
+                <p>Tipos de productos o formatos grandes guardados.</p>
               </div>
 
-              <span>{products.length} sacos</span>
+              <span>{products.length} productos</span>
             </div>
 
             <div className="sack-table-wrapper">
               <table className="sack-table">
                 <thead>
                   <tr>
-                    <th>Saco</th>
+                    <th>Producto</th>
                     <th>Código</th>
                     <th>Formato</th>
                     <th>Costo</th>
@@ -411,7 +411,7 @@ export default function BulkRestockPage() {
 
                   {products.length === 0 && (
                     <tr>
-                      <td colSpan={5}>No hay sacos registrados todavía.</td>
+                      <td colSpan={5}>No hay productos registrados todavía.</td>
                     </tr>
                   )}
                 </tbody>
@@ -423,7 +423,7 @@ export default function BulkRestockPage() {
             <div className="inventory-history-header">
               <div>
                 <h2>Historial de reposiciones</h2>
-                <p>Últimos ingresos de sacos o formatos grandes.</p>
+                <p>Últimos ingresos de productos o formatos grandes.</p>
               </div>
 
               <span>{restocks.length} registros</span>
@@ -434,10 +434,10 @@ export default function BulkRestockPage() {
                 <thead>
                   <tr>
                     <th>Fecha</th>
-                    <th>Saco</th>
+                    <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Formato</th>
-                    <th>Costo saco</th>
+                    <th>Costo producto</th>
                     <th>Total</th>
                     <th>Nota</th>
                   </tr>
@@ -473,16 +473,18 @@ export default function BulkRestockPage() {
 
         <aside className="sack-side">
           <section className="sack-card">
-            <h2>{isEditing ? "Editar saco" : "Registrar tipo de saco"}</h2>
+            <h2>
+              {isEditing ? "Editar producto" : "Registrar tipo de producto"}
+            </h2>
             <p>
               {isEditing
-                ? "Actualiza la información del saco registrado."
-                : "Crea el saco base y registra su primera llegada al historial."}
+                ? "Actualiza la información del producto registrado."
+                : "Crea el producto base y registra su primera llegada al historial."}
             </p>
 
             <form className="sack-form" onSubmit={handleCreateOrUpdateSack}>
               <div className="sack-field">
-                <label>Nombre del saco</label>
+                <label>Nombre del producto</label>
                 <input
                   type="text"
                   value={sackForm.name}
@@ -492,18 +494,18 @@ export default function BulkRestockPage() {
               </div>
 
               <div className="sack-field">
-                <label>Código del saco</label>
+                <label>Código del producto</label>
                 <input
                   type="text"
                   value={sackForm.barcode}
                   onChange={(e) => updateSackForm("barcode", e.target.value)}
-                  placeholder="Escanear código del saco"
+                  placeholder="Escanear código del producto o escribir uno nuevo"
                 />
               </div>
 
               <div className="sack-form-grid">
                 <div className="sack-field">
-                  <label>Cantidad por saco</label>
+                  <label>Cantidad/peso</label>
                   <input
                     type="number"
                     min={0}
@@ -530,7 +532,7 @@ export default function BulkRestockPage() {
               </div>
 
               <div className="sack-field">
-                <label>Costo saco</label>
+                <label>Costo producto</label>
                 <input
                   type="number"
                   min={0}
@@ -541,13 +543,13 @@ export default function BulkRestockPage() {
                       e.target.value === "" ? "" : Number(e.target.value),
                     )
                   }
-                  placeholder="Opcional"
+                  placeholder="$"
                 />
               </div>
 
               {!isEditing && (
                 <div className="sack-field">
-                  <label>Sacos recibidos ahora</label>
+                  <label>Productos recibidos ahora</label>
                   <input
                     type="number"
                     min={1}

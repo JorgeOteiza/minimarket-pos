@@ -27,23 +27,23 @@ def get_bulk_product_by_id(product_id):
     product = db.session.get(BulkProduct, product_id)
 
     if not product or not product.active:
-        raise NotFoundError("Saco no encontrado")
+        raise NotFoundError("Producto no encontrado")
 
     return product
 
 
 def _normalize_bulk_product_data(data):
-    name = (data.get("name") or "").strip()
+    name = ((data.get("name") or "").strip()).upper()
     barcode = (data.get("barcode") or "").strip() or None
     package_quantity = data.get("package_quantity")
     unit = (data.get("unit") or "kg").strip()
     cost = data.get("cost")
 
     if not name:
-        raise ValidationError("El nombre del saco es obligatorio")
+        raise ValidationError("El nombre del producto es obligatorio")
 
     if package_quantity is None or Decimal(str(package_quantity)) <= 0:
-        raise ValidationError("La cantidad por saco debe ser mayor a 0")
+        raise ValidationError("La cantidad por producto debe ser mayor a 0")
 
     return {
         "name": name,
@@ -63,7 +63,7 @@ def create_bulk_product(data):
         existing = get_bulk_product_by_barcode(barcode)
 
         if existing:
-            raise ConflictError("Ya existe un saco registrado con ese código")
+            raise ConflictError("Ya existe un producto registrado con ese código")
 
     product = BulkProduct(**clean_data)
 
@@ -83,7 +83,7 @@ def update_bulk_product(product_id, data):
         existing = get_bulk_product_by_barcode(barcode)
 
         if existing and existing.id != product.id:
-            raise ConflictError("Ya existe otro saco registrado con ese código")
+            raise ConflictError("Ya existe otro producto registrado con ese código")
 
     product.name = clean_data["name"]
     product.barcode = clean_data["barcode"]
@@ -103,7 +103,7 @@ def register_bulk_restock(data):
     note = data.get("note")
 
     if quantity_packages <= 0:
-        raise ValidationError("La cantidad de sacos debe ser mayor a 0")
+        raise ValidationError("La cantidad de productos debe ser mayor a 0")
 
     product = None
 
@@ -114,7 +114,7 @@ def register_bulk_restock(data):
         product = get_bulk_product_by_barcode(barcode)
 
     if not product or not product.active:
-        raise NotFoundError("Saco registrado no encontrado")
+        raise NotFoundError("Producto registrado no encontrado")
 
     total_cost = None
 

@@ -6,6 +6,15 @@ from backend.extensions import db
 from backend.models import Product
 
 
+def normalize_product_name(value):
+    if value is None:
+        return None
+
+    value = str(value).strip()
+
+    return value.upper() if value else None
+
+
 def calculate_price(cost, margin):
     if cost is None:
         return None
@@ -40,6 +49,9 @@ def get_product_by_id(product_id):
 
 
 def upsert_product(data):
+    if "name" in data:
+        data["name"] = normalize_product_name(data.get("name"))
+
     product = Product.query.filter_by(
         barcode=data.get("barcode")
     ).first()
@@ -55,7 +67,7 @@ def upsert_product(data):
 
 def create_product(data):
     product = Product(
-        name=data.get("name"),
+        name=normalize_product_name(data.get("name")),
         price=data.get("price"),
         barcode=data.get("barcode"),
         pack_units=data.get("pack_units"),
@@ -149,7 +161,10 @@ def update_product(product, data):
 
     for key, value in data.items():
         if key in allowed_fields:
-            setattr(product, key, value)
+            if key == "name":
+                setattr(product, key, normalize_product_name(value))
+            else:
+                setattr(product, key, value)
 
     cost = data.get("cost", product.cost)
     margin = data.get("margin", product.margin)

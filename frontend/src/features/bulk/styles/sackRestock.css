@@ -49,7 +49,7 @@
 .sack-card p {
   margin: 6px 0 16px;
   color: #64748b;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .sack-form {
@@ -75,7 +75,7 @@
 }
 
 .sack-field label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 900;
   color: #475569;
   text-transform: uppercase;
@@ -203,14 +203,14 @@
   border-bottom: 1px solid #f1f5f9;
   text-align: left;
   vertical-align: middle;
-  font-size: 15px;
+  font-size: large;
 }
 
 .sack-table th {
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .sack-badge {

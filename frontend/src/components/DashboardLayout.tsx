@@ -22,7 +22,7 @@ export const DashboardLayout = () => {
             to="/dashboard/bulk-restock"
             className={isActive("/dashboard/bulk-restock") ? "active" : ""}
           >
-            Reposición de sacos
+            Reposición de sacos y paquetes
           </Link>
 
           <Link
