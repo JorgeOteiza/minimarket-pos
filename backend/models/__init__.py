@@ -3,3 +3,5 @@ from .category import Category
 from .sale import Sale
 from .sale_item import SaleItem
 from .inventory_movement import InventoryMovement
+from .bulk_product import BulkProduct
+from .bulk_restock import BulkRestock

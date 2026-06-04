@@ -1,10 +1,10 @@
-from backend.models import Product
-from backend.extensions import db
 from decimal import Decimal, ROUND_HALF_UP
-from sqlalchemy import or_
 
+from sqlalchemy import or_, case
 
-# 🔹 helper: calcular precio desde costo + margen
+from backend.extensions import db
+from backend.models import Product
+
 
 def calculate_price(cost, margin):
     if cost is None:
@@ -38,6 +38,7 @@ def get_product_by_barcode(barcode):
 def get_product_by_id(product_id):
     return Product.query.get(product_id)
 
+
 def upsert_product(data):
     product = Product.query.filter_by(
         barcode=data.get("barcode")
@@ -50,6 +51,7 @@ def upsert_product(data):
         db.session.add(product)
 
     return product
+
 
 def create_product(data):
     product = Product(
@@ -71,6 +73,7 @@ def create_product(data):
 
     return product
 
+
 def apply_product_sort(query, sort="name_asc"):
     if sort == "name_desc":
         return query.order_by(Product.name.desc())
@@ -82,6 +85,7 @@ def apply_product_sort(query, sort="name_asc"):
         return query.order_by(Product.price.desc().nullslast())
 
     return query.order_by(Product.name.asc())
+
 
 def get_paginated_products(page=1, per_page=100, sort="name_asc"):
     query = Product.query
@@ -96,14 +100,31 @@ def get_paginated_products(page=1, per_page=100, sort="name_asc"):
 
 
 def search_products_paginated(query, page=1, per_page=100, sort="name_asc"):
+    normalized_query = query.strip()
+
     product_query = Product.query.filter(
         or_(
-            Product.name.ilike(f"%{query}%"),
-            Product.barcode.ilike(f"%{query}%"),
+            Product.name.ilike(f"%{normalized_query}%"),
+            Product.barcode.ilike(f"%{normalized_query}%"),
         )
     )
 
-    product_query = apply_product_sort(product_query, sort)
+    relevance_order = case(
+        (
+            Product.name.ilike(f"{normalized_query}%"),
+            0,
+        ),
+        (
+            Product.barcode.ilike(f"{normalized_query}%"),
+            1,
+        ),
+        else_=2,
+    )
+
+    product_query = product_query.order_by(
+        relevance_order,
+        Product.name.asc(),
+    )
 
     return product_query.paginate(
         page=page,
@@ -112,7 +133,6 @@ def search_products_paginated(query, page=1, per_page=100, sort="name_asc"):
     )
 
 
-# 🔹 UPDATE
 def update_product(product, data):
     allowed_fields = {
         "name",
@@ -127,16 +147,14 @@ def update_product(product, data):
         "category_id",
     }
 
-    # 🔥 aplicar cambios básicos
     for key, value in data.items():
         if key in allowed_fields:
             setattr(product, key, value)
 
-    # 🔥 lógica de negocio post-update
     cost = data.get("cost", product.cost)
     margin = data.get("margin", product.margin)
 
-    # ⚠️ solo recalculamos si NO viene price explícito
+    # Se mantiene desactivado para no sobrescribir precios manuales.
     # if "price" not in data and cost is not None:
     #     product.price = calculate_price(cost, margin)
 

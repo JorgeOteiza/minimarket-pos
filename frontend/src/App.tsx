@@ -5,6 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { DashboardLayout } from "./components/DashboardLayout";
 import ProductsPage from "./features/products/pages/ProductsPage";
 import AnalyticsPage from "./features/analytics/pages/AnalyticsPage";
+import BulkRestockPage from "./features/bulk/pages/BulkRestockPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="bulk-restock" element={<BulkRestockPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
         </Route>
       </Routes>

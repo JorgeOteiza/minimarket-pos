@@ -202,3 +202,46 @@
   font-size: 18px !important;
   line-height: 1.25;
 }
+
+.analytics-header h1 {
+  font-size: 34px;
+}
+
+.analytics-header p {
+  font-size: 20px;
+}
+
+.analytics-card span {
+  font-size: 16px;
+}
+
+.analytics-card strong {
+  font-size: 36px;
+}
+
+.analytics-card small {
+  font-size: 18px;
+}
+
+.analytics-panel h2,
+.analytics-chart-header h2 {
+  font-size: 24px;
+}
+
+.analytics-chart-header p {
+  font-size: 18px;
+}
+
+.analytics-row strong,
+.analytics-row b {
+  font-size: 18px;
+}
+
+.analytics-row span {
+  font-size: 16px;
+}
+
+.analytics-tabs button {
+  font-size: 17px;
+  padding: 11px 16px;
+}

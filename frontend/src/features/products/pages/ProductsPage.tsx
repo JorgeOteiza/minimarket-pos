@@ -12,6 +12,30 @@ type PanelMode = "create" | "edit" | "inventory" | null;
 
 type SortMode = "name_asc" | "name_desc" | "price_asc" | "price_desc";
 
+const PRODUCTS_SORT_STORAGE_KEY = "products_sort_mode";
+const PRODUCTS_PER_PAGE_STORAGE_KEY = "products_per_page";
+
+const getInitialSortMode = (): SortMode => {
+  const saved = localStorage.getItem(PRODUCTS_SORT_STORAGE_KEY);
+
+  if (
+    saved === "name_asc" ||
+    saved === "name_desc" ||
+    saved === "price_asc" ||
+    saved === "price_desc"
+  ) {
+    return saved;
+  }
+
+  return "name_asc";
+};
+
+const getInitialPerPage = () => {
+  const saved = Number(localStorage.getItem(PRODUCTS_PER_PAGE_STORAGE_KEY));
+
+  return [50, 100, 200, 300].includes(saved) ? saved : 100;
+};
+
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -26,10 +50,10 @@ const ProductsPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("name_asc");
+  const [sortMode, setSortMode] = useState<SortMode>(getInitialSortMode);
 
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(100);
+  const [perPage, setPerPage] = useState(getInitialPerPage);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
@@ -148,11 +172,13 @@ const ProductsPage = () => {
   };
 
   const handlePerPageChange = (value: number) => {
+    localStorage.setItem(PRODUCTS_PER_PAGE_STORAGE_KEY, String(value));
     setPerPage(value);
     setPage(1);
   };
 
   const handleSortChange = (value: SortMode) => {
+    localStorage.setItem(PRODUCTS_SORT_STORAGE_KEY, value);
     setSortMode(value);
     setPage(1);
   };

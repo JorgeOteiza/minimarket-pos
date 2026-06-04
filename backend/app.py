@@ -6,6 +6,7 @@ from backend.routes.cart import cart_bp
 from backend.routes.inventory import inventory_bp
 from backend.routes.analytics import analytics_bp
 from backend.routes.sales import sales_bp
+from backend.routes.bulk import bulk_bp
 from backend.models import Product, Sale, SaleItem
 from backend.exceptions import AppError
 from marshmallow import ValidationError as MarshmallowValidationError
@@ -59,6 +60,7 @@ def create_app():
     app.register_blueprint(cart_bp, url_prefix="/api")
     app.register_blueprint(inventory_bp, url_prefix="/api",)
     app.register_blueprint(analytics_bp, url_prefix="/api")
+    app.register_blueprint(bulk_bp, url_prefix="/api")
 
     register_error_handlers(app)
 

@@ -7,7 +7,6 @@ export const DashboardLayout = () => {
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <h2 className="sidebar-title">Menú</h2>
 
@@ -20,6 +19,13 @@ export const DashboardLayout = () => {
           </Link>
 
           <Link
+            to="/dashboard/bulk-restock"
+            className={isActive("/dashboard/bulk-restock") ? "active" : ""}
+          >
+            Reposición de sacos
+          </Link>
+
+          <Link
             to="/dashboard/analytics"
             className={isActive("/dashboard/analytics") ? "active" : ""}
           >
@@ -28,7 +34,6 @@ export const DashboardLayout = () => {
         </nav>
       </aside>
 
-      {/* MAIN */}
       <main className="dashboard-main">
         <Outlet />
       </main>
