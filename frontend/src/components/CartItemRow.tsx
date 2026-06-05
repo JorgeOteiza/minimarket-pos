@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+
 import type { CartItem } from "../types/cart";
 import { formatCurrency } from "../../utils/format";
 
@@ -49,29 +50,40 @@ const CartItemRow = ({
       </div>
 
       <div className="cart-item-controls">
-        <button type="button" onClick={() => onDecrease(item.product_id)}>
+        <button
+          type="button"
+          className="cart-quantity-btn"
+          onClick={() => onDecrease(item.product_id)}
+          title="Quitar una unidad"
+        >
           −
         </button>
 
-        <strong>{item.quantity}</strong>
-
-        <button type="button" onClick={() => onIncrease(item.product_id)}>
-          +
-        </button>
+        <strong className="cart-item-quantity">{item.quantity}</strong>
 
         <button
           type="button"
-          className="cart-item-remove"
-          onClick={() => onRemove(item.product_id)}
-          title="Quitar producto"
+          className="cart-quantity-btn"
+          onClick={() => onIncrease(item.product_id)}
+          title="Agregar una unidad"
         >
-          ×
+          +
         </button>
       </div>
 
       <div className="cart-item-subtotal">
         {hasNoPrice ? "—" : formatCurrency(item.subtotal)}
       </div>
+
+      <button
+        type="button"
+        className="cart-item-remove"
+        onClick={() => onRemove(item.product_id)}
+        title="Eliminar producto"
+        aria-label="Eliminar producto"
+      >
+        🗑
+      </button>
     </div>
   );
 };

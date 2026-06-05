@@ -15,6 +15,8 @@ class BulkProduct(db.Model):
     cost = db.Column(db.Numeric(10, 2), nullable=True)
 
     active = db.Column(db.Boolean, default=True, nullable=False)
+    
+    sale_margin = db.Column(db.Float, nullable=False, default=0.4)
 
     created_at = db.Column(
         db.DateTime,
@@ -37,5 +39,6 @@ class BulkProduct(db.Model):
             "unit": self.unit,
             "cost": float(self.cost) if self.cost is not None else None,
             "active": self.active,
+            "sale_margin": self.sale_margin,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

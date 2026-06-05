@@ -7,6 +7,7 @@ export type BulkProduct = {
   package_quantity: number;
   unit: string;
   cost: number | null;
+  sale_margin: number;
   active: boolean;
   created_at: string;
 };
@@ -31,6 +32,7 @@ export type BulkProductDTO = {
   package_quantity: number;
   unit: string;
   cost?: number | "";
+  sale_margin: number;
 };
 
 export type CreateBulkRestockDTO = {

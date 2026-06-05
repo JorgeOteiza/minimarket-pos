@@ -21,14 +21,42 @@
 
 .sack-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 460px;
   gap: 14px;
   align-items: start;
+}
+
+.sack-layout.with-side-panel {
+  grid-template-columns: minmax(0, 1fr) 30px 460px;
+}
+
+.sack-layout.without-side-panel {
+  grid-template-columns: minmax(0, 1fr) 30px;
 }
 
 .sack-main,
 .sack-side {
   min-width: 0;
+}
+
+.sack-side {
+  position: sticky;
+  top: 20px;
+}
+
+.sack-sidebar-toggle {
+  width: 30px;
+  min-height: 420px;
+  border: none;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.sack-sidebar-toggle:hover {
+  background: #d1d5db;
 }
 
 .sack-card {
@@ -85,14 +113,14 @@
 .sack-field input,
 .sack-field select {
   width: 100%;
-  height: 44px;
+  height: 46px;
   border: 1px solid #cbd5e1;
   border-radius: 12px;
   background: white;
   color: #111827;
   padding: 0 12px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
   outline: none;
 }
 
@@ -113,7 +141,7 @@
 .sack-edit-btn {
   border-radius: 12px;
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   cursor: pointer;
 }
@@ -174,7 +202,7 @@
 .sack-summary span {
   display: block;
   color: #64748b;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -183,17 +211,19 @@
   display: block;
   margin-top: 4px;
   color: #111827;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 900;
 }
 
 .sack-table-wrapper {
   width: 100%;
   overflow-x: auto;
+  padding-bottom: 8px;
 }
 
 .sack-table {
   width: 100%;
+  min-width: 1180px;
   border-collapse: collapse;
 }
 
@@ -207,7 +237,7 @@
 }
 
 .sack-table th {
-  color: #64748b;
+  color: #000000;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 15px;
@@ -220,12 +250,47 @@
   background: #e0f2fe;
   color: #075985;
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
 }
 
+.sack-sale-price {
+  color: #15a44b;
+  font-weight: 900;
+  font-size: larger;
+}
+
+.sack-table-wrapper::-webkit-scrollbar {
+  height: 13px;
+}
+
+.sack-table-wrapper::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+.sack-table-wrapper::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+}
+
+.sack-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 @media (max-width: 1200px) {
-  .sack-layout {
+  .sack-layout.with-side-panel,
+  .sack-layout.without-side-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .sack-sidebar-toggle {
+    width: 100%;
+    min-height: 36px;
+  }
+
+  .sack-form-grid,
+  .sack-summary {
     grid-template-columns: 1fr;
   }
 }

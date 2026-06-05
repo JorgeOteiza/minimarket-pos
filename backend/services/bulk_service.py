@@ -6,6 +6,9 @@ from backend.models.bulk_product import BulkProduct
 from backend.models.bulk_restock import BulkRestock
 
 
+DEFAULT_SALE_MARGIN = 0.4
+
+
 def get_bulk_products():
     return (
         db.session.query(BulkProduct)
@@ -27,7 +30,7 @@ def get_bulk_product_by_id(product_id):
     product = db.session.get(BulkProduct, product_id)
 
     if not product or not product.active:
-        raise NotFoundError("Producto no encontrado")
+        raise NotFoundError("Producto registrado no encontrado")
 
     return product
 
@@ -38,6 +41,7 @@ def _normalize_bulk_product_data(data):
     package_quantity = data.get("package_quantity")
     unit = (data.get("unit") or "kg").strip()
     cost = data.get("cost")
+    sale_margin = data.get("sale_margin", DEFAULT_SALE_MARGIN)
 
     if not name:
         raise ValidationError("El nombre del producto es obligatorio")
@@ -45,12 +49,21 @@ def _normalize_bulk_product_data(data):
     if package_quantity is None or Decimal(str(package_quantity)) <= 0:
         raise ValidationError("La cantidad por producto debe ser mayor a 0")
 
+    if sale_margin is None or sale_margin == "":
+        sale_margin = DEFAULT_SALE_MARGIN
+
+    sale_margin = float(sale_margin)
+
+    if sale_margin < 0:
+        raise ValidationError("El margen de venta no puede ser negativo")
+
     return {
         "name": name,
         "barcode": barcode,
         "package_quantity": Decimal(str(package_quantity)),
         "unit": unit,
         "cost": Decimal(str(cost)) if cost not in (None, "") else None,
+        "sale_margin": sale_margin,
     }
 
 
@@ -90,6 +103,7 @@ def update_bulk_product(product_id, data):
     product.package_quantity = clean_data["package_quantity"]
     product.unit = clean_data["unit"]
     product.cost = clean_data["cost"]
+    product.sale_margin = clean_data["sale_margin"]
 
     db.session.commit()
 

@@ -9,7 +9,8 @@ type Props = {
   refreshKey?: number;
 };
 
-type MovementFilter = "ALL" | "SALE" | "ADJUSTMENT";
+type MovementFilter = "ALL" | "ADJUSTMENT";
+
 type DateSort = "newest" | "oldest";
 
 const formatDate = (value: string) =>
@@ -20,7 +21,6 @@ const formatDate = (value: string) =>
 
 const getMovementLabel = (type: string) => {
   const labels: Record<string, string> = {
-    SALE: "Venta",
     ADJUSTMENT_ADD: "Ajuste +",
     ADJUSTMENT_REMOVE: "Ajuste -",
     ADJUSTMENT_SET: "Ajuste fijo",
@@ -33,11 +33,15 @@ const isAdjustment = (type: string) => type.startsWith("ADJUSTMENT");
 
 export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
   const [movements, setMovements] = useState<InventoryMovement[]>([]);
+
   const [search, setSearch] = useState("");
+
   const [movementFilter, setMovementFilter] = useState<MovementFilter>("ALL");
+
   const [dateSort, setDateSort] = useState<DateSort>("newest");
 
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -50,6 +54,7 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
         if (!isMounted) return;
 
         setMovements(data);
+
         setError("");
       } catch (err: unknown) {
         if (!isMounted) return;
@@ -72,27 +77,31 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
   const filteredMovements = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return [...movements]
-      .filter((movement) => {
-        const productName = movement.product_name.toLowerCase();
+    return (
+      [...movements]
+        // 🔥 EXCLUIR VENTAS DEL HISTORIAL DE INVENTARIO
+        .filter((movement) => movement.movement_type !== "SALE")
+        .filter((movement) => {
+          const productName = movement.product_name.toLowerCase();
 
-        const matchesSearch =
-          !normalizedSearch || productName.includes(normalizedSearch);
+          const matchesSearch =
+            !normalizedSearch || productName.includes(normalizedSearch);
 
-        const matchesType =
-          movementFilter === "ALL" ||
-          movement.movement_type === movementFilter ||
-          (movementFilter === "ADJUSTMENT" &&
-            isAdjustment(movement.movement_type));
+          const matchesType =
+            movementFilter === "ALL" ||
+            (movementFilter === "ADJUSTMENT" &&
+              isAdjustment(movement.movement_type));
 
-        return matchesSearch && matchesType;
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
+          return matchesSearch && matchesType;
+        })
+        .sort((a, b) => {
+          const dateA = new Date(a.created_at).getTime();
 
-        return dateSort === "newest" ? dateB - dateA : dateA - dateB;
-      });
+          const dateB = new Date(b.created_at).getTime();
+
+          return dateSort === "newest" ? dateB - dateA : dateA - dateB;
+        })
+    );
   }, [movements, search, movementFilter, dateSort]);
 
   if (loading) {
@@ -103,7 +112,7 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
     return <div className="error">{error}</div>;
   }
 
-  if (movements.length === 0) {
+  if (filteredMovements.length === 0) {
     return <p>No hay movimientos de inventario registrados.</p>;
   }
 
@@ -112,7 +121,8 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
       <div className="inventory-history-header">
         <div>
           <h2>Historial reciente de inventario</h2>
-          <p>Revisa ventas y ajustes registrados en stock.</p>
+
+          <p>Revisa únicamente ajustes y correcciones de inventario.</p>
         </div>
 
         <span>{filteredMovements.length} movimientos</span>
@@ -130,8 +140,8 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
           value={movementFilter}
           onChange={(e) => setMovementFilter(e.target.value as MovementFilter)}
         >
-          <option value="ALL">Todos</option>
-          <option value="SALE">Ventas</option>
+          <option value="ALL">Todos los ajustes</option>
+
           <option value="ADJUSTMENT">Ajustes</option>
         </select>
 
@@ -140,6 +150,7 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
           onChange={(e) => setDateSort(e.target.value as DateSort)}
         >
           <option value="newest">Más reciente</option>
+
           <option value="oldest">Más antiguo</option>
         </select>
       </div>
@@ -165,11 +176,17 @@ export default function InventoryMovementsList({ refreshKey = 0 }: Props) {
               {filteredMovements.map((movement) => (
                 <tr key={movement.id}>
                   <td>{formatDate(movement.created_at)}</td>
+
                   <td>{movement.product_name}</td>
+
                   <td>{getMovementLabel(movement.movement_type)}</td>
+
                   <td>{movement.quantity}</td>
+
                   <td>{movement.previous_stock}</td>
+
                   <td>{movement.new_stock}</td>
+
                   <td>{movement.note || "—"}</td>
                 </tr>
               ))}

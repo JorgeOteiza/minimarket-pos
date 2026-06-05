@@ -132,8 +132,10 @@ export default function AnalyticsPage() {
             <TopProductsChart data={data.top_products} />
 
             <InventoryStatusChart
-              lowStockCount={data.low_stock_products.length}
-              productsWithoutPriceCount={data.products_without_price.length}
+              lowStockCount={data.inventory_alerts.low_stock_count}
+              productsWithoutPriceCount={
+                data.inventory_alerts.products_without_price_count
+              }
             />
           </div>
         </>
@@ -259,10 +261,15 @@ export default function AnalyticsPage() {
             {data.top_products.length === 0 ? (
               <p>No hay ventas registradas.</p>
             ) : (
-              data.top_products.map((product) => (
-                <div key={product.id} className="analytics-row">
+              data.top_products.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="analytics-row analytics-row-large"
+                >
                   <div>
-                    <strong>{product.name}</strong>
+                    <strong>
+                      #{index + 1} · {product.name}
+                    </strong>
 
                     <span>{product.quantity_sold} unidades vendidas</span>
                   </div>
@@ -274,26 +281,75 @@ export default function AnalyticsPage() {
           </section>
 
           <section className="analytics-panel">
+            <h2>Productos sin movimiento</h2>
+
+            <p className="analytics-panel-note">
+              Productos sin ventas en los últimos{" "}
+              {data.inventory_alerts.no_movement_days} días o que nunca se han
+              vendido.
+            </p>
+
+            {data.products_without_movement.length === 0 ? (
+              <p>No hay productos sin movimiento relevante.</p>
+            ) : (
+              data.products_without_movement.map((product) => (
+                <div
+                  key={product.id}
+                  className="analytics-row analytics-row-large"
+                >
+                  <div>
+                    <strong>{product.name}</strong>
+
+                    <span>
+                      {product.last_sale_date
+                        ? `Última venta: ${product.last_sale_date}`
+                        : "Nunca vendido"}
+                      {" · "}
+                      Stock: {product.stock}
+                    </span>
+                  </div>
+
+                  <b>
+                    {product.price === null
+                      ? "Sin precio"
+                      : formatCLP(product.price)}
+                  </b>
+                </div>
+              ))
+            )}
+          </section>
+
+          <section className="analytics-panel">
             <h2>Alertas de productos</h2>
 
-            <div className="analytics-row">
+            <div className="analytics-row analytics-row-large">
               <div>
                 <strong>Productos con bajo stock</strong>
 
                 <span>Requieren reposición</span>
               </div>
 
-              <b>{data.low_stock_products.length}</b>
+              <b>{data.inventory_alerts.low_stock_count}</b>
             </div>
 
-            <div className="analytics-row">
+            <div className="analytics-row analytics-row-large">
               <div>
                 <strong>Productos sin precio</strong>
 
                 <span>No pueden venderse en POS</span>
               </div>
 
-              <b>{data.products_without_price.length}</b>
+              <b>{data.inventory_alerts.products_without_price_count}</b>
+            </div>
+
+            <div className="analytics-row analytics-row-large">
+              <div>
+                <strong>Productos sin movimiento</strong>
+
+                <span>Sin ventas recientes o nunca vendidos</span>
+              </div>
+
+              <b>{data.inventory_alerts.products_without_movement_count}</b>
             </div>
           </section>
         </div>

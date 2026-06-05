@@ -54,7 +54,8 @@ export default function SummaryPanel({
           onClick={onCheckout}
           disabled={actionsDisabled}
         >
-          {loading ? "Procesando..." : "Cobrar"}
+          <span className="summary-action-icon">🛒</span>
+          <span>{loading ? "Procesando..." : "Cobrar"}</span>
         </button>
 
         <button
@@ -63,7 +64,8 @@ export default function SummaryPanel({
           onClick={onClear}
           disabled={actionsDisabled}
         >
-          Vaciar carrito
+          <span className="summary-action-icon">🗑</span>
+          <span>Cancelar compra</span>
         </button>
       </div>
     </div>

@@ -17,6 +17,7 @@ def safe_average(total, count):
 def get_analytics_summary():
     today = date.today()
     last_30_days = today - timedelta(days=30)
+    no_movement_since = today - timedelta(days=90)
 
     today_sales = (
         db.session.query(
@@ -37,9 +38,7 @@ def get_analytics_summary():
     )
 
     units_sold_30_days = (
-        db.session.query(
-            func.coalesce(func.sum(SaleItem.quantity), 0)
-        )
+        db.session.query(func.coalesce(func.sum(SaleItem.quantity), 0))
         .join(Sale, Sale.id == SaleItem.sale_id)
         .filter(func.date(Sale.created_at) >= last_30_days)
         .scalar()
@@ -57,17 +56,26 @@ def get_analytics_summary():
         .all()
     )
 
+    low_stock_query = db.session.query(Product).filter(
+        Product.stock <= Product.min_stock
+    )
+
+    products_without_price_query = db.session.query(Product).filter(
+        Product.price.is_(None)
+    )
+
+    low_stock_count = low_stock_query.count()
+    products_without_price_count = products_without_price_query.count()
+
     low_stock_products = (
-        db.session.query(Product)
-        .filter(Product.stock <= Product.min_stock)
+        low_stock_query
         .order_by(Product.stock.asc())
         .limit(10)
         .all()
     )
 
     products_without_price = (
-        db.session.query(Product)
-        .filter(Product.price.is_(None))
+        products_without_price_query
         .order_by(Product.id.desc())
         .limit(10)
         .all()
@@ -86,6 +94,47 @@ def get_analytics_summary():
         .group_by(Product.id, Product.name)
         .order_by(desc("quantity_sold"))
         .limit(10)
+        .all()
+    )
+
+    last_sale_subquery = (
+        db.session.query(
+            SaleItem.product_id.label("product_id"),
+            func.max(func.date(Sale.created_at)).label("last_sale_date"),
+        )
+        .join(Sale, Sale.id == SaleItem.sale_id)
+        .group_by(SaleItem.product_id)
+        .subquery()
+    )
+
+    no_movement_query = (
+        db.session.query(
+            Product.id,
+            Product.name,
+            Product.barcode,
+            Product.stock,
+            Product.price,
+            last_sale_subquery.c.last_sale_date,
+        )
+        .outerjoin(
+            last_sale_subquery,
+            last_sale_subquery.c.product_id == Product.id,
+        )
+        .filter(
+            (last_sale_subquery.c.last_sale_date.is_(None))
+            | (last_sale_subquery.c.last_sale_date < no_movement_since)
+        )
+    )
+
+    products_without_movement_count = no_movement_query.count()
+
+    products_without_movement = (
+        no_movement_query
+        .order_by(
+            last_sale_subquery.c.last_sale_date.asc().nullsfirst(),
+            Product.name.asc(),
+        )
+        .limit(15)
         .all()
     )
 
@@ -112,6 +161,12 @@ def get_analytics_summary():
             ),
             "total_units_sold": float(units_sold_30_days or 0),
             "average_daily_sales": safe_average(last_30_total_sales, 30),
+        },
+        "inventory_alerts": {
+            "low_stock_count": low_stock_count,
+            "products_without_price_count": products_without_price_count,
+            "products_without_movement_count": products_without_movement_count,
+            "no_movement_days": 90,
         },
         "top_product": {
             "id": top_product.id,
@@ -145,6 +200,19 @@ def get_analytics_summary():
                 "barcode": p.barcode,
             }
             for p in products_without_price
+        ],
+        "products_without_movement": [
+            {
+                "id": row.id,
+                "name": row.name,
+                "barcode": row.barcode,
+                "stock": row.stock,
+                "price": float(row.price) if row.price is not None else None,
+                "last_sale_date": (
+                    str(row.last_sale_date) if row.last_sale_date else None
+                ),
+            }
+            for row in products_without_movement
         ],
         "top_products": [
             {

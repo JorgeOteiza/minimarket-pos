@@ -13,6 +13,12 @@ export type AnalyticsSummary = {
     total_units_sold: number;
     average_daily_sales: number;
   };
+  inventory_alerts: {
+    low_stock_count: number;
+    products_without_price_count: number;
+    products_without_movement_count: number;
+    no_movement_days: number;
+  };
   top_product: {
     id: number;
     name: string;
@@ -34,6 +40,14 @@ export type AnalyticsSummary = {
     id: number;
     name: string;
     barcode?: string | null;
+  }[];
+  products_without_movement: {
+    id: number;
+    name: string;
+    barcode?: string | null;
+    stock: number;
+    price: number | null;
+    last_sale_date: string | null;
   }[];
   top_products: {
     id: number;

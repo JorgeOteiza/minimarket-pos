@@ -44,21 +44,35 @@ export default function TopProductsChart({ data }: Props) {
     <div className="analytics-chart-card">
       <div className="analytics-chart-header">
         <h2>Productos más vendidos</h2>
-        <p>Ranking por unidades vendidas.</p>
+        <p>Ranking por unidades vendidas en los últimos 30 días.</p>
       </div>
 
       <div className="analytics-chart-container analytics-chart-container-tall">
-        <ResponsiveContainer width="100%" height={340}>
-          <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
+        <ResponsiveContainer width="100%" height={520}>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 10, right: 30, left: 60, bottom: 10 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis type="number" allowDecimals={false} />
+            <XAxis
+              type="number"
+              allowDecimals={false}
+              tick={{
+                fontSize: 18,
+                fontWeight: 700,
+              }}
+            />
 
             <YAxis
               type="category"
               dataKey="name"
-              width={150}
-              tick={{ fontSize: 12 }}
+              width={260}
+              tick={{
+                fontSize: 18,
+                fontWeight: 800,
+              }}
             />
 
             <Tooltip
@@ -71,7 +85,7 @@ export default function TopProductsChart({ data }: Props) {
               }}
             />
 
-            <Bar dataKey="quantity_sold" radius={[0, 8, 8, 0]} />
+            <Bar dataKey="quantity_sold" radius={[0, 10, 10, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
