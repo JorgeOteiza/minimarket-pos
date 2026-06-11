@@ -26,6 +26,13 @@ export const DashboardLayout = () => {
           </Link>
 
           <Link
+            to="/dashboard/backups"
+            className={isActive("/dashboard/backups") ? "active" : ""}
+          >
+            Respaldos
+          </Link>
+
+          <Link
             to="/dashboard/analytics"
             className={isActive("/dashboard/analytics") ? "active" : ""}
           >

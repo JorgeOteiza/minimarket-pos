@@ -26,7 +26,7 @@ def upgrade():
     sa.Column('unit', sa.String(length=20), nullable=False),
     sa.Column('cost', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('active', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('bulk_products', schema=None) as batch_op:
@@ -41,7 +41,7 @@ def upgrade():
     sa.Column('unit_cost', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('total_cost', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('note', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
     sa.ForeignKeyConstraint(['bulk_product_id'], ['bulk_products.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

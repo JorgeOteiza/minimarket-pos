@@ -6,6 +6,7 @@ import { DashboardLayout } from "./components/DashboardLayout";
 import ProductsPage from "./features/products/pages/ProductsPage";
 import AnalyticsPage from "./features/analytics/pages/AnalyticsPage";
 import BulkRestockPage from "./features/bulk/pages/BulkRestockPage";
+import BackupsPage from "./features/backups/pages/BackupsPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="bulk-restock" element={<BulkRestockPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="backups" element={<BackupsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
