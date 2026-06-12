@@ -265,3 +265,39 @@
     grid-template-columns: 1fr;
   }
 }
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.reports-pdf-button {
+  border: none;
+  border-radius: 14px;
+  background: #111827;
+  color: white;
+  padding: 14px 20px;
+  font-size: 20px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reports-pdf-button:hover {
+  background: #1f2937;
+}
+
+@media (max-width: 900px) {
+  .reports-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reports-pdf-button {
+    width: 100%;
+    text-align: center;
+  }
+}

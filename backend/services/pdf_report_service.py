@@ -47,9 +47,9 @@ def _build_styles():
         ParagraphStyle(
             name="ReportTitle",
             parent=styles["Title"],
-            fontSize=20,
-            leading=24,
-            spaceAfter=10,
+            fontSize=21,
+            leading=25,
+            spaceAfter=8,
             textColor=colors.HexColor("#111827"),
         )
     )
@@ -61,7 +61,20 @@ def _build_styles():
             fontSize=11,
             leading=15,
             textColor=colors.HexColor("#4b5563"),
-            spaceAfter=12,
+            spaceAfter=10,
+        )
+    )
+
+    styles.add(
+        ParagraphStyle(
+            name="ReportNote",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=12,
+            textColor=colors.HexColor("#374151"),
+            backColor=colors.HexColor("#f3f4f6"),
+            borderPadding=6,
+            spaceAfter=10,
         )
     )
 
@@ -87,6 +100,16 @@ def _build_styles():
         )
     )
 
+    styles.add(
+        ParagraphStyle(
+            name="FooterText",
+            parent=styles["Normal"],
+            fontSize=8,
+            leading=11,
+            textColor=colors.HexColor("#6b7280"),
+        )
+    )
+
     return styles
 
 
@@ -108,7 +131,12 @@ def _make_table(data, column_widths=None):
                 ("FONTSIZE", (0, 1), (-1, -1), 8),
                 ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#e5e7eb")),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+                (
+                    "ROWBACKGROUNDS",
+                    (0, 1),
+                    (-1, -1),
+                    [colors.white, colors.HexColor("#f9fafb")],
+                ),
             ]
         )
     )
@@ -118,7 +146,6 @@ def _make_table(data, column_widths=None):
 
 def generate_sales_report_pdf(period="today"):
     report = get_sales_report(period=period)
-
     buffer = BytesIO()
 
     document = SimpleDocTemplate(
@@ -135,18 +162,30 @@ def generate_sales_report_pdf(period="today"):
     elements = []
 
     generated_at = datetime.now().strftime("%d-%m-%Y %H:%M")
+    summary = report["summary"]
+    top_products = report["top_products"][:10]
+    recent_sales = report["recent_sales"][:20]
 
     elements.append(Paragraph("MINIMARKET POS", styles["ReportTitle"]))
+
     elements.append(
         Paragraph(
-            f"Reporte de ventas · {report['period']['label']}<br/>"
-            f"Periodo: {report['period']['start_date']} al {report['period']['end_date']}<br/>"
-            f"Generado: {generated_at}",
+            f"<b>Reporte de ventas</b> · {report['period']['label']}<br/>"
+            f"<b>Periodo:</b> {report['period']['start_date']} al {report['period']['end_date']}<br/>"
+            f"<b>Fecha de generación:</b> {generated_at}<br/>"
+            f"<b>Tipo de reporte:</b> Resumen administrativo",
             styles["ReportSubtitle"],
         )
     )
 
-    summary = report["summary"]
+    elements.append(
+        Paragraph(
+            "Este documento resume las ventas registradas en el sistema para el "
+            "periodo seleccionado. Los montos corresponden a ventas almacenadas "
+            "en la base de datos local de la aplicación.",
+            styles["ReportNote"],
+        )
+    )
 
     elements.append(Paragraph("Resumen comercial", styles["SectionTitle"]))
 
@@ -165,8 +204,6 @@ def generate_sales_report_pdf(period="today"):
     elements.append(Spacer(1, 0.4 * cm))
 
     elements.append(Paragraph("Top productos vendidos", styles["SectionTitle"]))
-
-    top_products = report["top_products"][:10]
 
     if top_products:
         top_products_table = [["#", "Producto", "Unidades", "Total vendido"]]
@@ -199,7 +236,12 @@ def generate_sales_report_pdf(period="today"):
 
     elements.append(Paragraph("Ventas recientes", styles["SectionTitle"]))
 
-    recent_sales = report["recent_sales"][:20]
+    elements.append(
+        Paragraph(
+            f"Se muestran hasta {len(recent_sales)} ventas recientes del periodo seleccionado.",
+            styles["SmallText"],
+        )
+    )
 
     if recent_sales:
         recent_sales_table = [["Venta", "Fecha", "Productos", "Total"]]
@@ -229,17 +271,21 @@ def generate_sales_report_pdf(period="today"):
         )
 
     elements.append(Spacer(1, 0.5 * cm))
+
     elements.append(
         Paragraph(
-            "Documento generado automáticamente por Minimarket POS.",
-            styles["SmallText"],
+            "Documento generado automáticamente por Minimarket POS. "
+            "Este reporte tiene fines administrativos y de control interno.",
+            styles["FooterText"],
         )
     )
 
     document.build(elements)
-
     buffer.seek(0)
 
-    filename = f"reporte_ventas_{period}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+    filename = (
+        f"reporte_ventas_{period}_"
+        f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+    )
 
     return buffer, filename
