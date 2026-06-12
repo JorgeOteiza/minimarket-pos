@@ -8,6 +8,7 @@ import AnalyticsPage from "./features/analytics/pages/AnalyticsPage";
 import BulkRestockPage from "./features/bulk/pages/BulkRestockPage";
 import BackupsPage from "./features/backups/pages/BackupsPage";
 import ReportsPage from "./features/reports/pages/ReportsPage";
+import BusinessSettingsPage from "./features/settings/pages/BusinessSettingsPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="backups" element={<BackupsPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="settings" element={<BusinessSettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

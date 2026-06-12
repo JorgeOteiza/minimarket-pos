@@ -11,40 +11,59 @@ export const DashboardLayout = () => {
         <h2 className="sidebar-title">Menú</h2>
 
         <nav className="sidebar-nav">
-          <Link
-            to="/dashboard/products"
-            className={isActive("/dashboard/products") ? "active" : ""}
-          >
-            Productos
-          </Link>
+          <div className="sidebar-section">
+            <span className="sidebar-section-title">Gestión diaria</span>
 
-          <Link
-            to="/dashboard/bulk-restock"
-            className={isActive("/dashboard/bulk-restock") ? "active" : ""}
-          >
-            Reposición de sacos y paquetes
-          </Link>
+            <Link
+              to="/dashboard/products"
+              className={isActive("/dashboard/products") ? "active" : ""}
+            >
+              Productos
+            </Link>
 
-          <Link
-            to="/dashboard/backups"
-            className={isActive("/dashboard/backups") ? "active" : ""}
-          >
-            Respaldos
-          </Link>
+            <Link
+              to="/dashboard/bulk-restock"
+              className={isActive("/dashboard/bulk-restock") ? "active" : ""}
+            >
+              Reposición de sacos y paquetes
+            </Link>
+          </div>
 
-          <Link
-            to="/dashboard/reports"
-            className={isActive("/dashboard/reports") ? "active" : ""}
-          >
-            Reportes
-          </Link>
+          <div className="sidebar-section">
+            <span className="sidebar-section-title">Información comercial</span>
 
-          <Link
-            to="/dashboard/analytics"
-            className={isActive("/dashboard/analytics") ? "active" : ""}
-          >
-            Análisis de Datos
-          </Link>
+            <Link
+              to="/dashboard/reports"
+              className={isActive("/dashboard/reports") ? "active" : ""}
+            >
+              Reportes de ventas
+            </Link>
+
+            <Link
+              to="/dashboard/analytics"
+              className={isActive("/dashboard/analytics") ? "active" : ""}
+            >
+              Análisis de datos
+            </Link>
+          </div>
+
+          <div className="sidebar-section sidebar-section-system">
+            <span className="sidebar-section-title">Sistema</span>
+
+            <Link
+              to="/dashboard/backups"
+              className={isActive("/dashboard/backups") ? "active" : ""}
+            >
+              Respaldos
+            </Link>
+
+            <Link
+              to="/dashboard/settings"
+              className={isActive("/dashboard/settings") ? "active" : ""}
+            >
+              Configuración del negocio
+            </Link>
+          </div>
         </nav>
       </aside>
 
