@@ -12,6 +12,7 @@ from backend.exceptions import AppError
 from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.exceptions import HTTPException
 from backend.routes.backups import backups_bp
+from backend.routes.reports import reports_bp
 
 import traceback
 
@@ -63,6 +64,7 @@ def create_app():
     app.register_blueprint(analytics_bp, url_prefix="/api")
     app.register_blueprint(bulk_bp, url_prefix="/api")
     app.register_blueprint(backups_bp, url_prefix="/api")
+    app.register_blueprint(reports_bp, url_prefix="/api")
 
     register_error_handlers(app)
 
