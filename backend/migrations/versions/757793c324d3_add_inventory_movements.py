@@ -27,7 +27,7 @@ def upgrade():
     sa.Column('new_stock', sa.Integer(), nullable=False),
     sa.Column('reference_id', sa.Integer(), nullable=True),
     sa.Column('note', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

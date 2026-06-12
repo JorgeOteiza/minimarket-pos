@@ -27,7 +27,7 @@ def upgrade():
     op.create_table('sales',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
