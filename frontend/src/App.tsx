@@ -7,6 +7,7 @@ import ProductsPage from "./features/products/pages/ProductsPage";
 import AnalyticsPage from "./features/analytics/pages/AnalyticsPage";
 import BulkRestockPage from "./features/bulk/pages/BulkRestockPage";
 import BackupsPage from "./features/backups/pages/BackupsPage";
+import ReportsPage from "./features/reports/pages/ReportsPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="bulk-restock" element={<BulkRestockPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="backups" element={<BackupsPage />} />
+          <Route path="reports" element={<ReportsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

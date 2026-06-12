@@ -33,6 +33,13 @@ export const DashboardLayout = () => {
           </Link>
 
           <Link
+            to="/dashboard/reports"
+            className={isActive("/dashboard/reports") ? "active" : ""}
+          >
+            Reportes
+          </Link>
+
+          <Link
             to="/dashboard/analytics"
             className={isActive("/dashboard/analytics") ? "active" : ""}
           >
