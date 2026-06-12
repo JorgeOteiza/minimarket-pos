@@ -12,6 +12,7 @@ marshmallow = "*"
 flask-marshmallow = "*"
 psycopg2-binary = "*"
 flask-cors = "*"
+reportlab = "*"
 
 [dev-packages]
 

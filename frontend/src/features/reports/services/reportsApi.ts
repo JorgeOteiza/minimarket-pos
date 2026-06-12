@@ -48,3 +48,7 @@ export async function getSalesReport(
 
   return res.json();
 }
+
+export function getSalesReportPdfUrl(period: ReportPeriod): string {
+  return `${API_URL}/reports/sales/pdf?period=${period}`;
+}

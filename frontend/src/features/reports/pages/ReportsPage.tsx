@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import {
   getSalesReport,
+  getSalesReportPdfUrl,
   type ReportPeriod,
   type SalesReport,
 } from "../services/reportsApi";
@@ -78,6 +79,14 @@ export default function ReportsPage() {
           <h1>Reportes de ventas</h1>
           <p>Revisa ventas diarias, semanales, mensuales y anuales.</p>
         </div>
+
+        <a
+          className="reports-pdf-button"
+          href={getSalesReportPdfUrl(activePeriod)}
+          download
+        >
+          Exportar PDF
+        </a>
       </div>
 
       <div className="reports-tabs">
