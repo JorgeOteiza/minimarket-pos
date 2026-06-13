@@ -18,7 +18,7 @@
 
 .analytics-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -162,6 +162,26 @@
   font-weight: 900;
 }
 
+.analytics-row-large strong {
+  font-size: 24px;
+}
+
+.analytics-row-large span {
+  font-size: 20px;
+}
+
+.analytics-row-large b {
+  font-size: 26px;
+}
+
+.analytics-panel-note {
+  color: #64748b;
+  font-size: 20px;
+  line-height: 1.35;
+  margin: -6px 0 12px;
+  font-weight: 700;
+}
+
 .analytics-chart-container {
   width: 100%;
   height: 320px;
@@ -170,10 +190,6 @@
 .analytics-chart-container-tall {
   height: 540px;
 }
-
-/* =========================
-   INVENTORY ALERTS
-========================= */
 
 .inventory-alert-card {
   display: flex;
@@ -268,8 +284,22 @@
   border: 1px solid #fed7aa;
 }
 
+.recharts-cartesian-axis-tick-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.recharts-tooltip-wrapper {
+  font-size: 18px;
+}
+
+@media (max-width: 1400px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1100px) {
-  .analytics-kpi-grid,
   .analytics-grid,
   .analytics-grid-two,
   .inventory-alert-grid {
@@ -285,31 +315,8 @@
   }
 }
 
-.recharts-cartesian-axis-tick-value {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.recharts-tooltip-wrapper {
-  font-size: 18px;
-}
-
-.analytics-panel-note {
-  color: #64748b;
-  font-size: 20px;
-  line-height: 1.35;
-  margin: -6px 0 12px;
-  font-weight: 700;
-}
-
-.analytics-row-large strong {
-  font-size: 24px;
-}
-
-.analytics-row-large span {
-  font-size: 20px;
-}
-
-.analytics-row-large b {
-  font-size: 26px;
+@media (max-width: 900px) {
+  .analytics-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }

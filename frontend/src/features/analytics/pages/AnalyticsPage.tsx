@@ -22,11 +22,8 @@ const formatCLP = (value: number) =>
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsSummary | null>(null);
-
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("summary");
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -53,7 +50,6 @@ export default function AnalyticsPage() {
       <div className="analytics-header">
         <div>
           <h1>Análisis de Datos</h1>
-
           <p>Resumen comercial e inventario del minimarket.</p>
         </div>
       </div>
@@ -124,6 +120,22 @@ export default function AnalyticsPage() {
                   : "No hay datos"}
               </small>
             </div>
+
+            <div className="analytics-card">
+              <span>Producto más rentable</span>
+              <strong className="analytics-card-product">
+                {data.most_profitable_product
+                  ? data.most_profitable_product.name
+                  : "Sin datos"}
+              </strong>
+              <small>
+                {data.most_profitable_product
+                  ? `Ganancia estimada: ${formatCLP(
+                      data.most_profitable_product.estimated_total_profit,
+                    )}`
+                  : "No hay datos"}
+              </small>
+            </div>
           </div>
 
           <SalesChart data={data.sales_by_day} />
@@ -149,7 +161,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Ventas de hoy</strong>
-
                 <span>Cantidad de ventas registradas</span>
               </div>
 
@@ -159,7 +170,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Total vendido hoy</strong>
-
                 <span>Monto acumulado del día</span>
               </div>
 
@@ -169,7 +179,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Ventas últimos 30 días</strong>
-
                 <span>Cantidad de ventas recientes</span>
               </div>
 
@@ -179,7 +188,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row">
               <div>
                 <strong>Total últimos 30 días</strong>
-
                 <span>Monto acumulado reciente</span>
               </div>
 
@@ -197,11 +205,41 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
-
                     <span>{product.quantity_sold} unidades</span>
                   </div>
 
                   <b>{formatCLP(product.total_sold)}</b>
+                </div>
+              ))
+            )}
+          </section>
+
+          <section className="analytics-panel">
+            <h2>Productos más rentables</h2>
+
+            <p className="analytics-panel-note">
+              Top 5 según ganancia estimada en los últimos 30 días.
+            </p>
+
+            {data.profitable_products.length === 0 ? (
+              <p>No hay datos suficientes para calcular rentabilidad.</p>
+            ) : (
+              data.profitable_products.slice(0, 5).map((product, index) => (
+                <div key={product.id} className="analytics-row">
+                  <div>
+                    <strong>
+                      #{index + 1} · {product.name}
+                    </strong>
+
+                    <span>
+                      Ganancia unidad: {formatCLP(product.profit_per_unit)}
+                      {" · "}
+                      Margen: {product.margin_percent.toFixed(0)}%{" · "}
+                      Vendidas: {product.quantity_sold}
+                    </span>
+                  </div>
+
+                  <b>{formatCLP(product.estimated_total_profit)}</b>
                 </div>
               ))
             )}
@@ -221,7 +259,6 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
-
                     <span>Mínimo: {product.min_stock}</span>
                   </div>
 
@@ -241,7 +278,6 @@ export default function AnalyticsPage() {
                 <div key={product.id} className="analytics-row">
                   <div>
                     <strong>{product.name}</strong>
-
                     <span>{product.barcode || "Sin código"}</span>
                   </div>
 
@@ -255,6 +291,40 @@ export default function AnalyticsPage() {
 
       {activeTab === "products" && (
         <div className="analytics-grid analytics-grid-two">
+          <section className="analytics-panel">
+            <h2>Productos más rentables</h2>
+
+            <p className="analytics-panel-note">
+              Ranking estimado según ganancia total de los últimos 30 días.
+            </p>
+
+            {data.profitable_products.length === 0 ? (
+              <p>No hay datos suficientes para calcular rentabilidad.</p>
+            ) : (
+              data.profitable_products.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="analytics-row analytics-row-large"
+                >
+                  <div>
+                    <strong>
+                      #{index + 1} · {product.name}
+                    </strong>
+
+                    <span>
+                      Ganancia unidad: {formatCLP(product.profit_per_unit)}
+                      {" · "}
+                      Margen: {product.margin_percent.toFixed(0)}%{" · "}
+                      Vendidas: {product.quantity_sold}
+                    </span>
+                  </div>
+
+                  <b>{formatCLP(product.estimated_total_profit)}</b>
+                </div>
+              ))
+            )}
+          </section>
+
           <section className="analytics-panel">
             <h2>Top productos vendidos</h2>
 
@@ -325,7 +395,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row analytics-row-large">
               <div>
                 <strong>Productos con bajo stock</strong>
-
                 <span>Requieren reposición</span>
               </div>
 
@@ -335,7 +404,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row analytics-row-large">
               <div>
                 <strong>Productos sin precio</strong>
-
                 <span>No pueden venderse en POS</span>
               </div>
 
@@ -345,7 +413,6 @@ export default function AnalyticsPage() {
             <div className="analytics-row analytics-row-large">
               <div>
                 <strong>Productos sin movimiento</strong>
-
                 <span>Sin ventas recientes o nunca vendidos</span>
               </div>
 

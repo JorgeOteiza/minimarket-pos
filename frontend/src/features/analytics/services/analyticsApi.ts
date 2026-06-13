@@ -55,6 +55,28 @@ export type AnalyticsSummary = {
     quantity_sold: number;
     total_sold: number;
   }[];
+  profitable_products: {
+    id: number;
+    name: string;
+    price: number;
+    unit_cost_estimated: number;
+    profit_per_unit: number;
+    margin_percent: number;
+    quantity_sold: number;
+    total_sold: number;
+    estimated_total_profit: number;
+  }[];
+  most_profitable_product: {
+    id: number;
+    name: string;
+    price: number;
+    unit_cost_estimated: number;
+    profit_per_unit: number;
+    margin_percent: number;
+    quantity_sold: number;
+    total_sold: number;
+    estimated_total_profit: number;
+  } | null;
 };
 
 export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
