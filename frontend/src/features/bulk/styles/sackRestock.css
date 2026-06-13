@@ -278,6 +278,12 @@
   background: #64748b;
 }
 
+.sack-form-grid .sack-field label {
+  min-height: 34px;
+  display: flex;
+  align-items: flex-end;
+}
+
 @media (max-width: 1200px) {
   .sack-layout.with-side-panel,
   .sack-layout.without-side-panel {

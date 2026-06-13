@@ -1944,3 +1944,14 @@ textarea {
 .products-table tbody tr.product-row.selected:hover td {
   background-color: #dcfce7 !important;
 }
+
+.form-help-box {
+  background: #eff6ff;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}

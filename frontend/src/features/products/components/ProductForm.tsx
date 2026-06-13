@@ -23,6 +23,7 @@ export const ProductForm = ({
 }: Props) => {
   const {
     formData,
+    marginPercentInput,
 
     loading,
 
@@ -33,6 +34,7 @@ export const ProductForm = ({
     hasUnsavedChanges,
 
     handleChange,
+    handleMarginChange,
     handleSubmit,
     handleDelete,
   } = useProductForm({
@@ -45,17 +47,13 @@ export const ProductForm = ({
 
   return (
     <div className="product-form" data-dirty={hasUnsavedChanges}>
-      {/* =========================
-          HEADER
-      ========================= */}
-
       <div className="product-form-header">
         <div>
           <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
 
           <p>
             {mode === "create"
-              ? "Ingresa los datos del producto."
+              ? "Ingresa los datos del producto. El stock se administra desde Inventario."
               : "Actualiza la información general."}
           </p>
         </div>
@@ -71,10 +69,6 @@ export const ProductForm = ({
           </button>
         )}
       </div>
-
-      {/* =========================
-          FORM
-      ========================= */}
 
       <form onSubmit={handleSubmit} className="product-form-body">
         <div className="form-grid">
@@ -113,17 +107,14 @@ export const ProductForm = ({
             error={fieldErrors.pack_units}
           />
 
-          {mode === "create" && (
-            <FormField
-              label="Stock inicial"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              error={fieldErrors.stock}
-              warning={warnings.stock}
-            />
-          )}
+          <FormField
+            label="Margen de venta (%)"
+            name="margin"
+            type="number"
+            value={marginPercentInput}
+            onChange={handleMarginChange}
+            error={fieldErrors.margin}
+          />
 
           <FormField
             label="Precio venta"
@@ -146,9 +137,11 @@ export const ProductForm = ({
           />
         </div>
 
-        {/* =========================
-            MENSAJES GLOBALES
-        ========================= */}
+        <div className="form-help-box">
+          Para modificar el stock, vuelve a la lista de{" "}
+          <strong>Productos</strong> y usa el botón <strong>Inventario</strong>{" "}
+          del producto correspondiente.
+        </div>
 
         {successMessage && (
           <div className="form-success-message">✓ {successMessage}</div>
@@ -157,10 +150,6 @@ export const ProductForm = ({
         {fieldErrors.general && (
           <div className="form-error-message">✕ {fieldErrors.general}</div>
         )}
-
-        {/* =========================
-            ACTIONS
-        ========================= */}
 
         <div className="product-form-actions">
           <button

@@ -36,6 +36,8 @@ type UseProductFormProps = {
   onCancel?: () => void;
 };
 
+const DEFAULT_IVA = 0.19;
+
 const EMPTY_FORM: CreateProductDTO = {
   name: "",
   pack_units: null,
@@ -43,10 +45,58 @@ const EMPTY_FORM: CreateProductDTO = {
   cost: null,
   barcode: "",
   stock: 0,
-  margin: 0,
+  margin: 0.3,
   min_stock: 0,
-  iva: 0.19,
+  iva: DEFAULT_IVA,
 };
+
+const getInitialFormData = (product?: Product): CreateProductDTO => {
+  const iva = product?.iva ?? DEFAULT_IVA;
+
+  const calculatedMargin = calculateMarginFromValues(
+    product?.cost,
+    product?.pack_units,
+    product?.price,
+    iva,
+  );
+
+  return {
+    name: product?.name ?? "",
+    pack_units: product?.pack_units ?? null,
+    price: product?.price ?? null,
+    cost: product?.cost ?? null,
+    barcode: product?.barcode ?? "",
+    stock: product?.stock ?? 0,
+    margin: calculatedMargin ?? product?.margin ?? 0.3,
+    min_stock: product?.min_stock ?? 0,
+    iva,
+  };
+};
+
+const calculateMarginFromValues = (
+  cost?: number | null,
+  packUnits?: number | null,
+  price?: number | null,
+  iva = DEFAULT_IVA,
+) => {
+  if (!cost || !packUnits || packUnits <= 0 || !price || price <= 0) {
+    return null;
+  }
+
+  const unitCost = Number(cost) / Number(packUnits);
+  const costWithIva = unitCost * (1 + iva);
+
+  if (costWithIva <= 0) {
+    return null;
+  }
+
+  return (Number(price) - costWithIva) / costWithIva;
+};
+
+const toMarginPercent = (margin?: number | null) =>
+  margin === null || margin === undefined
+    ? ""
+    : String(Math.round(margin * 100));
 
 export const useProductForm = ({
   mode,
@@ -55,19 +105,13 @@ export const useProductForm = ({
   onUpdated,
   onDeleted,
 }: UseProductFormProps) => {
-  const initialFormData: CreateProductDTO = {
-    name: product?.name ?? "",
-    pack_units: product?.pack_units ?? null,
-    price: product?.price ?? null,
-    cost: product?.cost ?? null,
-    barcode: product?.barcode ?? "",
-    stock: product?.stock ?? 0,
-    margin: product?.margin ?? 0,
-    min_stock: product?.min_stock ?? 0,
-    iva: product?.iva ?? 0.19,
-  };
+  const initialFormData = getInitialFormData(product);
 
   const [formData, setFormData] = useState<CreateProductDTO>(initialFormData);
+
+  const [marginPercentInput, setMarginPercentInput] = useState(
+    toMarginPercent(initialFormData.margin),
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -77,6 +121,7 @@ export const useProductForm = ({
 
   const hasUnsavedChanges =
     JSON.stringify(formData) !== JSON.stringify(initialFormData);
+
   const { barcodeWarning } = useBarcodeValidation({
     barcode: formData.barcode ?? "",
     currentProductId: product?.id,
@@ -90,32 +135,61 @@ export const useProductForm = ({
     }));
   };
 
+  const recalculateMarginFromPrice = (
+    cost: number | null | undefined,
+    packUnits: number | null | undefined,
+    price: number | null | undefined,
+    iva: number,
+  ) => {
+    if (!cost || !packUnits || packUnits <= 0 || !price || price <= 0) {
+      return null;
+    }
+
+    const unitCost = Number(cost) / Number(packUnits);
+    const unitCostWithIva = unitCost * (1 + iva);
+
+    if (unitCostWithIva <= 0) {
+      return null;
+    }
+
+    return (Number(price) - unitCostWithIva) / unitCostWithIva;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     let normalizedValue: string | number | null = value;
 
-    // =========================
-    // TEXT FIELDS
-    // =========================
-
     if (name === "name") {
       normalizedValue = normalizeText(value);
     } else if (name === "barcode") {
       normalizedValue = normalizeBarcode(value);
-    }
-
-    // =========================
-    // NUMBER FIELDS
-    // =========================
-    else {
+    } else {
       normalizedValue = value === "" ? null : normalizeNumber(Number(value));
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: normalizedValue,
-    }));
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        [name]: normalizedValue,
+      };
+
+      if (name === "price") {
+        const newMargin = recalculateMarginFromPrice(
+          next.cost,
+          next.pack_units,
+          next.price,
+          next.iva ?? DEFAULT_IVA,
+        );
+
+        if (newMargin !== null) {
+          next.margin = newMargin;
+          setMarginPercentInput(String(Math.round(newMargin * 100)));
+        }
+      }
+
+      return next;
+    });
 
     clearFieldError(name);
   };
@@ -123,7 +197,20 @@ export const useProductForm = ({
   const handleMarginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/^0+(?=\d)/, "");
 
-    const marginPercent = raw === "" ? 0 : Number(raw);
+    setMarginPercentInput(raw);
+
+    const marginPercent = raw === "" ? null : Number(raw);
+
+    if (marginPercent === null || Number.isNaN(marginPercent)) {
+      setFormData((prev) => ({
+        ...prev,
+        margin: null,
+        price: prev.price,
+      }));
+
+      clearFieldError("margin");
+      return;
+    }
 
     const marginDecimal = marginPercent / 100;
 
@@ -131,7 +218,7 @@ export const useProductForm = ({
       cost: formData.cost ?? null,
       packUnits: formData.pack_units ?? 0,
       marginPercent,
-      iva: formData.iva ?? 0.19,
+      iva: formData.iva ?? DEFAULT_IVA,
     });
 
     setFormData((prev) => ({
@@ -146,6 +233,7 @@ export const useProductForm = ({
 
   const resetForm = () => {
     setFormData(EMPTY_FORM);
+    setMarginPercentInput(toMarginPercent(EMPTY_FORM.margin));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -157,7 +245,12 @@ export const useProductForm = ({
 
     setSuccessMessage(null);
 
-    const errors = validateProductForm(formData);
+    const payload: CreateProductDTO = {
+      ...formData,
+      stock: mode === "create" ? 0 : formData.stock,
+    };
+
+    const errors = validateProductForm(payload);
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -169,7 +262,7 @@ export const useProductForm = ({
 
     try {
       if (mode === "create") {
-        const created = await createProduct(formData);
+        const created = await createProduct(payload);
 
         onCreated?.(created);
 
@@ -181,7 +274,7 @@ export const useProductForm = ({
       if (mode === "edit" && product) {
         const updated = await updateProduct(
           product.id,
-          formData as UpdateProductDTO,
+          payload as UpdateProductDTO,
         );
 
         onUpdated?.(updated);
@@ -256,13 +349,13 @@ export const useProductForm = ({
 
   const warnings = {
     ...getProductWarnings(formData),
-
     barcode: barcodeWarning || getProductWarnings(formData).barcode,
   };
 
   return {
     formData,
     setFormData,
+    marginPercentInput,
 
     loading,
 
