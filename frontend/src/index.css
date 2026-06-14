@@ -376,6 +376,9 @@ textarea {
 .products-page {
   padding: 24px;
   color: #111827;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .products-header {
@@ -467,10 +470,14 @@ textarea {
 
 .products-list-panel {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .products-table-wrapper {
   width: 100%;
+  min-height: 360px;
   max-height: calc(100vh - 390px);
   overflow: auto;
   padding-bottom: 10px;
@@ -1495,6 +1502,9 @@ textarea {
 
 .inventory-history-panel {
   margin-top: 24px;
+  flex-shrink: 0;
+  max-height: 360px;
+  overflow: hidden;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
@@ -1510,10 +1520,8 @@ textarea {
 
 .inventory-history-table-wrapper {
   width: 100%;
-  overflow-x: auto;
-
-  max-height: 500px;
-  overflow-y: auto;
+  overflow: auto;
+  max-height: 210px;
 }
 
 .inventory-history-table thead th {

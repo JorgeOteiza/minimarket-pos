@@ -620,9 +620,9 @@ export default function BulkRestockPage() {
                   </div>
                 </div>
 
-                <div className="sack-form-grid">
+                <div className="sack-form-grid sack-pricing-grid">
                   <div className="sack-field">
-                    <label>Costo producto sin IVA</label>
+                    <label>Costo sin IVA</label>
                     <input
                       type="number"
                       min={0}
@@ -635,7 +635,7 @@ export default function BulkRestockPage() {
                   </div>
 
                   <div className="sack-field">
-                    <label>Margen de venta (%)</label>
+                    <label>Margen (%)</label>
                     <input
                       type="number"
                       min={0}
@@ -653,7 +653,7 @@ export default function BulkRestockPage() {
                             : Number(e.target.value) / 100,
                         )
                       }
-                      placeholder="Ej: 40%"
+                      placeholder="Ej: 40"
                     />
                   </div>
                 </div>

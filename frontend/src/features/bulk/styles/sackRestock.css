@@ -278,8 +278,18 @@
   background: #64748b;
 }
 
-.sack-form-grid .sack-field label {
-  min-height: 34px;
+.sack-pricing-grid {
+  align-items: end;
+}
+
+.sack-pricing-grid .sack-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.sack-pricing-grid .sack-field label {
+  min-height: 22px;
   display: flex;
   align-items: flex-end;
 }
