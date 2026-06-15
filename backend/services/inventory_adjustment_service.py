@@ -1,15 +1,7 @@
 from backend.extensions import db
-
 from backend.models import Product
-
-from backend.exceptions import (
-    NotFoundError,
-    ValidationError,
-)
-
-from backend.services.inventory_service import (
-    register_inventory_movement,
-)
+from backend.exceptions import NotFoundError, ValidationError
+from backend.services.inventory_service import register_inventory_movement
 
 
 VALID_MOVEMENT_TYPES = {
@@ -27,12 +19,12 @@ def adjust_inventory(
     note=None,
 ):
     if movement_type not in VALID_MOVEMENT_TYPES:
-        raise ValidationError("Invalid movement type")
+        raise ValidationError("Tipo de movimiento de inventario inválido.")
 
     quantity = int(quantity)
 
     if quantity <= 0:
-        raise ValidationError("Quantity must be greater than 0")
+        raise ValidationError("La cantidad debe ser mayor a 0.")
 
     with db.session.begin():
         product = (
@@ -43,7 +35,7 @@ def adjust_inventory(
         )
 
         if not product:
-            raise NotFoundError(f"Product {product_id} not found")
+            raise NotFoundError("No se encontró el producto solicitado.")
 
         if movement_type == "ADJUSTMENT_ADD":
             register_inventory_movement(
@@ -54,6 +46,12 @@ def adjust_inventory(
             )
 
         elif movement_type == "ADJUSTMENT_REMOVE":
+            if product.stock < quantity:
+                raise ValidationError(
+                    f"Stock insuficiente para {product.name}. "
+                    f"Disponible: {product.stock} unidades."
+                )
+
             register_inventory_movement(
                 product=product,
                 quantity=-quantity,

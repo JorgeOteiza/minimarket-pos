@@ -32,10 +32,12 @@ def validate_quantity(product, quantity):
     quantity = float(quantity)
 
     if quantity <= 0:
-        raise ValidationError("Quantity must be greater than 0")
+        raise ValidationError("La cantidad debe ser mayor a 0.")
 
     if not product.is_weighted and not quantity.is_integer():
-        raise ValidationError(f"Product {product.name} must have integer quantity")
+        raise ValidationError(
+            f"El producto {product.name} debe venderse en unidades enteras."
+        )
 
     return quantity
 
@@ -61,16 +63,18 @@ def build_cart_response(cart: Cart):
         unit_price = float(product.price) if has_price else 0
         subtotal = unit_price * item.quantity
 
-        items.append({
-            "product_id": product.id,
-            "name": product.name,
-            "quantity": int(item.quantity)
-            if float(item.quantity).is_integer()
-            else item.quantity,
-            "unit_price": unit_price,
-            "subtotal": subtotal,
-            "has_price": has_price,
-        })
+        items.append(
+            {
+                "product_id": product.id,
+                "name": product.name,
+                "quantity": int(item.quantity)
+                if float(item.quantity).is_integer()
+                else item.quantity,
+                "unit_price": unit_price,
+                "subtotal": subtotal,
+                "has_price": has_price,
+            }
+        )
 
         total += subtotal
 
@@ -90,7 +94,7 @@ def add_to_cart(product_id, quantity):
     product = db.session.get(Product, product_id)
 
     if not product:
-        raise NotFoundError(f"Product {product_id} not found")
+        raise NotFoundError("No se encontró el producto solicitado.")
 
     quantity = validate_quantity(product, quantity)
 
@@ -101,7 +105,8 @@ def add_to_cart(product_id, quantity):
 
     if product.stock < new_quantity:
         raise ValidationError(
-            f"Not enough stock for {product.name}. Available: {product.stock}"
+            f"Stock insuficiente para {product.name}. "
+            f"Disponible: {product.stock} unidades."
         )
 
     if cart_item:
@@ -124,7 +129,7 @@ def remove_from_cart(product_id):
     cart_item = get_cart_item(cart.id, product_id)
 
     if not cart_item:
-        raise NotFoundError(f"Product {product_id} not in cart")
+        raise NotFoundError("El producto no está en el carrito.")
 
     db.session.delete(cart_item)
     db.session.commit()
@@ -137,14 +142,14 @@ def decrease_quantity(product_id, quantity):
     product = db.session.get(Product, product_id)
 
     if not product:
-        raise NotFoundError(f"Product {product_id} not found")
+        raise NotFoundError("No se encontró el producto solicitado.")
 
     quantity = validate_quantity(product, quantity)
 
     cart_item = get_cart_item(cart.id, product_id)
 
     if not cart_item:
-        raise NotFoundError(f"Product {product_id} not in cart")
+        raise NotFoundError("El producto no está en el carrito.")
 
     cart_item.quantity -= quantity
 
@@ -174,7 +179,7 @@ def checkout():
     )
 
     if not cart_items:
-        raise ValidationError("Cart is empty")
+        raise ValidationError("El carrito está vacío.")
 
     items = [
         {
@@ -185,9 +190,11 @@ def checkout():
     ]
 
     try:
-        sale = create_sale({
-            "items": items
-        })
+        sale = create_sale(
+            {
+                "items": items,
+            }
+        )
 
         (
             db.session.query(CartItem)

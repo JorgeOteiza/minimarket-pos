@@ -34,7 +34,7 @@ def _create_sale(data):
     items_data = data.get("items")
 
     if not items_data:
-        raise ValidationError("Sale must have at least one item")
+        raise ValidationError("La venta debe tener al menos un producto.")
 
     grouped_items = defaultdict(float)
 
@@ -43,10 +43,10 @@ def _create_sale(data):
         quantity = item.get("quantity")
 
         if product_id is None:
-            raise ValidationError("Product id is required")
+            raise ValidationError("El producto es obligatorio.")
 
         if quantity is None:
-            raise ValidationError("Quantity is required")
+            raise ValidationError("La cantidad es obligatoria.")
 
         grouped_items[product_id] += quantity
 
@@ -65,16 +65,18 @@ def _create_sale(data):
         )
 
         if not product:
-            raise NotFoundError(f"Product {product_id} not found")
+            raise NotFoundError("No se encontró el producto solicitado.")
 
         if not product.is_weighted and not float(quantity).is_integer():
-            raise ValidationError(f"Product {product.name} must have integer quantity")
+            raise ValidationError(f"El producto {product.name} debe venderse en unidades enteras.")
 
         if product.stock < quantity:
-            raise InsufficientStockError(f"{product.name}")
+            raise InsufficientStockError(
+    f"Stock insuficiente para {product.name}. Disponible: {product.stock} unidades."
+)
 
         if product.price is None:
-            raise ValidationError(f"Product {product.name} has no price")
+            raise ValidationError(f"El producto {product.name} no tiene precio registrado.")
 
         quantity_dec = Decimal(str(quantity))
         unit_price = Decimal(str(product.price))

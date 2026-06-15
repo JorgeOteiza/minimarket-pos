@@ -1,8 +1,11 @@
+import { useState } from "react";
+
 import type { Product } from "../types/product";
 
 import { useProductForm } from "../hooks/useProductForm";
 
 import { FormField } from "../../../components/ui/FormField";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 
 type Props = {
   mode: "create" | "edit";
@@ -13,6 +16,8 @@ type Props = {
   onCancel: () => void;
 };
 
+type ConfirmAction = "delete" | "cancel" | null;
+
 export const ProductForm = ({
   mode,
   product,
@@ -21,6 +26,8 @@ export const ProductForm = ({
   onDeleted,
   onCancel,
 }: Props) => {
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
   const {
     formData,
     marginPercentInput,
@@ -45,6 +52,39 @@ export const ProductForm = ({
     onDeleted,
   });
 
+  const handleCancelClick = () => {
+    if (hasUnsavedChanges) {
+      setConfirmAction("cancel");
+      return;
+    }
+
+    onCancel();
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction === "cancel") {
+      setConfirmAction(null);
+      onCancel();
+      return;
+    }
+
+    if (confirmAction === "delete") {
+      await handleDelete();
+      setConfirmAction(null);
+    }
+  };
+
+  const dialogTitle =
+    confirmAction === "delete" ? "Eliminar producto" : "Cerrar formulario";
+
+  const dialogDescription =
+    confirmAction === "delete"
+      ? `¿Seguro que quieres eliminar "${product?.name}"? Esta acción no se puede deshacer.`
+      : "Tienes cambios sin guardar. Si cierras el formulario, se perderán los cambios realizados.";
+
+  const confirmLabel =
+    confirmAction === "delete" ? "Eliminar producto" : "Cerrar sin guardar";
+
   return (
     <div className="product-form" data-dirty={hasUnsavedChanges}>
       <div className="product-form-header">
@@ -62,7 +102,7 @@ export const ProductForm = ({
           <button
             type="button"
             className="product-delete-button"
-            onClick={handleDelete}
+            onClick={() => setConfirmAction("delete")}
             disabled={loading}
           >
             Eliminar
@@ -163,24 +203,24 @@ export const ProductForm = ({
           <button
             type="button"
             className="secondary-btn"
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                const confirmed = window.confirm(
-                  "Tienes cambios sin guardar. ¿Cerrar igualmente?",
-                );
-
-                if (!confirmed) {
-                  return;
-                }
-              }
-
-              onCancel();
-            }}
+            onClick={handleCancelClick}
           >
             Cancelar
           </button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title={dialogTitle}
+        description={dialogDescription}
+        confirmLabel={confirmLabel}
+        cancelLabel="Volver"
+        variant={confirmAction === "delete" ? "danger" : "warning"}
+        loading={loading}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 };

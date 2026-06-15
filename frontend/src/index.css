@@ -38,10 +38,13 @@ textarea {
 .error {
   background: #fee2e2;
   color: #991b1b;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.35;
+  border: 1px solid #fca5a5;
 }
 
 /* =========================

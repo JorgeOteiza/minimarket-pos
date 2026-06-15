@@ -33,7 +33,6 @@ type UseProductFormProps = {
   onCreated?: (product: Product) => void;
   onUpdated?: (product: Product) => void;
   onDeleted?: (productId: number) => void;
-  onCancel?: () => void;
 };
 
 const DEFAULT_IVA = 0.19;
@@ -48,6 +47,24 @@ const EMPTY_FORM: CreateProductDTO = {
   margin: 0.3,
   min_stock: 0,
   iva: DEFAULT_IVA,
+};
+
+const calculateMarginFromValues = (
+  cost?: number | null,
+  packUnits?: number | null,
+  price?: number | null,
+  iva = DEFAULT_IVA,
+) => {
+  if (!cost || !packUnits || packUnits <= 0 || !price || price <= 0) {
+    return null;
+  }
+
+  const unitCost = Number(cost) / Number(packUnits);
+  const costWithIva = unitCost * (1 + iva);
+
+  if (costWithIva <= 0) return null;
+
+  return (Number(price) - costWithIva) / costWithIva;
 };
 
 const getInitialFormData = (product?: Product): CreateProductDTO => {
@@ -73,26 +90,6 @@ const getInitialFormData = (product?: Product): CreateProductDTO => {
   };
 };
 
-const calculateMarginFromValues = (
-  cost?: number | null,
-  packUnits?: number | null,
-  price?: number | null,
-  iva = DEFAULT_IVA,
-) => {
-  if (!cost || !packUnits || packUnits <= 0 || !price || price <= 0) {
-    return null;
-  }
-
-  const unitCost = Number(cost) / Number(packUnits);
-  const costWithIva = unitCost * (1 + iva);
-
-  if (costWithIva <= 0) {
-    return null;
-  }
-
-  return (Number(price) - costWithIva) / costWithIva;
-};
-
 const toMarginPercent = (margin?: number | null) =>
   margin === null || margin === undefined
     ? ""
@@ -108,15 +105,12 @@ export const useProductForm = ({
   const initialFormData = getInitialFormData(product);
 
   const [formData, setFormData] = useState<CreateProductDTO>(initialFormData);
-
   const [marginPercentInput, setMarginPercentInput] = useState(
     toMarginPercent(initialFormData.margin),
   );
 
   const [loading, setLoading] = useState(false);
-
   const [fieldErrors, setFieldErrors] = useState<ProductFieldErrors>({});
-
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const hasUnsavedChanges =
@@ -148,9 +142,7 @@ export const useProductForm = ({
     const unitCost = Number(cost) / Number(packUnits);
     const unitCostWithIva = unitCost * (1 + iva);
 
-    if (unitCostWithIva <= 0) {
-      return null;
-    }
+    if (unitCostWithIva <= 0) return null;
 
     return (Number(price) - unitCostWithIva) / unitCostWithIva;
   };
@@ -212,8 +204,6 @@ export const useProductForm = ({
       return;
     }
 
-    const marginDecimal = marginPercent / 100;
-
     const newPrice = calculateSalePrice({
       cost: formData.cost ?? null,
       packUnits: formData.pack_units ?? 0,
@@ -223,7 +213,7 @@ export const useProductForm = ({
 
     setFormData((prev) => ({
       ...prev,
-      margin: marginDecimal,
+      margin: marginPercent / 100,
       price: newPrice,
     }));
 
@@ -240,9 +230,7 @@ export const useProductForm = ({
     e.preventDefault();
 
     setLoading(true);
-
     setFieldErrors({});
-
     setSuccessMessage(null);
 
     const payload: CreateProductDTO = {
@@ -254,9 +242,7 @@ export const useProductForm = ({
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-
       setLoading(false);
-
       return;
     }
 
@@ -265,9 +251,7 @@ export const useProductForm = ({
         const created = await createProduct(payload);
 
         onCreated?.(created);
-
         setSuccessMessage("Producto creado correctamente");
-
         resetForm();
       }
 
@@ -278,7 +262,6 @@ export const useProductForm = ({
         );
 
         onUpdated?.(updated);
-
         setSuccessMessage("Producto actualizado correctamente");
       }
     } catch (err: unknown) {
@@ -308,29 +291,16 @@ export const useProductForm = ({
   };
 
   const handleDelete = async () => {
-    if (!product || mode !== "edit") {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
+    if (!product || mode !== "edit") return;
 
     setLoading(true);
-
     setFieldErrors({});
-
     setSuccessMessage(null);
 
     try {
       await deleteProduct(product.id);
 
       onDeleted?.(product.id);
-
       setSuccessMessage("Producto eliminado correctamente");
     } catch (err: unknown) {
       if (err instanceof Error) {
