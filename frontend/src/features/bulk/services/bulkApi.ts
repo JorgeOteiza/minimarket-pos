@@ -42,6 +42,11 @@ export type CreateBulkRestockDTO = {
   note?: string;
 };
 
+export type DeleteBulkProductResponse = {
+  message: string;
+  id: number;
+};
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const error = await res.json().catch(() => null);
@@ -53,6 +58,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export async function getBulkProducts(): Promise<BulkProduct[]> {
   const res = await fetch(`${API_URL}/bulk-products`);
+
   return handleResponse<BulkProduct[]>(res);
 }
 
@@ -85,8 +91,19 @@ export async function updateBulkProduct(
   return handleResponse<BulkProduct>(res);
 }
 
+export async function deleteBulkProduct(
+  id: number,
+): Promise<DeleteBulkProductResponse> {
+  const res = await fetch(`${API_URL}/bulk-products/${id}`, {
+    method: "DELETE",
+  });
+
+  return handleResponse<DeleteBulkProductResponse>(res);
+}
+
 export async function getBulkRestocks(): Promise<BulkRestock[]> {
   const res = await fetch(`${API_URL}/bulk-restocks?limit=100`);
+
   return handleResponse<BulkRestock[]>(res);
 }
 

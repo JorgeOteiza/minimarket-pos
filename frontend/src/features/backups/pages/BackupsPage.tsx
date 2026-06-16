@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   createBackup,
+  createDailyAutoBackup,
   deleteBackup,
   getBackupDownloadUrl,
   getBackups,
@@ -35,14 +36,22 @@ const formatBytes = (bytes: number) => {
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(new Date(value))
+    .replace("a. m.", "AM")
+    .replace("p. m.", "PM");
 
 export default function BackupsPage() {
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [autoBackupChecking, setAutoBackupChecking] = useState(false);
   const [restoringFilename, setRestoringFilename] = useState<string | null>(
     null,
   );
@@ -67,7 +76,10 @@ export default function BackupsPage() {
     const run = async () => {
       try {
         setLoading(true);
+        setAutoBackupChecking(true);
         setError("");
+
+        await createDailyAutoBackup();
 
         const data = await getBackups();
 
@@ -81,6 +93,7 @@ export default function BackupsPage() {
       } finally {
         if (isMounted) {
           setLoading(false);
+          setAutoBackupChecking(false);
         }
       }
     };
@@ -219,12 +232,16 @@ export default function BackupsPage() {
         <div className="backup-summary-card">
           <span>Estado</span>
           <strong>
-            {backups.length >= MAX_BACKUPS ? "Límite activo" : "OK"}
+            {autoBackupChecking
+              ? "Revisando..."
+              : backups.length >= MAX_BACKUPS
+                ? "Límite activo"
+                : "OK"}
           </strong>
           <small>
             {backups.length >= MAX_BACKUPS
               ? "Se eliminarán respaldos antiguos automáticamente"
-              : "Aún hay margen para más respaldos"}
+              : "Respaldo automático diario activado"}
           </small>
         </div>
       </div>

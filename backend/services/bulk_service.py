@@ -21,7 +21,10 @@ def get_bulk_products():
 def get_bulk_product_by_barcode(barcode):
     return (
         db.session.query(BulkProduct)
-        .filter(BulkProduct.barcode == barcode)
+        .filter(
+            BulkProduct.barcode == barcode,
+            BulkProduct.active.is_(True),
+        )
         .first()
     )
 
@@ -108,6 +111,19 @@ def update_bulk_product(product_id, data):
     db.session.commit()
 
     return product
+
+
+def delete_bulk_product(product_id):
+    product = get_bulk_product_by_id(product_id)
+
+    product.active = False
+
+    db.session.commit()
+
+    return {
+        "message": "Producto eliminado correctamente.",
+        "id": product.id,
+    }
 
 
 def register_bulk_restock(data):

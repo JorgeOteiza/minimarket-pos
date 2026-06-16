@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
+
 import {
   createBulkProduct,
   createBulkRestock,
+  deleteBulkProduct,
   getBulkProducts,
   getBulkRestocks,
   updateBulkProduct,
@@ -23,6 +26,11 @@ type SackFormState = {
   cost: NumericInputValue;
   sale_margin: NumericInputValue;
 };
+
+type ConfirmAction = {
+  type: "delete";
+  product: BulkProduct;
+} | null;
 
 const IVA_RATE = 0.19;
 
@@ -65,9 +73,7 @@ const getKgPricing = (product: BulkProduct) => {
   const margin = product.sale_margin ?? 0.4;
 
   const costPerKgWithoutIva = product.cost / product.package_quantity;
-
   const costPerKgWithIva = costPerKgWithoutIva * (1 + IVA_RATE);
-
   const salePricePerKg = costPerKgWithIva * (1 + margin);
 
   return {
@@ -102,6 +108,10 @@ export default function BulkRestockPage() {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
 
   const [loading, setLoading] = useState(false);
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(
+    null,
+  );
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -113,7 +123,21 @@ export default function BulkRestockPage() {
     return products.find((product) => product.barcode === cleanBarcode) ?? null;
   }, [restockBarcode, products]);
 
+  const editingProduct = useMemo(
+    () => products.find((product) => product.id === editingProductId) ?? null,
+    [editingProductId, products],
+  );
+
   const isEditing = editingProductId !== null;
+
+  const hasSackFormData =
+    sackForm.name.trim() !== "" ||
+    sackForm.barcode.trim() !== "" ||
+    sackForm.package_quantity !== "" ||
+    sackForm.cost !== "" ||
+    sackForm.sale_margin !== EMPTY_SACK_FORM.sale_margin ||
+    initialPackages !== 1 ||
+    isEditing;
 
   useEffect(() => {
     let isMounted = true;
@@ -158,6 +182,8 @@ export default function BulkRestockPage() {
     setSackForm(EMPTY_SACK_FORM);
     setInitialPackages(1);
     setEditingProductId(null);
+    setError("");
+    setSuccessMessage("");
   };
 
   const validateSackForm = () => {
@@ -255,6 +281,33 @@ export default function BulkRestockPage() {
     setError("");
   };
 
+  const handleDeleteSack = async (product: BulkProduct) => {
+    try {
+      setDeletingProductId(product.id);
+      setError("");
+      setSuccessMessage("");
+
+      const result = await deleteBulkProduct(product.id);
+
+      setProducts((prev) => prev.filter((item) => item.id !== product.id));
+
+      if (editingProductId === product.id) {
+        resetSackForm();
+      }
+
+      setSuccessMessage(result.message);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error eliminando el producto registrado",
+      );
+    } finally {
+      setDeletingProductId(null);
+      setConfirmAction(null);
+    }
+  };
+
   const handleRegisterRestock = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -330,7 +383,7 @@ export default function BulkRestockPage() {
                   <input
                     type="text"
                     value={restockBarcode}
-                    onChange={(e) => setRestockBarcode(e.target.value)}
+                    onChange={(event) => setRestockBarcode(event.target.value)}
                     placeholder="Escanear o escribir código..."
                     autoFocus
                   />
@@ -356,8 +409,8 @@ export default function BulkRestockPage() {
                     type="number"
                     min={1}
                     value={quantityPackages}
-                    onChange={(e) =>
-                      setQuantityPackages(toNumberOrEmpty(e.target.value))
+                    onChange={(event) =>
+                      setQuantityPackages(toNumberOrEmpty(event.target.value))
                     }
                   />
                 </div>
@@ -367,7 +420,7 @@ export default function BulkRestockPage() {
                   <input
                     type="text"
                     value={note}
-                    onChange={(e) => setNote(e.target.value)}
+                    onChange={(event) => setNote(event.target.value)}
                     placeholder="Opcional"
                   />
                 </div>
@@ -438,6 +491,7 @@ export default function BulkRestockPage() {
                 <tbody>
                   {products.map((product) => {
                     const pricing = getKgPricing(product);
+                    const isDeleting = deletingProductId === product.id;
 
                     return (
                       <tr key={product.id}>
@@ -472,13 +526,16 @@ export default function BulkRestockPage() {
                           </strong>
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            className="sack-edit-btn"
-                            onClick={() => handleEditSack(product)}
-                          >
-                            Editar
-                          </button>
+                          <div className="sack-table-actions">
+                            <button
+                              type="button"
+                              className="sack-edit-btn"
+                              onClick={() => handleEditSack(product)}
+                              disabled={isDeleting}
+                            >
+                              Editar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -558,14 +615,38 @@ export default function BulkRestockPage() {
         {isSidePanelOpen && (
           <aside className="sack-side">
             <section className="sack-card">
-              <h2>
-                {isEditing ? "Editar producto" : "Registrar tipo de producto"}
-              </h2>
-              <p>
-                {isEditing
-                  ? "Actualiza la información del producto registrado."
-                  : "Crea el producto base y registra su primera llegada al historial."}
-              </p>
+              <div className="sack-side-header">
+                <div>
+                  <h2>
+                    {isEditing
+                      ? "Editar producto"
+                      : "Registrar tipo de producto"}
+                  </h2>
+                  <p>
+                    {isEditing
+                      ? "Actualiza la información del producto registrado."
+                      : "Crea el producto base y registra su primera llegada al historial."}
+                  </p>
+                </div>
+
+                {isEditing && editingProduct && (
+                  <button
+                    type="button"
+                    className="sack-delete-side-btn"
+                    onClick={() =>
+                      setConfirmAction({
+                        type: "delete",
+                        product: editingProduct,
+                      })
+                    }
+                    disabled={
+                      loading || deletingProductId === editingProduct.id
+                    }
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
 
               <form className="sack-form" onSubmit={handleCreateOrUpdateSack}>
                 <div className="sack-field">
@@ -573,7 +654,9 @@ export default function BulkRestockPage() {
                   <input
                     type="text"
                     value={sackForm.name}
-                    onChange={(e) => updateSackForm("name", e.target.value)}
+                    onChange={(event) =>
+                      updateSackForm("name", event.target.value)
+                    }
                     placeholder="Ej: Alimento perro adulto 25 kg"
                   />
                 </div>
@@ -583,7 +666,9 @@ export default function BulkRestockPage() {
                   <input
                     type="text"
                     value={sackForm.barcode}
-                    onChange={(e) => updateSackForm("barcode", e.target.value)}
+                    onChange={(event) =>
+                      updateSackForm("barcode", event.target.value)
+                    }
                     placeholder="Escanear código del producto o escribir uno nuevo"
                   />
                 </div>
@@ -596,10 +681,10 @@ export default function BulkRestockPage() {
                       min={0}
                       step="0.01"
                       value={sackForm.package_quantity}
-                      onChange={(e) =>
+                      onChange={(event) =>
                         updateSackForm(
                           "package_quantity",
-                          toNumberOrEmpty(e.target.value),
+                          toNumberOrEmpty(event.target.value),
                         )
                       }
                       placeholder="Ej: 25"
@@ -610,7 +695,9 @@ export default function BulkRestockPage() {
                     <label>Unidad</label>
                     <select
                       value={sackForm.unit}
-                      onChange={(e) => updateSackForm("unit", e.target.value)}
+                      onChange={(event) =>
+                        updateSackForm("unit", event.target.value)
+                      }
                     >
                       <option value="kg">kg</option>
                       <option value="g">g</option>
@@ -627,8 +714,11 @@ export default function BulkRestockPage() {
                       type="number"
                       min={0}
                       value={sackForm.cost}
-                      onChange={(e) =>
-                        updateSackForm("cost", toNumberOrEmpty(e.target.value))
+                      onChange={(event) =>
+                        updateSackForm(
+                          "cost",
+                          toNumberOrEmpty(event.target.value),
+                        )
                       }
                       placeholder="Ej: 20000"
                     />
@@ -645,12 +735,12 @@ export default function BulkRestockPage() {
                           ? ""
                           : Math.round(Number(sackForm.sale_margin) * 100)
                       }
-                      onChange={(e) =>
+                      onChange={(event) =>
                         updateSackForm(
                           "sale_margin",
-                          e.target.value === ""
+                          event.target.value === ""
                             ? ""
-                            : Number(e.target.value) / 100,
+                            : Number(event.target.value) / 100,
                         )
                       }
                       placeholder="Ej: 40"
@@ -665,8 +755,8 @@ export default function BulkRestockPage() {
                       type="number"
                       min={1}
                       value={initialPackages}
-                      onChange={(e) =>
-                        setInitialPackages(toNumberOrEmpty(e.target.value))
+                      onChange={(event) =>
+                        setInitialPackages(toNumberOrEmpty(event.target.value))
                       }
                       placeholder="Ej: 1"
                     />
@@ -674,7 +764,7 @@ export default function BulkRestockPage() {
                 )}
 
                 <div className="sack-actions">
-                  {isEditing && (
+                  {hasSackFormData && (
                     <button
                       type="button"
                       className="sack-secondary-btn"
@@ -702,6 +792,28 @@ export default function BulkRestockPage() {
           </aside>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title="Eliminar producto"
+        description={
+          confirmAction
+            ? `¿Eliminar "${confirmAction.product.name}"? El producto dejará de aparecer en la lista, pero el historial de reposiciones se conservará.`
+            : ""
+        }
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+        loading={
+          confirmAction ? deletingProductId === confirmAction.product.id : false
+        }
+        onConfirm={() => {
+          if (confirmAction) {
+            void handleDeleteSack(confirmAction.product);
+          }
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

@@ -80,6 +80,22 @@
   font-size: 20px;
 }
 
+.sack-side-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.sack-side-header h2 {
+  margin: 0;
+}
+
+.sack-side-header p {
+  margin: 6px 0 0;
+}
+
 .sack-form {
   display: flex;
   flex-direction: column;
@@ -134,11 +150,14 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .sack-primary-btn,
 .sack-secondary-btn,
-.sack-edit-btn {
+.sack-edit-btn,
+.sack-delete-btn,
+.sack-delete-side-btn {
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 16px;
@@ -152,10 +171,18 @@
   color: white;
 }
 
+.sack-primary-btn:hover {
+  background: #1f2937;
+}
+
 .sack-secondary-btn {
   border: 1px solid #cbd5e1;
   background: white;
   color: #334155;
+}
+
+.sack-secondary-btn:hover {
+  background: #f8fafc;
 }
 
 .sack-edit-btn {
@@ -164,17 +191,47 @@
   color: #1d4ed8;
 }
 
+.sack-edit-btn:hover {
+  background: #dbeafe;
+}
+
+.sack-delete-btn,
+.sack-delete-side-btn {
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sack-delete-btn:hover,
+.sack-delete-side-btn:hover {
+  background: #fecaca;
+}
+
+.sack-delete-side-btn {
+  flex-shrink: 0;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
 .sack-primary-btn:disabled,
 .sack-secondary-btn:disabled,
-.sack-edit-btn:disabled {
+.sack-edit-btn:disabled,
+.sack-delete-btn:disabled,
+.sack-delete-side-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
 .sack-status {
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-weight: 800;
+  border-radius: 14px;
+
+  padding: 18px 22px;
+
+  font-size: 22px;
+
+  font-weight: 900;
+
+  line-height: 1.4;
 }
 
 .sack-status.success {
@@ -223,7 +280,7 @@
 
 .sack-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1240px;
   border-collapse: collapse;
 }
 
@@ -241,6 +298,13 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 15px;
+}
+
+.sack-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .sack-badge {
@@ -308,5 +372,9 @@
   .sack-form-grid,
   .sack-summary {
     grid-template-columns: 1fr;
+  }
+
+  .sack-side {
+    position: static;
   }
 }
