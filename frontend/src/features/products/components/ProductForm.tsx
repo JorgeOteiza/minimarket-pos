@@ -1,8 +1,11 @@
+import { useState } from "react";
+
 import type { Product } from "../types/product";
 
 import { useProductForm } from "../hooks/useProductForm";
 
 import { FormField } from "../../../components/ui/FormField";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 
 type Props = {
   mode: "create" | "edit";
@@ -13,6 +16,8 @@ type Props = {
   onCancel: () => void;
 };
 
+type ConfirmAction = "delete" | "cancel" | null;
+
 export const ProductForm = ({
   mode,
   product,
@@ -21,8 +26,11 @@ export const ProductForm = ({
   onDeleted,
   onCancel,
 }: Props) => {
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
   const {
     formData,
+    marginPercentInput,
 
     loading,
 
@@ -33,6 +41,7 @@ export const ProductForm = ({
     hasUnsavedChanges,
 
     handleChange,
+    handleMarginChange,
     handleSubmit,
     handleDelete,
   } = useProductForm({
@@ -43,19 +52,48 @@ export const ProductForm = ({
     onDeleted,
   });
 
+  const handleCancelClick = () => {
+    if (hasUnsavedChanges) {
+      setConfirmAction("cancel");
+      return;
+    }
+
+    onCancel();
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction === "cancel") {
+      setConfirmAction(null);
+      onCancel();
+      return;
+    }
+
+    if (confirmAction === "delete") {
+      await handleDelete();
+      setConfirmAction(null);
+    }
+  };
+
+  const dialogTitle =
+    confirmAction === "delete" ? "Eliminar producto" : "Cerrar formulario";
+
+  const dialogDescription =
+    confirmAction === "delete"
+      ? `¿Seguro que quieres eliminar "${product?.name}"? Esta acción no se puede deshacer.`
+      : "Tienes cambios sin guardar. Si cierras el formulario, se perderán los cambios realizados.";
+
+  const confirmLabel =
+    confirmAction === "delete" ? "Eliminar producto" : "Cerrar sin guardar";
+
   return (
     <div className="product-form" data-dirty={hasUnsavedChanges}>
-      {/* =========================
-          HEADER
-      ========================= */}
-
       <div className="product-form-header">
         <div>
           <h2>{mode === "create" ? "Agregar producto" : "Editar producto"}</h2>
 
           <p>
             {mode === "create"
-              ? "Ingresa los datos del producto."
+              ? "Ingresa los datos del producto. El stock se administra desde Inventario."
               : "Actualiza la información general."}
           </p>
         </div>
@@ -64,17 +102,13 @@ export const ProductForm = ({
           <button
             type="button"
             className="product-delete-button"
-            onClick={handleDelete}
+            onClick={() => setConfirmAction("delete")}
             disabled={loading}
           >
             Eliminar
           </button>
         )}
       </div>
-
-      {/* =========================
-          FORM
-      ========================= */}
 
       <form onSubmit={handleSubmit} className="product-form-body">
         <div className="form-grid">
@@ -113,17 +147,14 @@ export const ProductForm = ({
             error={fieldErrors.pack_units}
           />
 
-          {mode === "create" && (
-            <FormField
-              label="Stock inicial"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              error={fieldErrors.stock}
-              warning={warnings.stock}
-            />
-          )}
+          <FormField
+            label="Margen de venta (%)"
+            name="margin"
+            type="number"
+            value={marginPercentInput}
+            onChange={handleMarginChange}
+            error={fieldErrors.margin}
+          />
 
           <FormField
             label="Precio venta"
@@ -146,9 +177,11 @@ export const ProductForm = ({
           />
         </div>
 
-        {/* =========================
-            MENSAJES GLOBALES
-        ========================= */}
+        <div className="form-help-box">
+          Para modificar el stock, vuelve a la lista de{" "}
+          <strong>Productos</strong> y usa el botón <strong>Inventario</strong>{" "}
+          del producto correspondiente.
+        </div>
 
         {successMessage && (
           <div className="form-success-message">✓ {successMessage}</div>
@@ -157,10 +190,6 @@ export const ProductForm = ({
         {fieldErrors.general && (
           <div className="form-error-message">✕ {fieldErrors.general}</div>
         )}
-
-        {/* =========================
-            ACTIONS
-        ========================= */}
 
         <div className="product-form-actions">
           <button
@@ -174,24 +203,24 @@ export const ProductForm = ({
           <button
             type="button"
             className="secondary-btn"
-            onClick={() => {
-              if (hasUnsavedChanges) {
-                const confirmed = window.confirm(
-                  "Tienes cambios sin guardar. ¿Cerrar igualmente?",
-                );
-
-                if (!confirmed) {
-                  return;
-                }
-              }
-
-              onCancel();
-            }}
+            onClick={handleCancelClick}
           >
             Cancelar
           </button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title={dialogTitle}
+        description={dialogDescription}
+        confirmLabel={confirmLabel}
+        cancelLabel="Volver"
+        variant={confirmAction === "delete" ? "danger" : "warning"}
+        loading={loading}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 };

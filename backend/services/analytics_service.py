@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from sqlalchemy import func, desc
+from sqlalchemy import desc, func
 
 from backend.extensions import db
 from backend.models import Product
@@ -11,7 +11,18 @@ from backend.models.sale_item import SaleItem
 def safe_average(total, count):
     if not count:
         return 0
+
     return float(total) / count
+
+
+def safe_profit_per_unit(price, cost, pack_units, iva=0.19):
+    if price is None or cost is None or not pack_units or pack_units <= 0:
+        return None
+
+    unit_cost = float(cost) / float(pack_units)
+    unit_cost_with_iva = unit_cost * (1 + iva)
+
+    return float(price) - unit_cost_with_iva
 
 
 def get_analytics_summary():
@@ -97,6 +108,82 @@ def get_analytics_summary():
         .all()
     )
 
+    profitable_products_rows = (
+        db.session.query(
+            Product.id,
+            Product.name,
+            Product.price,
+            Product.cost,
+            Product.pack_units,
+            func.sum(SaleItem.quantity).label("quantity_sold"),
+            func.sum(SaleItem.subtotal).label("total_sold"),
+        )
+        .join(SaleItem, SaleItem.product_id == Product.id)
+        .join(Sale, Sale.id == SaleItem.sale_id)
+        .filter(func.date(Sale.created_at) >= last_30_days)
+        .filter(Product.price.isnot(None))
+        .filter(Product.cost.isnot(None))
+        .filter(Product.pack_units.isnot(None))
+        .filter(Product.pack_units > 0)
+        .group_by(
+            Product.id,
+            Product.name,
+            Product.price,
+            Product.cost,
+            Product.pack_units,
+        )
+        .all()
+    )
+
+    profitable_products = []
+
+    for row in profitable_products_rows:
+        profit_per_unit = safe_profit_per_unit(
+            row.price,
+            row.cost,
+            row.pack_units,
+        )
+
+        if profit_per_unit is None:
+            continue
+
+        quantity_sold = float(row.quantity_sold or 0)
+        price = float(row.price)
+        unit_cost_estimated = float(row.cost) / float(row.pack_units)
+        estimated_total_profit = profit_per_unit * quantity_sold
+
+        margin_percent = (
+            (profit_per_unit / price) * 100
+            if price > 0
+            else 0
+        )
+
+        profitable_products.append(
+            {
+                "id": row.id,
+                "name": row.name,
+                "price": price,
+                "unit_cost_estimated": unit_cost_estimated,
+                "profit_per_unit": profit_per_unit,
+                "margin_percent": margin_percent,
+                "quantity_sold": quantity_sold,
+                "total_sold": float(row.total_sold or 0),
+                "estimated_total_profit": estimated_total_profit,
+            }
+        )
+
+    profitable_products = sorted(
+        profitable_products,
+        key=lambda item: item["estimated_total_profit"],
+        reverse=True,
+    )[:10]
+    
+    most_profitable_product = (
+    profitable_products[0]
+    if profitable_products
+    else None
+)
+
     last_sale_subquery = (
         db.session.query(
             SaleItem.product_id.label("product_id"),
@@ -176,6 +263,7 @@ def get_analytics_summary():
         }
         if top_product
         else None,
+        "most_profitable_product": most_profitable_product,
         "sales_by_day": [
             {
                 "date": str(row.sale_date),
@@ -186,20 +274,20 @@ def get_analytics_summary():
         ],
         "low_stock_products": [
             {
-                "id": p.id,
-                "name": p.name,
-                "stock": p.stock,
-                "min_stock": p.min_stock,
+                "id": product.id,
+                "name": product.name,
+                "stock": product.stock,
+                "min_stock": product.min_stock,
             }
-            for p in low_stock_products
+            for product in low_stock_products
         ],
         "products_without_price": [
             {
-                "id": p.id,
-                "name": p.name,
-                "barcode": p.barcode,
+                "id": product.id,
+                "name": product.name,
+                "barcode": product.barcode,
             }
-            for p in products_without_price
+            for product in products_without_price
         ],
         "products_without_movement": [
             {
@@ -223,4 +311,5 @@ def get_analytics_summary():
             }
             for row in top_products
         ],
+        "profitable_products": profitable_products,
     }

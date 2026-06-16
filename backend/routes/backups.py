@@ -1,9 +1,10 @@
 from flask import Blueprint, jsonify, send_file
-from backend.services.backup_service import get_backup_file_path
 
 from backend.services.backup_service import (
     create_backup,
+    create_daily_auto_backup,
     delete_backup,
+    get_backup_file_path,
     list_backups,
     restore_backup,
 )
@@ -27,6 +28,13 @@ def create_backup_route():
             "backup": backup,
         }
     ), 201
+
+
+@backups_bp.route("/backups/create-auto-daily", methods=["POST"])
+def create_daily_auto_backup_route():
+    result = create_daily_auto_backup()
+
+    return jsonify(result), 201 if result["created"] else 200
 
 
 @backups_bp.route("/backups/<path:filename>/restore", methods=["POST"])

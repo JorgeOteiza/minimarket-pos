@@ -30,7 +30,7 @@ def scan_product_route(barcode):
     product = get_product_by_barcode(barcode)
 
     if not product:
-        raise NotFoundError("Product not found")
+        raise NotFoundError("Producto no encontrado.")
 
     data = request.get_json(silent=True) or {}
 

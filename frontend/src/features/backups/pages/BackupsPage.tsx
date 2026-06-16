@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   createBackup,
+  createDailyAutoBackup,
   deleteBackup,
   getBackupDownloadUrl,
   getBackups,
@@ -9,9 +10,22 @@ import {
   type BackupFile,
 } from "../services/backupApi";
 
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
+
 import "../styles/backups.css";
 
 const MAX_BACKUPS = 30;
+
+type BackupConfirmAction =
+  | {
+      type: "restore";
+      filename: string;
+    }
+  | {
+      type: "delete";
+      filename: string;
+    }
+  | null;
 
 const formatBytes = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -22,18 +36,27 @@ const formatBytes = (bytes: number) => {
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(new Date(value))
+    .replace("a. m.", "AM")
+    .replace("p. m.", "PM");
 
 export default function BackupsPage() {
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [autoBackupChecking, setAutoBackupChecking] = useState(false);
   const [restoringFilename, setRestoringFilename] = useState<string | null>(
     null,
   );
   const [deletingFilename, setDeletingFilename] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<BackupConfirmAction>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -53,7 +76,10 @@ export default function BackupsPage() {
     const run = async () => {
       try {
         setLoading(true);
+        setAutoBackupChecking(true);
         setError("");
+
+        await createDailyAutoBackup();
 
         const data = await getBackups();
 
@@ -67,6 +93,7 @@ export default function BackupsPage() {
       } finally {
         if (isMounted) {
           setLoading(false);
+          setAutoBackupChecking(false);
         }
       }
     };
@@ -96,12 +123,6 @@ export default function BackupsPage() {
   };
 
   const handleRestoreBackup = async (filename: string) => {
-    const confirmed = window.confirm(
-      "¿Restaurar este respaldo?\n\nSe reemplazará la base de datos actual por la copia seleccionada. Antes de restaurar, el sistema creará un respaldo de seguridad del estado actual.",
-    );
-
-    if (!confirmed) return;
-
     try {
       setRestoringFilename(filename);
       setError("");
@@ -119,12 +140,6 @@ export default function BackupsPage() {
   };
 
   const handleDeleteBackup = async (filename: string) => {
-    const confirmed = window.confirm(
-      "¿Eliminar este respaldo?\n\nEsta acción no elimina productos ni ventas, solo borra el archivo de respaldo seleccionado.",
-    );
-
-    if (!confirmed) return;
-
     try {
       setDeletingFilename(filename);
       setError("");
@@ -140,6 +155,40 @@ export default function BackupsPage() {
       setDeletingFilename(null);
     }
   };
+
+  const handleConfirmBackupAction = async () => {
+    if (!confirmAction) return;
+
+    const currentAction = confirmAction;
+
+    if (currentAction.type === "restore") {
+      await handleRestoreBackup(currentAction.filename);
+    }
+
+    if (currentAction.type === "delete") {
+      await handleDeleteBackup(currentAction.filename);
+    }
+
+    setConfirmAction(null);
+  };
+
+  const confirmTitle =
+    confirmAction?.type === "restore"
+      ? "Restaurar respaldo"
+      : "Eliminar respaldo";
+
+  const confirmDescription =
+    confirmAction?.type === "restore"
+      ? "Se reemplazará la base de datos actual por la copia seleccionada. Antes de restaurar, el sistema creará automáticamente un respaldo de seguridad del estado actual."
+      : "Esta acción solo elimina el archivo de respaldo seleccionado. No elimina productos, ventas ni datos actuales de la aplicación.";
+
+  const confirmLabel =
+    confirmAction?.type === "restore" ? "Restaurar respaldo" : "Eliminar";
+
+  const confirmLoading =
+    confirmAction?.type === "restore"
+      ? restoringFilename !== null
+      : deletingFilename !== null;
 
   return (
     <div className="backups-page">
@@ -183,12 +232,16 @@ export default function BackupsPage() {
         <div className="backup-summary-card">
           <span>Estado</span>
           <strong>
-            {backups.length >= MAX_BACKUPS ? "Límite activo" : "OK"}
+            {autoBackupChecking
+              ? "Revisando..."
+              : backups.length >= MAX_BACKUPS
+                ? "Límite activo"
+                : "OK"}
           </strong>
           <small>
             {backups.length >= MAX_BACKUPS
               ? "Se eliminarán respaldos antiguos automáticamente"
-              : "Aún hay margen para más respaldos"}
+              : "Respaldo automático diario activado"}
           </small>
         </div>
       </div>
@@ -231,7 +284,12 @@ export default function BackupsPage() {
                           <button
                             type="button"
                             className="backup-restore-button"
-                            onClick={() => handleRestoreBackup(backup.filename)}
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "restore",
+                                filename: backup.filename,
+                              })
+                            }
                             disabled={
                               isRestoring ||
                               isDeleting ||
@@ -253,7 +311,12 @@ export default function BackupsPage() {
                           <button
                             type="button"
                             className="backup-delete-button"
-                            onClick={() => handleDeleteBackup(backup.filename)}
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "delete",
+                                filename: backup.filename,
+                              })
+                            }
                             disabled={isRestoring || isDeleting || creating}
                           >
                             {isDeleting ? "Eliminando..." : "Eliminar"}
@@ -268,6 +331,18 @@ export default function BackupsPage() {
           </div>
         )}
       </section>
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title={confirmTitle}
+        description={confirmDescription}
+        confirmLabel={confirmLabel}
+        cancelLabel="Cancelar"
+        variant={confirmAction?.type === "delete" ? "danger" : "warning"}
+        loading={confirmLoading}
+        onConfirm={handleConfirmBackupAction}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

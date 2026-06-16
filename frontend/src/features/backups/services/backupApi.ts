@@ -7,6 +7,12 @@ export type BackupFile = {
   created_at: string;
 };
 
+export type AutoBackupResponse = {
+  created: boolean;
+  message: string;
+  backup: BackupFile;
+};
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const error = await res.json().catch(() => null);
@@ -34,6 +40,14 @@ export async function createBackup(): Promise<{
     message: string;
     backup: BackupFile;
   }>(res);
+}
+
+export async function createDailyAutoBackup(): Promise<AutoBackupResponse> {
+  const res = await fetch(`${API_URL}/backups/create-auto-daily`, {
+    method: "POST",
+  });
+
+  return handleResponse<AutoBackupResponse>(res);
 }
 
 export async function restoreBackup(filename: string): Promise<{

@@ -3,10 +3,11 @@ from flask import Blueprint, jsonify, request
 from backend.exceptions import AppError
 from backend.services.bulk_service import (
     create_bulk_product,
-    update_bulk_product,
+    delete_bulk_product,
     get_bulk_products,
-    register_bulk_restock,
     get_bulk_restocks,
+    register_bulk_restock,
+    update_bulk_product,
 )
 
 
@@ -42,6 +43,20 @@ def update_bulk_product_route(product_id):
         product = update_bulk_product(product_id, data)
 
         return jsonify(product.to_dict()), 200
+
+    except AppError as err:
+        return jsonify({"error": err.message}), err.status_code
+
+    except Exception as err:
+        return jsonify({"error": str(err)}), 500
+
+
+@bulk_bp.route("/bulk-products/<int:product_id>", methods=["DELETE"])
+def delete_bulk_product_route(product_id):
+    try:
+        result = delete_bulk_product(product_id)
+
+        return jsonify(result), 200
 
     except AppError as err:
         return jsonify({"error": err.message}), err.status_code

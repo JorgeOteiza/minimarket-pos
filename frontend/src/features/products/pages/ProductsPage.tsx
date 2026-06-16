@@ -8,9 +8,16 @@ import InventoryMovementsList from "../components/InventoryMovementsList";
 import { getProducts } from "../services/productApi";
 import type { Product } from "../types/product";
 
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
+
 type PanelMode = "create" | "edit" | "inventory" | null;
 
 type SortMode = "name_asc" | "name_desc" | "price_asc" | "price_desc";
+
+type PendingProductAction = {
+  type: "select";
+  product: Product;
+} | null;
 
 const PRODUCTS_SORT_STORAGE_KEY = "products_sort_mode";
 const PRODUCTS_PER_PAGE_STORAGE_KEY = "products_per_page";
@@ -57,6 +64,9 @@ const ProductsPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
 
+  const [pendingProductAction, setPendingProductAction] =
+    useState<PendingProductAction>(null);
+
   const [inventoryHistoryRefreshKey, setInventoryHistoryRefreshKey] =
     useState(0);
 
@@ -99,6 +109,13 @@ const ProductsPage = () => {
     };
   }, [query, page, perPage, sortMode]);
 
+  const openProductForEdit = (product: Product) => {
+    setHighlightedProductId(product.id);
+    setSelectedProduct(product);
+    setPanelMode("edit");
+    setIsFormPanelOpen(true);
+  };
+
   const handleHighlightProduct = (product: Product) => {
     setHighlightedProductId(product.id);
   };
@@ -108,17 +125,25 @@ const ProductsPage = () => {
     const isDirty = formElement?.getAttribute("data-dirty") === "true";
 
     if (isDirty) {
-      const confirmed = window.confirm(
-        "Tienes cambios sin guardar. ¿Cambiar de producto igualmente?",
-      );
+      setPendingProductAction({
+        type: "select",
+        product,
+      });
 
-      if (!confirmed) return;
+      return;
     }
 
-    setHighlightedProductId(product.id);
-    setSelectedProduct(product);
-    setPanelMode("edit");
-    setIsFormPanelOpen(true);
+    openProductForEdit(product);
+  };
+
+  const handleConfirmPendingProductAction = () => {
+    if (!pendingProductAction) return;
+
+    if (pendingProductAction.type === "select") {
+      openProductForEdit(pendingProductAction.product);
+    }
+
+    setPendingProductAction(null);
   };
 
   const handleInventoryAdjust = (product: Product) => {
@@ -201,8 +226,8 @@ const ProductsPage = () => {
           type="text"
           placeholder="Buscar por nombre o código..."
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
+          onChange={(event) => {
+            setQuery(event.target.value);
             setPage(1);
           }}
           className="products-search"
@@ -213,7 +238,9 @@ const ProductsPage = () => {
             Ordenar
             <select
               value={sortMode}
-              onChange={(e) => handleSortChange(e.target.value as SortMode)}
+              onChange={(event) =>
+                handleSortChange(event.target.value as SortMode)
+              }
             >
               <option value="name_asc">Nombre A-Z</option>
               <option value="name_desc">Nombre Z-A</option>
@@ -226,7 +253,9 @@ const ProductsPage = () => {
             Mostrar
             <select
               value={perPage}
-              onChange={(e) => handlePerPageChange(Number(e.target.value))}
+              onChange={(event) =>
+                handlePerPageChange(Number(event.target.value))
+              }
             >
               <option value={50}>50</option>
               <option value={100}>100</option>
@@ -263,7 +292,9 @@ const ProductsPage = () => {
             <div className="pagination-controls">
               <select
                 value={perPage}
-                onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                onChange={(event) =>
+                  handlePerPageChange(Number(event.target.value))
+                }
               >
                 <option value={50}>50</option>
                 <option value={100}>100</option>
@@ -354,6 +385,17 @@ const ProductsPage = () => {
       </div>
 
       <InventoryMovementsList refreshKey={inventoryHistoryRefreshKey} />
+
+      <ConfirmDialog
+        open={pendingProductAction !== null}
+        title="Cambiar de producto"
+        description="Tienes cambios sin guardar. Si cambias de producto, se perderán los cambios realizados."
+        confirmLabel="Cambiar sin guardar"
+        cancelLabel="Volver"
+        variant="warning"
+        onConfirm={handleConfirmPendingProductAction}
+        onCancel={() => setPendingProductAction(null)}
+      />
     </div>
   );
 };

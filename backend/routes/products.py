@@ -53,7 +53,7 @@ def get_product(id):
     product = get_product_by_id(id)
 
     if not product:
-        return jsonify({"error": "Product not found"}), 404
+        return jsonify({"error": "Producto no encontrado"}), 404
 
     return jsonify(product_schema.dump(product)), 200
 
@@ -64,7 +64,7 @@ def get_product_by_barcode_route(barcode):
 
     if not product:
         from backend.exceptions import NotFoundError
-        raise NotFoundError("Product not found")
+        raise NotFoundError("Producto no encontrado.")
 
     return jsonify(product_schema.dump(product)), 200
 
@@ -132,7 +132,7 @@ def update_product(id):
     product = get_product_by_id(id)
 
     if not product:
-        return jsonify({"error": "Product not found"}), 404
+        return jsonify({"error": "Producto no encontrado"}), 404
 
     data = request.get_json()
 
@@ -169,8 +169,8 @@ def delete_product_route(id):
     product = get_product_by_id(id)
 
     if not product:
-        return jsonify({"error": "Product not found"}), 404
+        return jsonify({"error": "Producto no encontrado"}), 404
 
     delete_product(product)
 
-    return jsonify({"message": "Product deleted"}), 200
+    return jsonify({"message": "Producto eliminado"}), 200
