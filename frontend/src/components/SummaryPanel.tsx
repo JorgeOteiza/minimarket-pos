@@ -65,7 +65,7 @@ export default function SummaryPanel({
           disabled={actionsDisabled}
         >
           <span className="summary-action-icon">🗑</span>
-          <span>Cancelar compra</span>
+          <span>Anular compra</span>
         </button>
       </div>
     </div>

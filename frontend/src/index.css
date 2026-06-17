@@ -1976,3 +1976,221 @@ textarea {
   font-weight: 700;
   line-height: 1.35;
 }
+
+/* =========================
+   TABLET FINAL OVERRIDE
+========================= */
+
+@media (max-width: 1100px) {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .dashboard-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    flex-shrink: 0 !important;
+    padding: 14px 18px !important;
+    border-right: none !important;
+    border-bottom: 1px solid #1f2937 !important;
+  }
+
+  .sidebar-title,
+  .sidebar-section-title {
+    display: none !important;
+  }
+
+  .sidebar-nav {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 8px !important;
+  }
+
+  .sidebar-section,
+  .sidebar-section-system {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .sidebar-nav a {
+    white-space: nowrap !important;
+    font-size: 17px !important;
+    padding: 10px 14px !important;
+    border-radius: 999px !important;
+    background: rgba(15, 23, 42, 0.35) !important;
+  }
+
+  .sidebar-nav a.active {
+    background: white !important;
+    color: #111827 !important;
+    font-size: 17px !important;
+    font-weight: 900 !important;
+  }
+
+  .dashboard-main {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 16px 16px 120px !important;
+  }
+
+  .products-page,
+  .sack-page,
+  .reports-page,
+  .analytics-page,
+  .backups-page {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 16px !important;
+    padding-bottom: 120px !important;
+  }
+
+  .products-layout,
+  .products-layout.with-form-panel,
+  .products-layout.without-form-panel,
+  .sack-layout,
+  .sack-layout.with-side-panel,
+  .sack-layout.without-side-panel {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .products-list-panel,
+  .products-form-panel,
+  .inventory-history-panel,
+  .sack-card,
+  .sack-side {
+    position: static !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .products-table-wrapper,
+  .inventory-history-table-wrapper,
+  .sack-table-wrapper {
+    max-height: 420px !important;
+    overflow: auto !important;
+  }
+
+  .product-sidebar-toggle,
+  .sack-sidebar-toggle {
+    width: 100% !important;
+    min-height: 34px !important;
+  }
+}
+
+/* =========================
+   POS TABLET SUPPORT
+========================= */
+
+@media (max-width: 1100px) {
+  .pos-container {
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pos-header-modern {
+    flex-shrink: 0;
+    padding: 14px 20px;
+    gap: 12px;
+  }
+
+  .pos-header-modern h1 {
+    font-size: 26px;
+  }
+
+  .pos-header-modern p {
+    font-size: 16px;
+  }
+
+  .pos-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 12px;
+    padding: 12px;
+    overflow: visible;
+  }
+
+  .pos-left {
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .pos-right {
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .cart-list {
+    max-height: 560px;
+    overflow-y: auto;
+  }
+
+  .total {
+    font-size: 38px;
+    margin-bottom: 12px;
+  }
+
+  .total-amount {
+    font-size: 38px;
+  }
+
+  .checkout-button,
+  .clear-cart-button {
+    padding: 15px 16px;
+    font-size: 1.7rem;
+  }
+
+  .summary-action-icon {
+    font-size: 2rem;
+  }
+
+  .last-item {
+    margin: 12px 0;
+  }
+
+  .last-item span {
+    font-size: 17px;
+  }
+
+  .last-item strong {
+    font-size: 23px;
+  }
+
+  .last-item small {
+    font-size: 20px;
+  }
+}
