@@ -53,11 +53,21 @@ const formatCurrency = (value: number | null) => {
   }).format(Math.round(value));
 };
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(new Date(value));
+const formatDate = (value: string) => {
+  const normalizedValue = value.endsWith("Z") ? value : `${value}Z`;
+
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(new Date(normalizedValue))
+    .replace("a. m.", "AM")
+    .replace("p. m.", "PM");
+};
 
 const toNumberOrEmpty = (value: string): NumericInputValue => {
   if (value === "") return "";
