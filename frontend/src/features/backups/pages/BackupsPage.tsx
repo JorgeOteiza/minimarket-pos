@@ -60,6 +60,16 @@ export default function BackupsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = window.setTimeout(() => {
+      setMessage("");
+    }, 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [message]);
+
   const totalBackupSize = useMemo(
     () => backups.reduce((sum, backup) => sum + backup.size_bytes, 0),
     [backups],
