@@ -13,6 +13,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from backend.services.business_settings_service import get_business_settings
 from backend.services.reports_service import get_sales_report
 
 
@@ -35,7 +36,7 @@ def _format_datetime(value):
 
     try:
         parsed = datetime.fromisoformat(value)
-        return parsed.strftime("%d-%m-%Y %H:%M")
+        return parsed.strftime("%d-%m-%Y %I:%M %p")
     except ValueError:
         return str(value)
 
@@ -47,10 +48,21 @@ def _build_styles():
         ParagraphStyle(
             name="ReportTitle",
             parent=styles["Title"],
-            fontSize=21,
-            leading=25,
-            spaceAfter=8,
+            fontSize=22,
+            leading=26,
+            spaceAfter=6,
             textColor=colors.HexColor("#111827"),
+        )
+    )
+
+    styles.add(
+        ParagraphStyle(
+            name="BusinessInfo",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=12,
+            textColor=colors.HexColor("#4b5563"),
+            spaceAfter=10,
         )
     )
 
@@ -60,7 +72,7 @@ def _build_styles():
             parent=styles["Normal"],
             fontSize=11,
             leading=15,
-            textColor=colors.HexColor("#4b5563"),
+            textColor=colors.HexColor("#374151"),
             spaceAfter=10,
         )
     )
@@ -144,9 +156,37 @@ def _make_table(data, column_widths=None):
     return table
 
 
+def _build_business_info(settings):
+    lines = []
+
+    if settings.rut:
+        lines.append(f"<b>RUT:</b> {settings.rut}")
+
+    if settings.address:
+        lines.append(f"<b>Dirección:</b> {settings.address}")
+
+    if settings.phone:
+        lines.append(f"<b>Teléfono:</b> {settings.phone}")
+
+    if settings.email:
+        lines.append(f"<b>Correo:</b> {settings.email}")
+
+    return "<br/>".join(lines)
+
+
 def generate_sales_report_pdf(period="today"):
     report = get_sales_report(period=period)
+    settings = get_business_settings()
+
     buffer = BytesIO()
+
+    business_name = settings.business_name or "MINIMARKET POS"
+    business_info = _build_business_info(settings)
+
+    footer_message = (
+        settings.footer_message
+        or "Documento generado automáticamente por Minimarket POS."
+    )
 
     document = SimpleDocTemplate(
         buffer,
@@ -161,12 +201,15 @@ def generate_sales_report_pdf(period="today"):
     styles = _build_styles()
     elements = []
 
-    generated_at = datetime.now().strftime("%d-%m-%Y %H:%M")
+    generated_at = datetime.now().strftime("%d-%m-%Y %I:%M %p")
     summary = report["summary"]
     top_products = report["top_products"][:10]
     recent_sales = report["recent_sales"][:20]
 
-    elements.append(Paragraph("MINIMARKET POS", styles["ReportTitle"]))
+    elements.append(Paragraph(business_name, styles["ReportTitle"]))
+
+    if business_info:
+        elements.append(Paragraph(business_info, styles["BusinessInfo"]))
 
     elements.append(
         Paragraph(
@@ -194,7 +237,7 @@ def generate_sales_report_pdf(period="today"):
             ["Indicador", "Valor"],
             ["Total vendido", _format_clp(summary["total_sales"])],
             ["Cantidad de ventas", _format_number(summary["sales_count"])],
-            ["Ticket promedio", _format_clp(summary["average_ticket"])],
+            ["Compra promedio", _format_clp(summary["average_ticket"])],
             ["Unidades vendidas", _format_number(summary["total_units_sold"])],
         ],
         column_widths=[8 * cm, 8 * cm],
@@ -274,8 +317,7 @@ def generate_sales_report_pdf(period="today"):
 
     elements.append(
         Paragraph(
-            "Documento generado automáticamente por Minimarket POS. "
-            "Este reporte tiene fines administrativos y de control interno.",
+            f"{footer_message} Este reporte tiene fines administrativos y de control interno.",
             styles["FooterText"],
         )
     )

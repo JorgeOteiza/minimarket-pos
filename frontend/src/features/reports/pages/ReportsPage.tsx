@@ -134,7 +134,7 @@ export default function ReportsPage() {
             </div>
 
             <div className="reports-kpi-card">
-              <span>Ticket promedio</span>
+              <span>Compra promedio</span>
               <strong>{formatCLP(report.summary.average_ticket)}</strong>
               <small>Promedio por venta</small>
             </div>
