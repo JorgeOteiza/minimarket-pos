@@ -2180,3 +2180,22 @@ textarea {
     height: 100px !important;
   }
 }
+
+/* =========================
+   GLOBAL FOOTER
+========================= */
+
+.app-footer {
+  text-align: center;
+  padding: 10px 0 14px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  user-select: none;
+  background-color: #02060e;
+  border-top: 1px solid #1f2937;
+}
+
+.footer-heart {
+  color: #dc2626;
+}

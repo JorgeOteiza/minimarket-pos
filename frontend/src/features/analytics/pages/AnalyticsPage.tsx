@@ -98,7 +98,7 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="analytics-card">
-              <span>Ticket promedio</span>
+              <span>Compra promedio</span>
               <strong>{formatCLP(data.last_30_days.average_ticket)}</strong>
               <small>Últimos 30 días</small>
             </div>

@@ -15,19 +15,25 @@ function App() {
     <BrowserRouter>
       <Navbar />
 
-      <Routes>
-        <Route path="/" element={<POS />} />
+      <>
+        <Routes>
+          <Route path="/" element={<POS />} />
 
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="bulk-restock" element={<BulkRestockPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="backups" element={<BackupsPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="settings" element={<BusinessSettingsPage />} />
-        </Route>
-      </Routes>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="bulk-restock" element={<BulkRestockPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="backups" element={<BackupsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="settings" element={<BusinessSettingsPage />} />
+          </Route>
+        </Routes>
+
+        <footer className="app-footer">
+          Hecho con <span className="footer-heart">❤</span>
+        </footer>
+      </>
     </BrowserRouter>
   );
 }
