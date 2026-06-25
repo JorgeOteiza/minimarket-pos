@@ -1,22 +1,22 @@
 .confirm-dialog-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: rgba(15, 23, 42, 0.58);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
   padding: 24px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
 }
 
 .confirm-dialog {
-  width: min(560px, 100%);
+  position: relative;
+  z-index: 100000;
+  width: min(520px, 100%);
   background: white;
-  border-radius: 22px;
-  padding: 28px;
-  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.35);
-  border: 1px solid #e5e7eb;
-  animation: confirm-dialog-enter 0.15s ease-out;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.35);
 }
 
 .confirm-dialog-icon {

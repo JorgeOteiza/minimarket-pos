@@ -39,8 +39,19 @@ export const ProductList = ({
   };
 
   const getStockStatus = (product: Product) => {
-    if (product.stock === 0) return "out";
-    if (product.stock <= (product.min_stock ?? 0)) return "low";
+    const stock = product.stock ?? 0;
+    const minStock = product.min_stock ?? 0;
+
+    if (stock <= 0) return "out";
+
+    if (minStock > 0 && stock <= minStock) return "low";
+
+    const warningBuffer = Math.max(2, Math.ceil(minStock * 0.25));
+
+    if (minStock > 0 && stock <= minStock + warningBuffer) {
+      return "warning";
+    }
+
     return "ok";
   };
 
@@ -49,15 +60,25 @@ export const ProductList = ({
       case "out":
         return {
           label: "Sin stock",
-          color: "#dc2626",
+          color: "#991b1b",
           bg: "#fee2e2",
+          border: "#fca5a5",
         };
 
       case "low":
         return {
           label: "Stock bajo",
-          color: "#b45309",
+          color: "#b91c1c",
+          bg: "#ffe4e6",
+          border: "#fda4af",
+        };
+
+      case "warning":
+        return {
+          label: "Por revisar",
+          color: "#92400e",
           bg: "#fef3c7",
+          border: "#fcd34d",
         };
 
       default:
@@ -65,6 +86,7 @@ export const ProductList = ({
           label: "OK",
           color: "#166534",
           bg: "#dcfce7",
+          border: "#86efac",
         };
     }
   };
@@ -135,7 +157,7 @@ export const ProductList = ({
                   className={`product-row ${isSelected ? "selected" : ""}`}
                   onClick={() => onHighlightProduct(product)}
                 >
-                  <td>{product.name}</td>
+                  <td>{product.name.toUpperCase()}</td>
                   <td>{product.barcode || "-"}</td>
                   <td>{formatOptionalCLP(boxCost)}</td>
                   <td>{packUnits || "-"}</td>
@@ -167,6 +189,7 @@ export const ProductList = ({
                       style={{
                         background: badge.bg,
                         color: badge.color,
+                        border: `1px solid ${badge.border}`,
                       }}
                     >
                       {badge.label}

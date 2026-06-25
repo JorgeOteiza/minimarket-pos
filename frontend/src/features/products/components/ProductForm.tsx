@@ -147,6 +147,28 @@ export const ProductForm = ({
             error={fieldErrors.pack_units}
           />
 
+          <div className="form-field">
+            <label>Costo unidad</label>
+            <input
+              type="text"
+              value={
+                formData.cost && formData.pack_units && formData.pack_units > 0
+                  ? new Intl.NumberFormat("es-CL", {
+                      style: "currency",
+                      currency: "CLP",
+                      maximumFractionDigits: 0,
+                    }).format(
+                      Math.round(
+                        Number(formData.cost) / Number(formData.pack_units),
+                      ),
+                    )
+                  : "-"
+              }
+              readOnly
+              className="readonly-input"
+            />
+          </div>
+
           <FormField
             label="Margen de venta (%)"
             name="margin"
@@ -154,6 +176,7 @@ export const ProductForm = ({
             value={marginPercentInput}
             onChange={handleMarginChange}
             error={fieldErrors.margin}
+            className="margin-highlight-input"
           />
 
           <FormField

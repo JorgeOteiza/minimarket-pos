@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+
 import "./confirmDialog.css";
 
 type ConfirmDialogVariant = "danger" | "warning" | "default";
@@ -27,7 +29,7 @@ export default function ConfirmDialog({
 }: Props) {
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="confirm-dialog-overlay" role="presentation">
       <div
         className="confirm-dialog"
@@ -64,6 +66,7 @@ export default function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
