@@ -14,6 +14,7 @@ import {
 
 import {
   normalizeText,
+  normalizeTextForSubmit,
   normalizeBarcode,
   normalizeNumber,
 } from "../utils/productNormalization";
@@ -166,7 +167,7 @@ export const useProductForm = ({
         [name]: normalizedValue,
       };
 
-      if (name === "price") {
+      if (name === "price" || name === "cost" || name === "pack_units") {
         const newMargin = recalculateMarginFromPrice(
           next.cost,
           next.pack_units,
@@ -235,6 +236,7 @@ export const useProductForm = ({
 
     const payload: CreateProductDTO = {
       ...formData,
+      name: normalizeTextForSubmit(formData.name),
       stock: mode === "create" ? 0 : formData.stock,
     };
 

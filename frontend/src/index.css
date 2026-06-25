@@ -2199,3 +2199,19 @@ textarea {
 .footer-heart {
   color: #dc2626;
 }
+
+.confirm-dialog-backdrop,
+.confirm-dialog-overlay {
+  z-index: 9999 !important;
+}
+
+.confirm-dialog {
+  z-index: 10000 !important;
+}
+
+.product-form input[name="margin"] {
+  background: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  color: #92400e !important;
+  font-weight: 700 !important;
+}

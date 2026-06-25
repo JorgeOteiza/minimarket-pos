@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+
 import { searchProducts } from "../services/productApi";
 import { useDebounce } from "../hooks/useDebounce";
 import type { Product } from "../types/product";
@@ -15,41 +16,67 @@ export const ProductSearch = ({ onSelectProduct }: Props) => {
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
-  // 🔄 fetch memoizado
-  const fetchProducts = useCallback(async () => {
-    if (!debouncedQuery) {
-      setResults([]);
-      return;
-    }
+  useEffect(() => {
+    let isMounted = true;
 
-    setLoading(true);
+    const loadProducts = async () => {
+      const cleanQuery = debouncedQuery.trim();
 
-    try {
-      const data = await searchProducts(debouncedQuery);
-      setResults(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+      if (!cleanQuery) {
+        setResults([]);
+        setActiveIndex(-1);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const data = await searchProducts(cleanQuery);
+
+        if (!isMounted) return;
+
+        setResults(data);
+        setActiveIndex(data.length > 0 ? 0 : -1);
+      } catch (err) {
+        if (!isMounted) return;
+
+        console.error(err);
+        setResults([]);
+        setActiveIndex(-1);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, [debouncedQuery]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // ⌨️ navegación teclado
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
+      e.preventDefault();
       setActiveIndex((prev) => Math.min(prev + 1, results.length - 1));
     }
 
     if (e.key === "ArrowUp") {
+      e.preventDefault();
       setActiveIndex((prev) => Math.max(prev - 1, 0));
     }
 
     if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
       handleSelect(results[activeIndex]);
+    }
+
+    if (e.key === "Escape") {
+      setResults([]);
+      setActiveIndex(-1);
     }
   };
 

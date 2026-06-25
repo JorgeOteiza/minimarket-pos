@@ -1,5 +1,9 @@
 export const normalizeText = (value: string): string => {
-  return value.trim().replace(/\s+/g, " ");
+  return value.replace(/\s+/g, " ").toUpperCase();
+};
+
+export const normalizeTextForSubmit = (value: string): string => {
+  return normalizeText(value).trim();
 };
 
 export const normalizeBarcode = (value: string): string => {
