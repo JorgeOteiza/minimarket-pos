@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { Product } from "../types/product";
 
@@ -17,6 +17,18 @@ type Props = {
 };
 
 type ConfirmAction = "delete" | "cancel" | null;
+
+const DEFAULT_IVA = 0.19;
+
+const formatCLP = (value: number | null) => {
+  if (value === null || Number.isNaN(value)) return "-";
+
+  return new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0,
+  }).format(Math.round(value));
+};
 
 export const ProductForm = ({
   mode,
@@ -51,6 +63,27 @@ export const ProductForm = ({
     onUpdated,
     onDeleted,
   });
+
+  const unitCosts = useMemo(() => {
+    const cost = Number(formData.cost ?? 0);
+    const packUnits = Number(formData.pack_units ?? 0);
+    const iva = Number(formData.iva ?? DEFAULT_IVA);
+
+    if (cost <= 0 || packUnits <= 0) {
+      return {
+        unitCostWithoutIva: null,
+        unitCostWithIva: null,
+      };
+    }
+
+    const unitCostWithoutIva = cost / packUnits;
+    const unitCostWithIva = unitCostWithoutIva * (1 + iva);
+
+    return {
+      unitCostWithoutIva,
+      unitCostWithIva,
+    };
+  }, [formData.cost, formData.pack_units, formData.iva]);
 
   const handleCancelClick = () => {
     if (hasUnsavedChanges) {
@@ -118,15 +151,7 @@ export const ProductForm = ({
             value={formData.name}
             onChange={handleChange}
             error={fieldErrors.name}
-          />
-
-          <FormField
-            label="Código de barras"
-            name="barcode"
-            value={formData.barcode ?? ""}
-            onChange={handleChange}
-            error={fieldErrors.barcode}
-            warning={warnings.barcode}
+            className="full"
           />
 
           <FormField
@@ -147,25 +172,21 @@ export const ProductForm = ({
             error={fieldErrors.pack_units}
           />
 
-          <div className="form-field">
-            <label>Costo unidad</label>
+          <div className="form-field calculated-field">
+            <label>Costo neto unidad ($)</label>
             <input
               type="text"
-              value={
-                formData.cost && formData.pack_units && formData.pack_units > 0
-                  ? new Intl.NumberFormat("es-CL", {
-                      style: "currency",
-                      currency: "CLP",
-                      maximumFractionDigits: 0,
-                    }).format(
-                      Math.round(
-                        Number(formData.cost) / Number(formData.pack_units),
-                      ),
-                    )
-                  : "-"
-              }
+              value={formatCLP(unitCosts.unitCostWithoutIva)}
               readOnly
-              className="readonly-input"
+            />
+          </div>
+
+          <div className="form-field calculated-field">
+            <label>Costo bruto unidad ($)</label>
+            <input
+              type="text"
+              value={formatCLP(unitCosts.unitCostWithIva)}
+              readOnly
             />
           </div>
 
@@ -180,7 +201,7 @@ export const ProductForm = ({
           />
 
           <FormField
-            label="Precio venta"
+            label="Precio venta ($)"
             name="price"
             type="number"
             value={formData.price}
@@ -198,12 +219,28 @@ export const ProductForm = ({
             error={fieldErrors.min_stock}
             warning={warnings.stock}
           />
+
+          <FormField
+            label="Código de barras"
+            name="barcode"
+            value={formData.barcode ?? ""}
+            onChange={handleChange}
+            error={fieldErrors.barcode}
+            warning={warnings.barcode}
+          />
         </div>
 
         <div className="form-help-box">
-          Para modificar el stock, vuelve a la lista de{" "}
-          <strong>Productos</strong> y usa el botón <strong>Inventario</strong>{" "}
-          del producto correspondiente.
+          <p>
+            <strong>Margen:</strong> se calcula sobre el costo bruto unitario
+            con IVA.
+          </p>
+
+          <p>
+            Para modificar el stock, vuelve a la lista de{" "}
+            <strong>Productos</strong> y usa el botón{" "}
+            <strong>Inventario</strong> del producto correspondiente.
+          </p>
         </div>
 
         {successMessage && (

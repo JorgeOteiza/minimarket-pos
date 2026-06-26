@@ -17,28 +17,30 @@ export function useKeyboardShortcuts({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (disabled) return;
 
-      // 🔥 NO interferir con inputs
       const activeElement = document.activeElement;
-      if (
-        activeElement &&
-        (activeElement.tagName === "INPUT" ||
-          activeElement.tagName === "TEXTAREA")
-      ) {
+
+      const isTyping =
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        activeElement instanceof HTMLSelectElement;
+
+      if (isTyping) {
         return;
       }
 
       switch (e.key) {
-        case "F2": // 💰 cobrar
+        case "Enter":
+        case "F2":
           e.preventDefault();
           onCheckout();
           break;
 
-        case "F4": // 🧹 limpiar
+        case "F4":
           e.preventDefault();
           onClear();
           break;
 
-        case "F8": // ⬅️ eliminar último
+        case "F8":
           e.preventDefault();
           onRemoveLast();
           break;

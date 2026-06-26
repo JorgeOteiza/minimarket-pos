@@ -25,14 +25,6 @@ export default function ProductSearchInput({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // =========================
-  // AUTOFOCUS
-  // =========================
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  // =========================
   // SEARCH
   // =========================
 

@@ -8,7 +8,7 @@ export const DashboardLayout = () => {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
-        <h2 className="sidebar-title">Menú</h2>
+        <h2 className="sidebar-title">MENÚ</h2>
 
         <nav className="sidebar-nav">
           <div className="sidebar-section">
@@ -18,14 +18,14 @@ export const DashboardLayout = () => {
               to="/dashboard/products"
               className={isActive("/dashboard/products") ? "active" : ""}
             >
-              Productos
+              PRODUCTOS
             </Link>
 
             <Link
               to="/dashboard/bulk-restock"
               className={isActive("/dashboard/bulk-restock") ? "active" : ""}
             >
-              Reposición de sacos y paquetes
+              REPOSICIÓN DE SACOS Y PAQUETES
             </Link>
           </div>
 
@@ -36,14 +36,14 @@ export const DashboardLayout = () => {
               to="/dashboard/reports"
               className={isActive("/dashboard/reports") ? "active" : ""}
             >
-              Reportes de ventas
+              REPORTES DE VENTAS
             </Link>
 
             <Link
               to="/dashboard/analytics"
               className={isActive("/dashboard/analytics") ? "active" : ""}
             >
-              Análisis de datos
+              ANÁLISIS DE DATOS
             </Link>
           </div>
 
@@ -54,14 +54,14 @@ export const DashboardLayout = () => {
               to="/dashboard/backups"
               className={isActive("/dashboard/backups") ? "active" : ""}
             >
-              Respaldos
+              RESPALDOS
             </Link>
 
             <Link
               to="/dashboard/settings"
               className={isActive("/dashboard/settings") ? "active" : ""}
             >
-              Configuración del negocio
+              AJUSTES DEL NEGOCIO
             </Link>
           </div>
         </nav>

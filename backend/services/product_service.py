@@ -33,8 +33,10 @@ def get_all_products():
 
 
 def search_products_by_name(name):
+    normalized_name = normalize_product_name(name) or ""
+
     return db.session.query(Product).filter(
-        Product.name.ilike(f"%{name}%")
+        Product.name.like(f"%{normalized_name}%")
     ).all()
 
 
@@ -112,22 +114,23 @@ def get_paginated_products(page=1, per_page=100, sort="name_asc"):
 
 
 def search_products_paginated(query, page=1, per_page=100, sort="name_asc"):
-    normalized_query = query.strip()
+    raw_query = (query or "").strip()
+    normalized_name_query = normalize_product_name(raw_query) or ""
 
     product_query = Product.query.filter(
         or_(
-            Product.name.ilike(f"%{normalized_query}%"),
-            Product.barcode.ilike(f"%{normalized_query}%"),
+            Product.name.like(f"%{normalized_name_query}%"),
+            Product.barcode.ilike(f"%{raw_query}%"),
         )
     )
 
     relevance_order = case(
         (
-            Product.name.ilike(f"{normalized_query}%"),
+            Product.name.like(f"{normalized_name_query}%"),
             0,
         ),
         (
-            Product.barcode.ilike(f"{normalized_query}%"),
+            Product.barcode.ilike(f"{raw_query}%"),
             1,
         ),
         else_=2,

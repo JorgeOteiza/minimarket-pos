@@ -333,7 +333,7 @@ textarea {
 }
 
 .sidebar-nav a.active {
-  background: #111827;
+  background: #11472dc2;
   color: white;
   font-weight: 600;
   font-size: 20px;
@@ -374,7 +374,7 @@ textarea {
 
 .dashboard-main {
   padding: 20px;
-  background: #f9fafb;
+  background: #d8bc0c1a;
   overflow: auto;
 }
 
@@ -1178,7 +1178,7 @@ textarea {
   display: grid;
   place-items: center;
   min-height: 420px;
-  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, #d8e2db 0%, #f8fafc 100%);
   border: 1px dashed #cbd5e1;
   border-radius: 18px;
 }
@@ -1983,6 +1983,13 @@ textarea {
   line-height: 1.35;
 }
 
+@media (max-width: 1100px) {
+  .sidebar-nav a {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+  }
+}
+
 /* =========================
    TABLET FINAL OVERRIDE
 ========================= */
@@ -2214,4 +2221,51 @@ textarea {
   border-color: #f59e0b !important;
   color: #92400e !important;
   font-weight: 700 !important;
+}
+
+.product-form .form-field:has(input[name="margin"]),
+.product-form .form-field:has(input[name="price"]) {
+  position: relative;
+}
+
+.product-form input[name="margin"] {
+  padding-right: 34px !important;
+}
+
+.product-form input[name="price"] {
+  padding-left: 30px !important;
+}
+
+.product-form .form-field:has(input[name="margin"])::after {
+  content: "%";
+  position: absolute;
+  right: 12px;
+  top: 33px;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.product-form .form-field:has(input[name="price"])::before {
+  content: "$";
+  position: absolute;
+  left: 12px;
+  top: 33px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.sidebar-nav a {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.sidebar-section {
+  min-width: 0;
 }

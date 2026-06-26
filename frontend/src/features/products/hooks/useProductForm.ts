@@ -13,7 +13,6 @@ import {
 } from "../services/productApi";
 
 import {
-  normalizeText,
   normalizeTextForSubmit,
   normalizeBarcode,
   normalizeNumber,
@@ -151,10 +150,17 @@ export const useProductForm = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
+    const input = e.target;
+    const cursorStart = input.selectionStart;
+    const cursorEnd = input.selectionEnd;
+    const previousScrollLeft = input.scrollLeft;
+    const wasCursorAtEnd =
+      cursorStart === value.length && cursorEnd === value.length;
+
     let normalizedValue: string | number | null = value;
 
     if (name === "name") {
-      normalizedValue = normalizeText(value);
+      normalizedValue = value.toUpperCase();
     } else if (name === "barcode") {
       normalizedValue = normalizeBarcode(value);
     } else {
@@ -183,6 +189,18 @@ export const useProductForm = ({
 
       return next;
     });
+
+    if (name === "name" && cursorStart !== null && cursorEnd !== null) {
+      window.requestAnimationFrame(() => {
+        input.setSelectionRange(cursorStart, cursorEnd);
+
+        if (wasCursorAtEnd) {
+          input.scrollLeft = input.scrollWidth;
+        } else {
+          input.scrollLeft = previousScrollLeft;
+        }
+      });
+    }
 
     clearFieldError(name);
   };
