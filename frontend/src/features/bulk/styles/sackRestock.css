@@ -378,3 +378,42 @@
     position: static;
   }
 }
+
+.sack-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sack-input-wrapper input {
+  width: 100%;
+}
+
+.sack-prefix input {
+  padding-left: 28px !important;
+}
+
+.sack-suffix input {
+  padding-right: 30px !important;
+}
+
+.sack-input-prefix,
+.sack-input-suffix {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.sack-input-prefix {
+  left: 12px;
+  color: #923a11;
+}
+
+.sack-input-suffix {
+  right: 12px;
+  color: #923a11;
+}

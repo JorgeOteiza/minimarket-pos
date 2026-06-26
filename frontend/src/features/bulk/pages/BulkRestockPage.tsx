@@ -679,7 +679,7 @@ export default function BulkRestockPage() {
                     onChange={(event) =>
                       updateSackForm("barcode", event.target.value)
                     }
-                    placeholder="Escanear código del producto o escribir uno nuevo"
+                    placeholder="Ingresa aquí el código de barras del producto"
                   />
                 </div>
 
@@ -718,43 +718,53 @@ export default function BulkRestockPage() {
                 </div>
 
                 <div className="sack-form-grid sack-pricing-grid">
-                  <div className="sack-field">
+                  <div className="sack-field sack-prefix">
                     <label>Costo sin IVA</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={sackForm.cost}
-                      onChange={(event) =>
-                        updateSackForm(
-                          "cost",
-                          toNumberOrEmpty(event.target.value),
-                        )
-                      }
-                      placeholder="Ej: 20000"
-                    />
+
+                    <div className="sack-input-wrapper">
+                      <span className="sack-input-prefix">$</span>
+
+                      <input
+                        type="number"
+                        min={0}
+                        value={sackForm.cost}
+                        onChange={(event) =>
+                          updateSackForm(
+                            "cost",
+                            toNumberOrEmpty(event.target.value),
+                          )
+                        }
+                        placeholder="Ej: 20000"
+                      />
+                    </div>
                   </div>
 
-                  <div className="sack-field">
-                    <label>Margen (%)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      step="1"
-                      value={
-                        sackForm.sale_margin === ""
-                          ? ""
-                          : Math.round(Number(sackForm.sale_margin) * 100)
-                      }
-                      onChange={(event) =>
-                        updateSackForm(
-                          "sale_margin",
-                          event.target.value === ""
+                  <div className="sack-field sack-suffix">
+                    <label>Margen de utilidad</label>
+
+                    <div className="sack-input-wrapper">
+                      <input
+                        type="number"
+                        min={0}
+                        step="1"
+                        value={
+                          sackForm.sale_margin === ""
                             ? ""
-                            : Number(event.target.value) / 100,
-                        )
-                      }
-                      placeholder="Ej: 40"
-                    />
+                            : Math.round(Number(sackForm.sale_margin) * 100)
+                        }
+                        onChange={(event) =>
+                          updateSackForm(
+                            "sale_margin",
+                            event.target.value === ""
+                              ? ""
+                              : Number(event.target.value) / 100,
+                          )
+                        }
+                        placeholder="Ej: 40"
+                      />
+
+                      <span className="sack-input-suffix">%</span>
+                    </div>
                   </div>
                 </div>
 
