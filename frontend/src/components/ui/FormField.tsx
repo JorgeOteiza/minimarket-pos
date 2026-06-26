@@ -1,27 +1,18 @@
 type Props = {
   label: string;
-
   name?: string;
-
   type?: string;
-
   value?: string | number | null;
-
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-
   error?: string;
-
   warning?: string;
-
   className?: string;
-
   inputClassName?: string;
-
   disabled?: boolean;
-
   placeholder?: string;
-
   step?: string | number;
+  prefix?: string;
+  suffix?: string;
 };
 
 export const FormField = ({
@@ -37,6 +28,8 @@ export const FormField = ({
   disabled = false,
   placeholder,
   step,
+  prefix,
+  suffix,
 }: Props) => {
   const computedInputClassName = error
     ? "input-error"
@@ -48,19 +41,29 @@ export const FormField = ({
     <div className={`form-field ${className}`}>
       <label>{label}</label>
 
-      <input
-        name={name}
-        type={type}
-        value={value ?? ""}
-        onChange={onChange}
-        disabled={disabled}
-        placeholder={placeholder}
-        step={step}
-        className={`
-          ${computedInputClassName}
-          ${inputClassName}
-        `}
-      />
+      <div
+        className={`input-adornment-wrapper ${
+          prefix ? "has-prefix" : ""
+        } ${suffix ? "has-suffix" : ""}`}
+      >
+        {prefix && <span className="input-prefix">{prefix}</span>}
+
+        <input
+          name={name}
+          type={type}
+          value={value ?? ""}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          step={step}
+          className={`
+            ${computedInputClassName}
+            ${inputClassName}
+          `}
+        />
+
+        {suffix && <span className="input-suffix">{suffix}</span>}
+      </div>
 
       {error && <span className="field-error">{error}</span>}
 

@@ -2236,28 +2236,6 @@ textarea {
   padding-left: 30px !important;
 }
 
-.product-form .form-field:has(input[name="margin"])::after {
-  content: "%";
-  position: absolute;
-  right: 12px;
-  top: 33px;
-  color: #92400e;
-  font-size: 14px;
-  font-weight: 900;
-  pointer-events: none;
-}
-
-.product-form .form-field:has(input[name="price"])::before {
-  content: "$";
-  position: absolute;
-  left: 12px;
-  top: 33px;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 900;
-  pointer-events: none;
-}
-
 .sidebar-nav a {
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -2268,4 +2246,61 @@ textarea {
 
 .sidebar-section {
   min-width: 0;
+}
+
+.input-adornment-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-adornment-wrapper input {
+  width: 100%;
+}
+
+.input-adornment-wrapper.has-prefix input {
+  padding-left: 30px !important;
+}
+
+.input-adornment-wrapper.has-suffix input {
+  padding-right: 34px !important;
+}
+
+.input-prefix,
+.input-suffix {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 14px;
+  font-weight: 900;
+  pointer-events: none;
+}
+
+.input-prefix {
+  left: 12px;
+  color: #475569;
+}
+
+.input-suffix {
+  right: 12px;
+  color: #92400e;
+}
+
+.product-form .form-field.calculated-field input {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+  font-weight: 900 !important;
+  cursor: default;
+}
+
+.product-form .form-field.calculated-field input:focus {
+  border-color: #cbd5e1 !important;
+  box-shadow: none !important;
 }

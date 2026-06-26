@@ -173,7 +173,7 @@ export const ProductForm = ({
           />
 
           <div className="form-field calculated-field">
-            <label>Costo neto unidad ($)</label>
+            <label>Costo neto unidad</label>
             <input
               type="text"
               value={formatCLP(unitCosts.unitCostWithoutIva)}
@@ -182,7 +182,7 @@ export const ProductForm = ({
           </div>
 
           <div className="form-field calculated-field">
-            <label>Costo bruto unidad ($)</label>
+            <label>Costo bruto unidad</label>
             <input
               type="text"
               value={formatCLP(unitCosts.unitCostWithIva)}
@@ -191,23 +191,25 @@ export const ProductForm = ({
           </div>
 
           <FormField
-            label="Margen de venta (%)"
+            label="Margen de venta"
             name="margin"
             type="number"
             value={marginPercentInput}
             onChange={handleMarginChange}
             error={fieldErrors.margin}
             className="margin-highlight-input"
+            suffix="%"
           />
 
           <FormField
-            label="Precio venta ($)"
+            label="Precio venta"
             name="price"
             type="number"
             value={formData.price}
             onChange={handleChange}
             error={fieldErrors.price}
             warning={warnings.price}
+            prefix="$"
           />
 
           <FormField
