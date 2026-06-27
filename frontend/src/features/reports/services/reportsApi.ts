@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+import { buildApiUrl } from "../../../api/config";
 
 export type ReportPeriod = "today" | "week" | "month" | "semester" | "year";
 
@@ -39,7 +39,7 @@ export type SalesReport = {
 export async function getSalesReport(
   period: ReportPeriod,
 ): Promise<SalesReport> {
-  const res = await fetch(`${API_URL}/reports/sales?period=${period}`);
+  const res = await fetch(buildApiUrl(`/reports/sales?period=${period}`));
 
   if (!res.ok) {
     const error = await res.json().catch(() => null);
@@ -50,5 +50,5 @@ export async function getSalesReport(
 }
 
 export function getSalesReportPdfUrl(period: ReportPeriod): string {
-  return `${API_URL}/reports/sales/pdf?period=${period}`;
+  return buildApiUrl(`/reports/sales/pdf?period=${period}`);
 }

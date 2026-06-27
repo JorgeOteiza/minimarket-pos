@@ -21,7 +21,6 @@ def clean_demo_data():
         db.session.commit()
 
         print("LIMPIEZA COMPLETADA")
-        print("LIMPIEZA COMPLETADA")
         print(
             "Se eliminaron las ventas y el carrito. "
             "Se mantuvieron productos, stock, historial de inventario, "

@@ -1,10 +1,9 @@
+import { buildApiUrl } from "../../../api/config";
 import type {
   Product,
   UpdateProductDTO,
   CreateProductDTO,
 } from "../types/product";
-
-const API_URL = "http://localhost:5000/api";
 
 const parseErrorResponse = async (res: Response, fallbackMessage: string) => {
   const error = await res.json().catch(() => null);
@@ -53,7 +52,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
   if (!query) return [];
 
   const res = await fetch(
-    `${API_URL}/products/search?q=${encodeURIComponent(query)}`,
+    buildApiUrl(`/products/search?q=${encodeURIComponent(query)}`),
   );
 
   if (!res.ok) {
@@ -66,7 +65,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
 export const createProduct = async (
   data: CreateProductDTO,
 ): Promise<Product> => {
-  const res = await fetch(`${API_URL}/products`, {
+  const res = await fetch(buildApiUrl("/products"), {
     method: "POST",
 
     headers: {
@@ -87,7 +86,7 @@ export const updateProduct = async (
   id: number,
   data: UpdateProductDTO,
 ): Promise<Product> => {
-  const res = await fetch(`${API_URL}/products/${id}`, {
+  const res = await fetch(buildApiUrl(`/products/${id}`), {
     method: "PUT",
 
     headers: {
@@ -105,7 +104,7 @@ export const updateProduct = async (
 };
 
 export const deleteProduct = async (id: number): Promise<void> => {
-  const res = await fetch(`${API_URL}/products/${id}`, {
+  const res = await fetch(buildApiUrl(`/products/${id}`), {
     method: "DELETE",
   });
 
@@ -142,8 +141,8 @@ export const getProducts = async ({
   });
 
   const endpoint = query.trim()
-    ? `${API_URL}/products/search?q=${encodeURIComponent(query)}&${params}`
-    : `${API_URL}/products?${params}`;
+    ? buildApiUrl(`/products/search?q=${encodeURIComponent(query)}&${params}`)
+    : buildApiUrl(`/products?${params}`);
 
   const res = await fetch(endpoint);
 
@@ -170,7 +169,7 @@ export type InventoryAdjustmentResponse = {
 export const adjustInventory = async (
   data: InventoryAdjustmentPayload,
 ): Promise<InventoryAdjustmentResponse> => {
-  const res = await fetch(`${API_URL}/inventory/adjust`, {
+  const res = await fetch(buildApiUrl("/inventory/adjust"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -201,7 +200,7 @@ export type InventoryMovement = {
 export const getInventoryMovements = async (
   limit = 50,
 ): Promise<InventoryMovement[]> => {
-  const res = await fetch(`${API_URL}/inventory/movements?limit=${limit}`);
+  const res = await fetch(buildApiUrl(`/inventory/movements?limit=${limit}`));
 
   if (!res.ok) {
     await parseErrorResponse(res, "Error obteniendo historial de inventario");

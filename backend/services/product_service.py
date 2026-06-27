@@ -169,13 +169,6 @@ def update_product(product, data):
             else:
                 setattr(product, key, value)
 
-    cost = data.get("cost", product.cost)
-    margin = data.get("margin", product.margin)
-
-    # Se mantiene desactivado para no sobrescribir precios manuales.
-    # if "price" not in data and cost is not None:
-    #     product.price = calculate_price(cost, margin)
-
     db.session.commit()
 
     return product

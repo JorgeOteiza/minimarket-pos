@@ -140,6 +140,10 @@ def create_daily_auto_backup():
     }
 
 
+def ensure_daily_auto_backup():
+    return create_daily_auto_backup()
+
+
 def list_backups():
     backups_dir = _get_backups_dir()
 

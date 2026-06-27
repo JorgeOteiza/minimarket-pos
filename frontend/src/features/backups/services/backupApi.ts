@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+import { buildApiUrl } from "../../../api/config";
 
 export type BackupFile = {
   filename: string;
@@ -23,7 +23,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function getBackups(): Promise<BackupFile[]> {
-  const res = await fetch(`${API_URL}/backups`);
+  const res = await fetch(buildApiUrl("/backups"));
 
   return handleResponse<BackupFile[]>(res);
 }
@@ -32,7 +32,7 @@ export async function createBackup(): Promise<{
   message: string;
   backup: BackupFile;
 }> {
-  const res = await fetch(`${API_URL}/backups/create`, {
+  const res = await fetch(buildApiUrl("/backups/create"), {
     method: "POST",
   });
 
@@ -43,7 +43,7 @@ export async function createBackup(): Promise<{
 }
 
 export async function createDailyAutoBackup(): Promise<AutoBackupResponse> {
-  const res = await fetch(`${API_URL}/backups/create-auto-daily`, {
+  const res = await fetch(buildApiUrl("/backups/create-auto-daily"), {
     method: "POST",
   });
 
@@ -56,7 +56,7 @@ export async function restoreBackup(filename: string): Promise<{
   safety_backup: string;
 }> {
   const res = await fetch(
-    `${API_URL}/backups/${encodeURIComponent(filename)}/restore`,
+    buildApiUrl(`/backups/${encodeURIComponent(filename)}/restore`),
     {
       method: "POST",
     },
@@ -74,7 +74,7 @@ export async function deleteBackup(filename: string): Promise<{
   filename: string;
 }> {
   const res = await fetch(
-    `${API_URL}/backups/${encodeURIComponent(filename)}`,
+    buildApiUrl(`/backups/${encodeURIComponent(filename)}`),
     {
       method: "DELETE",
     },
@@ -87,5 +87,5 @@ export async function deleteBackup(filename: string): Promise<{
 }
 
 export function getBackupDownloadUrl(filename: string) {
-  return `${API_URL}/backups/${encodeURIComponent(filename)}/download`;
+  return buildApiUrl(`/backups/${encodeURIComponent(filename)}/download`);
 }

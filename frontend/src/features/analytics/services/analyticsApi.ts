@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+import { buildApiUrl } from "../../../api/config";
 
 export type AnalyticsSummary = {
   today: {
@@ -80,7 +80,7 @@ export type AnalyticsSummary = {
 };
 
 export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
-  const res = await fetch(`${API_URL}/analytics/summary`);
+  const res = await fetch(buildApiUrl("/analytics/summary"));
 
   if (!res.ok) {
     throw new Error("Error cargando analytics");

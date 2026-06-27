@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api";
+import { buildApiUrl } from "../../../api/config";
 
 export type BusinessSettings = {
   id: number;
@@ -31,7 +31,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function getBusinessSettings(): Promise<BusinessSettings> {
-  const res = await fetch(`${API_URL}/business-settings`);
+  const res = await fetch(buildApiUrl("/business-settings"));
 
   return handleResponse<BusinessSettings>(res);
 }
@@ -39,7 +39,7 @@ export async function getBusinessSettings(): Promise<BusinessSettings> {
 export async function updateBusinessSettings(
   data: UpdateBusinessSettingsDTO,
 ): Promise<BusinessSettings> {
-  const res = await fetch(`${API_URL}/business-settings`, {
+  const res = await fetch(buildApiUrl("/business-settings"), {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
