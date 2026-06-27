@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import ConfirmDialog from "../../../components/ui/ConfirmDialog";
 
+import BulkProductsTable from "../components/BulkProductsTable";
+import BulkRestockForm from "../components/BulkRestockForm";
+import BulkRestockRegister from "../components/BulkRestockRegister";
+
 import {
   createBulkProduct,
   createBulkRestock,
@@ -67,12 +71,6 @@ const formatDate = (value: string) => {
     .format(new Date(normalizedValue))
     .replace("a. m.", "AM")
     .replace("p. m.", "PM");
-};
-
-const toNumberOrEmpty = (value: string): NumericInputValue => {
-  if (value === "") return "";
-
-  return Number(value);
 };
 
 const getKgPricing = (product: BulkProduct) => {
@@ -382,184 +380,26 @@ export default function BulkRestockPage() {
         }`}
       >
         <main className="sack-main">
-          <section className="sack-card">
-            <h2>Registrar nueva reposición</h2>
-            <p>Escanea el código del producto cuando llegue mercadería.</p>
+          <BulkRestockRegister
+            loading={loading}
+            restockBarcode={restockBarcode}
+            quantityPackages={quantityPackages}
+            note={note}
+            selectedProduct={selectedProduct}
+            onBarcodeChange={setRestockBarcode}
+            onQuantityChange={setQuantityPackages}
+            onNoteChange={setNote}
+            onSubmit={handleRegisterRestock}
+            formatCurrency={formatCurrency}
+          />
 
-            <form className="sack-form" onSubmit={handleRegisterRestock}>
-              <div className="sack-form-grid">
-                <div className="sack-field full">
-                  <label>Código del saco/paquete</label>
-                  <input
-                    type="text"
-                    value={restockBarcode}
-                    onChange={(event) => setRestockBarcode(event.target.value)}
-                    placeholder="Escanear o escribir código..."
-                    autoFocus
-                  />
-                </div>
-
-                {restockBarcode.trim() && (
-                  <div
-                    className={
-                      selectedProduct
-                        ? "sack-status success sack-field full"
-                        : "sack-status warning sack-field full"
-                    }
-                  >
-                    {selectedProduct
-                      ? `Producto detectado: ${selectedProduct.name}`
-                      : "No se encontró un producto registrado con ese código."}
-                  </div>
-                )}
-
-                <div className="sack-field">
-                  <label>Cantidad de sacos/paquetes</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={quantityPackages}
-                    onChange={(event) =>
-                      setQuantityPackages(toNumberOrEmpty(event.target.value))
-                    }
-                  />
-                </div>
-
-                <div className="sack-field">
-                  <label>Nota</label>
-                  <input
-                    type="text"
-                    value={note}
-                    onChange={(event) => setNote(event.target.value)}
-                    placeholder="Opcional"
-                  />
-                </div>
-              </div>
-
-              {selectedProduct && (
-                <div className="sack-summary">
-                  <div>
-                    <span>Producto</span>
-                    <strong>{selectedProduct.name}</strong>
-                  </div>
-
-                  <div>
-                    <span>Formato</span>
-                    <strong>
-                      {selectedProduct.package_quantity} {selectedProduct.unit}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Costo producto</span>
-                    <strong>{formatCurrency(selectedProduct.cost)}</strong>
-                  </div>
-                </div>
-              )}
-
-              <div className="sack-actions">
-                <button
-                  type="submit"
-                  className="sack-primary-btn"
-                  disabled={loading || !selectedProduct}
-                >
-                  {loading ? "Registrando..." : "Registrar reposición"}
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <section className="sack-card">
-            <div className="inventory-history-header">
-              <div>
-                <h2>Productos registrados</h2>
-                <p>
-                  Formatos guardados y precio referencial de venta por kg para
-                  sacos de alimentos.
-                </p>
-              </div>
-
-              <span>{products.length} productos</span>
-            </div>
-
-            <div className="sack-table-wrapper">
-              <table className="sack-table">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Código</th>
-                    <th>Formato</th>
-                    <th>Costo</th>
-                    <th>$/kg sin IVA</th>
-                    <th>$/kg + IVA</th>
-                    <th>Margen</th>
-                    <th>Venta kg</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {products.map((product) => {
-                    const pricing = getKgPricing(product);
-                    const isDeleting = deletingProductId === product.id;
-
-                    return (
-                      <tr key={product.id}>
-                        <td>{product.name}</td>
-                        <td>{product.barcode || "—"}</td>
-                        <td>
-                          <span className="sack-badge">
-                            {product.package_quantity} {product.unit}
-                          </span>
-                        </td>
-                        <td>{formatCurrency(product.cost)}</td>
-                        <td>
-                          {pricing
-                            ? formatCurrency(pricing.costPerKgWithoutIva)
-                            : "—"}
-                        </td>
-                        <td>
-                          {pricing
-                            ? formatCurrency(pricing.costPerKgWithIva)
-                            : "—"}
-                        </td>
-                        <td>
-                          {pricing
-                            ? `${Math.round(pricing.margin * 100)}%`
-                            : "—"}
-                        </td>
-                        <td>
-                          <strong className="sack-sale-price">
-                            {pricing
-                              ? formatCurrency(pricing.salePricePerKg)
-                              : "—"}
-                          </strong>
-                        </td>
-                        <td>
-                          <div className="sack-table-actions">
-                            <button
-                              type="button"
-                              className="sack-edit-btn"
-                              onClick={() => handleEditSack(product)}
-                              disabled={isDeleting}
-                            >
-                              Editar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-
-                  {products.length === 0 && (
-                    <tr>
-                      <td colSpan={9}>No hay productos registrados todavía.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <BulkProductsTable
+            products={products}
+            deletingProductId={deletingProductId}
+            onEdit={handleEditSack}
+            formatCurrency={formatCurrency}
+            getKgPricing={getKgPricing}
+          />
 
           <section className="sack-card">
             <div className="inventory-history-header">
@@ -624,191 +464,27 @@ export default function BulkRestockPage() {
 
         {isSidePanelOpen && (
           <aside className="sack-side">
-            <section className="sack-card">
-              <div className="sack-side-header">
-                <div>
-                  <h2>
-                    {isEditing
-                      ? "Editar producto"
-                      : "Registrar tipo de producto"}
-                  </h2>
-                  <p>
-                    {isEditing
-                      ? "Actualiza la información del producto registrado."
-                      : "Crea el producto base y registra su primera llegada al historial."}
-                  </p>
-                </div>
-
-                {isEditing && editingProduct && (
-                  <button
-                    type="button"
-                    className="sack-delete-side-btn"
-                    onClick={() =>
-                      setConfirmAction({
-                        type: "delete",
-                        product: editingProduct,
-                      })
-                    }
-                    disabled={
-                      loading || deletingProductId === editingProduct.id
-                    }
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </div>
-
-              <form className="sack-form" onSubmit={handleCreateOrUpdateSack}>
-                <div className="sack-field">
-                  <label>Nombre del producto</label>
-                  <input
-                    type="text"
-                    value={sackForm.name}
-                    onChange={(event) =>
-                      updateSackForm("name", event.target.value)
-                    }
-                    placeholder="Ej: Alimento perro adulto 25 kg"
-                  />
-                </div>
-
-                <div className="sack-field">
-                  <label>Código del producto</label>
-                  <input
-                    type="text"
-                    value={sackForm.barcode}
-                    onChange={(event) =>
-                      updateSackForm("barcode", event.target.value)
-                    }
-                    placeholder="Ingresa aquí el código de barras del producto"
-                  />
-                </div>
-
-                <div className="sack-form-grid">
-                  <div className="sack-field">
-                    <label>Cantidad/peso</label>
-                    <input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={sackForm.package_quantity}
-                      onChange={(event) =>
-                        updateSackForm(
-                          "package_quantity",
-                          toNumberOrEmpty(event.target.value),
-                        )
-                      }
-                      placeholder="Ej: 25"
-                    />
-                  </div>
-
-                  <div className="sack-field">
-                    <label>Unidad</label>
-                    <select
-                      value={sackForm.unit}
-                      onChange={(event) =>
-                        updateSackForm("unit", event.target.value)
-                      }
-                    >
-                      <option value="kg">kg</option>
-                      <option value="g">g</option>
-                      <option value="L">L</option>
-                      <option value="unidades">unidades</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="sack-form-grid sack-pricing-grid">
-                  <div className="sack-field sack-prefix">
-                    <label>Costo sin IVA</label>
-
-                    <div className="sack-input-wrapper">
-                      <span className="sack-input-prefix">$</span>
-
-                      <input
-                        type="number"
-                        min={0}
-                        value={sackForm.cost}
-                        onChange={(event) =>
-                          updateSackForm(
-                            "cost",
-                            toNumberOrEmpty(event.target.value),
-                          )
-                        }
-                        placeholder="Ej: 20000"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sack-field sack-suffix">
-                    <label>Margen de utilidad</label>
-
-                    <div className="sack-input-wrapper">
-                      <input
-                        type="number"
-                        min={0}
-                        step="1"
-                        value={
-                          sackForm.sale_margin === ""
-                            ? ""
-                            : Math.round(Number(sackForm.sale_margin) * 100)
-                        }
-                        onChange={(event) =>
-                          updateSackForm(
-                            "sale_margin",
-                            event.target.value === ""
-                              ? ""
-                              : Number(event.target.value) / 100,
-                          )
-                        }
-                        placeholder="Ej: 40"
-                      />
-
-                      <span className="sack-input-suffix">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {!isEditing && (
-                  <div className="sack-field">
-                    <label>Productos recibidos ahora</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={initialPackages}
-                      onChange={(event) =>
-                        setInitialPackages(toNumberOrEmpty(event.target.value))
-                      }
-                      placeholder="Ej: 1"
-                    />
-                  </div>
-                )}
-
-                <div className="sack-actions">
-                  {hasSackFormData && (
-                    <button
-                      type="button"
-                      className="sack-secondary-btn"
-                      onClick={resetSackForm}
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </button>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="sack-primary-btn"
-                    disabled={loading || !sackForm.name.trim()}
-                  >
-                    {loading
-                      ? "Guardando..."
-                      : isEditing
-                        ? "Guardar cambios"
-                        : "Registrar producto"}
-                  </button>
-                </div>
-              </form>
-            </section>
+            <BulkRestockForm
+              isEditing={isEditing}
+              editingProduct={editingProduct}
+              loading={loading}
+              deletingProductId={deletingProductId}
+              sackForm={sackForm}
+              initialPackages={initialPackages}
+              hasSackFormData={hasSackFormData}
+              onUpdateSackForm={updateSackForm}
+              onSetInitialPackages={setInitialPackages}
+              onResetSackForm={resetSackForm}
+              onSubmit={handleCreateOrUpdateSack}
+              onDeleteClick={() => {
+                if (editingProduct) {
+                  setConfirmAction({
+                    type: "delete",
+                    product: editingProduct,
+                  });
+                }
+              }}
+            />
           </aside>
         )}
       </div>

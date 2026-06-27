@@ -4,6 +4,9 @@ import { ProductList } from "../components/ProductList";
 import { ProductForm } from "../components/ProductForm";
 import InventoryAdjustmentForm from "../components/InventoryAdjustmentForm";
 import InventoryMovementsList from "../components/InventoryMovementsList";
+import ProductsPageHeader from "../components/ProductsPageHeader";
+import ProductsToolbar from "../components/ProductsToolbar";
+import ProductsPagination from "../components/ProductsPagination";
 
 import { getProducts } from "../services/productApi";
 import type { Product } from "../types/product";
@@ -210,61 +213,19 @@ const ProductsPage = () => {
 
   return (
     <div className="products-page">
-      <div className="products-header">
-        <div>
-          <h1>Gestión de Productos</h1>
-          <p>Administra costos, precios, stock e inventario.</p>
-        </div>
+      <ProductsPageHeader onAddProduct={handleAddProduct} />
 
-        <button className="add-product-button" onClick={handleAddProduct}>
-          + Agregar producto
-        </button>
-      </div>
-
-      <div className="products-toolbar">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o código..."
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setPage(1);
-          }}
-          className="products-search"
-        />
-
-        <div className="products-toolbar-controls">
-          <label>
-            Ordenar
-            <select
-              value={sortMode}
-              onChange={(event) =>
-                handleSortChange(event.target.value as SortMode)
-              }
-            >
-              <option value="name_asc">Nombre A-Z</option>
-              <option value="name_desc">Nombre Z-A</option>
-              <option value="price_desc">Precio mayor a menor</option>
-              <option value="price_asc">Precio menor a mayor</option>
-            </select>
-          </label>
-
-          <label>
-            Mostrar
-            <select
-              value={perPage}
-              onChange={(event) =>
-                handlePerPageChange(Number(event.target.value))
-              }
-            >
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={200}>200</option>
-              <option value={300}>300</option>
-            </select>
-          </label>
-        </div>
-      </div>
+      <ProductsToolbar
+        query={query}
+        sortMode={sortMode}
+        perPage={perPage}
+        onQueryChange={(value) => {
+          setQuery(value);
+          setPage(1);
+        }}
+        onSortChange={handleSortChange}
+        onPerPageChange={handlePerPageChange}
+      />
 
       {error && <div className="error">{error}</div>}
 
@@ -283,44 +244,15 @@ const ProductsPage = () => {
             onAdjustInventory={handleInventoryAdjust}
           />
 
-          <div className="products-pagination">
-            <span>
-              Mostrando página {page} de {totalPages} · {totalProducts}{" "}
-              productos
-            </span>
-
-            <div className="pagination-controls">
-              <select
-                value={perPage}
-                onChange={(event) =>
-                  handlePerPageChange(Number(event.target.value))
-                }
-              >
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={200}>200</option>
-                <option value={300}>300</option>
-              </select>
-
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              >
-                Anterior
-              </button>
-
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() =>
-                  setPage((prev) => Math.min(totalPages, prev + 1))
-                }
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
+          <ProductsPagination
+            page={page}
+            totalPages={totalPages}
+            totalProducts={totalProducts}
+            perPage={perPage}
+            onPerPageChange={handlePerPageChange}
+            onPreviousPage={() => setPage((prev) => Math.max(1, prev - 1))}
+            onNextPage={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+          />
         </div>
 
         <button
