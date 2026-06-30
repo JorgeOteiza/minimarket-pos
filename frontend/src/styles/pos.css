@@ -1,0 +1,194 @@
+
+
+.pos-container {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: calc(100dvh - 60px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pos-header {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background: #111827;
+  color: white;
+  font-weight: bold;
+}
+
+.pos-main {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.pos-left {
+  display: flex;
+  flex-direction: column;
+  background: rgb(236 215 215 / 47%);
+  border-radius: 8px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.pos-left > div {
+  overflow-y: auto;
+}
+
+.pos-input {
+  width: 100%;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border: 6px solid #dbe3ee;
+  border-radius: 18px;
+  background: white;
+  color: #0f172a;
+  font-size: 1.35rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.pos-input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.pos-input:focus {
+  border-color: #60a5fa;
+  box-shadow:
+    0 0 0 4px #dbeafe,
+    0 8px 20px rgba(15, 23, 42, 0.08);
+  transform: translateY(0px);
+}
+
+.pos-right {
+  background: #111827;
+  color: white;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pos-footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #e5e7eb;
+  font-size: 14px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  font-size: 24px;
+  border-bottom: 1px solid #eee;
+  transition: all 0.15s ease;
+}
+
+.cart-item.highlight {
+  background: #dcfce7;
+  transform: scale(1.02);
+}
+
+.cart-item.flash {
+  animation: flash-highlight 0.4s ease;
+}
+
+.total {
+  font-size: xxx-large;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.total-amount {
+  font-size: 42px;
+  font-weight: bold;
+}
+
+.cart-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-content {
+  max-width: 300px;
+}
+
+.empty-content h2 {
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 30px;
+}
+
+.empty-hint {
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+.last-item {
+  margin: 20px 0;
+  padding: 12px;
+  background: #1f2937;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.last-item span {
+  font-size: 24px;
+  opacity: 0.7;
+}
+
+.last-item strong {
+  font-size: 30px;
+}
+
+.last-item small {
+  opacity: 0.6;
+  font-size: xx-large;
+}
+
+.hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes flash-highlight {
+  0% {
+    background: #22c55e;
+    transform: scale(1.04);
+  }
+
+  50% {
+    background: #bbf7d0;
+  }
+
+  100% {
+    background: #dcfce7;
+    transform: scale(1);
+  }
+}
+
+/* Botones grandes SOLO para POS, no globales */
+.pos-container button,
+.pos-main button,
+.pos-footer button {
+  cursor: pointer;
+}
