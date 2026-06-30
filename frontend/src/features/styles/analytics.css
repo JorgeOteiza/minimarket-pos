@@ -118,21 +118,67 @@
 
 .analytics-panel h2,
 .analytics-chart-header h2 {
-  margin: 0 0 18px;
+  margin: 0;
   color: #0f172a;
   font-size: 32px;
   font-weight: 900;
   letter-spacing: -0.01em;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e5e7eb;
 }
 
 .analytics-chart-header p {
-  margin: 6px 0 18px;
+  margin: 6px 0 0;
   color: #64748b;
   font-size: 21px;
   line-height: 1.35;
   font-weight: 700;
+}
+
+.analytics-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.analytics-panel h2 {
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.analytics-chart-summary {
+  min-width: 230px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #14532d;
+}
+
+.analytics-chart-summary span,
+.analytics-chart-summary small {
+  display: block;
+  font-weight: 900;
+}
+
+.analytics-chart-summary span {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.analytics-chart-summary strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.analytics-chart-summary small {
+  font-size: 17px;
 }
 
 .analytics-row {
@@ -258,6 +304,21 @@
   gap: 8px;
 }
 
+.inventory-alert-box.ok {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.inventory-alert-box.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.inventory-alert-box.danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
 .inventory-alert-box span {
   color: #64748b;
   font-size: 18px;
@@ -271,6 +332,18 @@
   font-size: 48px;
   font-weight: 900;
   line-height: 1;
+}
+
+.inventory-alert-box.ok strong {
+  color: #166534;
+}
+
+.inventory-alert-box.warning strong {
+  color: #c2410c;
+}
+
+.inventory-alert-box.danger strong {
+  color: #b91c1c;
 }
 
 .inventory-alert-box small {
@@ -327,6 +400,14 @@
 
   .analytics-tabs button {
     flex: 1;
+  }
+
+  .analytics-chart-header {
+    flex-direction: column;
+  }
+
+  .analytics-chart-summary {
+    width: 100%;
   }
 }
 

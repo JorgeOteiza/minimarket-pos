@@ -34,24 +34,8 @@ export default function SummaryPanel({
       </div>
 
       {successMessage && (
-        <div
-          style={{
-            background: "#dcfce7",
-            color: "#166534",
-            border: "3px solid #86efac",
-            borderRadius: "20px",
-            padding: "24px 26px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "14px",
-            textAlign: "center",
-            fontSize: "30px",
-            fontWeight: 900,
-            lineHeight: 1.35,
-          }}
-        >
-          <span style={{ fontSize: "36px", fontWeight: 900 }}>✓</span>
+        <div className="summary-success-banner">
+          <span>✓</span>
           <strong>{successMessage}</strong>
         </div>
       )}

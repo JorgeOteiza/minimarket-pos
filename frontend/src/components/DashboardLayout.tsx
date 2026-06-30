@@ -12,7 +12,7 @@ export const DashboardLayout = () => {
 
         <nav className="sidebar-nav">
           <div className="sidebar-section">
-            <span className="sidebar-section-title">Gestión diaria</span>
+            <span className="sidebar-section-title">Uso diario</span>
 
             <Link
               to="/dashboard/products"
@@ -25,12 +25,12 @@ export const DashboardLayout = () => {
               to="/dashboard/bulk-restock"
               className={isActive("/dashboard/bulk-restock") ? "active" : ""}
             >
-              REPOSICIÓN DE SACOS Y PAQUETES
+              SACOS Y PAQUETES
             </Link>
           </div>
 
           <div className="sidebar-section">
-            <span className="sidebar-section-title">Información comercial</span>
+            <span className="sidebar-section-title">Ventas y resumen</span>
 
             <Link
               to="/dashboard/reports"
@@ -43,7 +43,7 @@ export const DashboardLayout = () => {
               to="/dashboard/analytics"
               className={isActive("/dashboard/analytics") ? "active" : ""}
             >
-              ANÁLISIS DE DATOS
+              ESTADÍSTICAS
             </Link>
           </div>
 
@@ -54,7 +54,7 @@ export const DashboardLayout = () => {
               to="/dashboard/backups"
               className={isActive("/dashboard/backups") ? "active" : ""}
             >
-              RESPALDOS
+              COPIAS DE SEGURIDAD
             </Link>
 
             <Link

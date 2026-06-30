@@ -27,13 +27,17 @@ export default function InventoryStatusChart({
       </div>
 
       <div className="inventory-alert-grid">
-        <div className="inventory-alert-box">
+        <div className={`inventory-alert-box ${lowStockCount > 0 ? "warning" : "ok"}`}>
           <span>Bajo stock</span>
           <strong>{lowStockCount}</strong>
           <small>Productos que requieren reposición</small>
         </div>
 
-        <div className="inventory-alert-box">
+        <div
+          className={`inventory-alert-box ${
+            productsWithoutPriceCount > 0 ? "danger" : "ok"
+          }`}
+        >
           <span>Sin precio</span>
           <strong>{productsWithoutPriceCount}</strong>
           <small>No pueden venderse en el POS</small>
