@@ -9,6 +9,9 @@ if TEST_ROOT not in sys.path:
 
 from backend.app import create_app
 from backend.extensions import db as _db
+from backend.models import InventoryMovement, Product, Sale, SaleItem
+from backend.models.cart import Cart
+from backend.models.cart_item import CartItem
 
 
 @pytest.fixture(scope="session")
@@ -23,6 +26,7 @@ def app():
                 },
             },
             "CORS_ORIGINS": ["http://localhost:5173"],
+            "ENABLE_AUTO_BACKUP": False,
         }
     )
 
@@ -35,3 +39,21 @@ def app():
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture(autouse=True)
+def clean_database(app):
+    yield
+
+    with app.app_context():
+        for model in (
+            CartItem,
+            Cart,
+            SaleItem,
+            Sale,
+            InventoryMovement,
+            Product,
+        ):
+            _db.session.query(model).delete()
+
+        _db.session.commit()

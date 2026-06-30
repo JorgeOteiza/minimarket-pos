@@ -68,15 +68,16 @@ def create_app(test_config=None):
         if not inspector.has_table("products"):
             db.create_all()
 
-        try:
-            backup_result = ensure_daily_auto_backup()
-            if backup_result.get("created"):
-                app.logger.info(
-                    "Respaldo automático creado: %s",
-                    backup_result["backup"]["filename"],
-                )
-        except Exception as exc:
-            app.logger.warning("No se pudo crear el respaldo automático: %s", exc)
+        if app.config.get("ENABLE_AUTO_BACKUP", True):
+            try:
+                backup_result = ensure_daily_auto_backup()
+                if backup_result.get("created"):
+                    app.logger.info(
+                        "Respaldo automático creado: %s",
+                        backup_result["backup"]["filename"],
+                    )
+            except Exception as exc:
+                app.logger.warning("No se pudo crear el respaldo automático: %s", exc)
 
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(sales_bp, url_prefix="/api")

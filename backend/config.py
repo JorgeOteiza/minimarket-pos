@@ -14,6 +14,12 @@ DEFAULT_SQLITE_DB = INSTANCE_DIR / "minimarket.db"
 
 
 class Config:
+    ENABLE_AUTO_BACKUP = os.getenv("ENABLE_AUTO_BACKUP", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
         f"sqlite:///{DEFAULT_SQLITE_DB.as_posix()}",

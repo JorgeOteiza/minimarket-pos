@@ -1,3 +1,7 @@
+:root {
+  --app-footer-height: 42px;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -20,6 +24,10 @@ body {
     sans-serif;
   color: #111827;
   background: #f9fafb;
+}
+
+.app-footer {
+  min-height: var(--app-footer-height);
 }
 
 /* No usar estilos globales agresivos para button.
@@ -45,4 +53,11 @@ textarea {
   font-weight: 900;
   line-height: 1.35;
   border: 1px solid #fca5a5;
+}
+
+.page-loading {
+  padding: 24px;
+  color: #374151;
+  font-size: 18px;
+  font-weight: 700;
 }

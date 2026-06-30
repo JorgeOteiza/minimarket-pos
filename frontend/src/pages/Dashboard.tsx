@@ -1,25 +1,52 @@
 import { Link } from "react-router-dom";
 
+const sections = [
+  {
+    title: "Productos",
+    description: "Mantén precios, stock mínimo, códigos de barra y ajustes.",
+    to: "/dashboard/products",
+  },
+  {
+    title: "Analytics",
+    description: "Revisa ventas, productos destacados y estado de inventario.",
+    to: "/dashboard/analytics",
+  },
+  {
+    title: "Reportes",
+    description: "Genera informes para revisar ventas y movimientos.",
+    to: "/dashboard/reports",
+  },
+  {
+    title: "Backups",
+    description: "Crea, descarga o restaura respaldos locales de la base.",
+    to: "/dashboard/backups",
+  },
+];
+
 const Dashboard = () => {
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <section className="dashboard-home">
+      <header className="dashboard-home-header">
+        <div>
+          <h1>Panel de administración</h1>
 
-      <p>Bienvenido al panel de administración.</p>
+          <p>Operación local del minimarket</p>
+        </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <p>Desde aquí puedes:</p>
+        <Link className="dashboard-home-primary" to="/">
+          Ir a caja
+        </Link>
+      </header>
 
-        <ul>
-          <li>
-            <Link to="/dashboard/products">Ir a productos</Link>
-          </li>
-          <li>
-            <Link to="/dashboard/analytics">Ver analytics</Link>
-          </li>
-        </ul>
+      <div className="dashboard-home-grid">
+        {sections.map((section) => (
+          <Link className="dashboard-home-card" key={section.to} to={section.to}>
+            <span>{section.title}</span>
+            <p>{section.description}</p>
+          </Link>
+        ))}
       </div>
-    </div>
+    </section>
   );
 };
 
